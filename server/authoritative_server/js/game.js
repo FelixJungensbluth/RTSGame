@@ -9,7 +9,9 @@ const config = {
     default: 'arcade',
     arcade: {
       debug: false,
-      gravity: { y: 0 }
+      gravity: {
+        y: 0
+      }
     }
   },
   scene: {
@@ -36,16 +38,15 @@ function preload() {
   this.load.image('star', 'assets/star_gold.png');
 }
 
+/*
+  Methode wird bei Start der anwendung ausgefuehrt 
+*/
 function create() {
   const self = this;
   this.players = this.physics.add.group();
 
-  this.scores = {
-    blue: 0,
-    red: 0
-  };
-
-  this.mouseInfo = { 
+  // Objekt mit Mausinfos
+  this.mouseInfo = {
     x: 0,
     y: 0,
     tileX: 0,
@@ -53,22 +54,30 @@ function create() {
 
   }
 
-  this.presesdInfo = { 
+  // Objekt mit Infos welche Taste gedrueckt worden ist
+  this.presesdInfo = {
     pressed: "none"
 
   }
 
+  // Zeitobjekt
   this.times = {
     milSec: 0
   }
 
+  // Teamobject
   this.team = {
     name: "none"
   }
 
   self.times.milSec = 10;
+
+  // Das Zeit objekt wird an die Clients gesended 
   io.emit('updateTime', self.times);
 
+  /*
+    Wenn ein Spieler connectet wird ein Objekt des Spieler mit allen Infos erzeugt 
+  */
   io.on('connection', function (socket) {
     console.log('a user connected');
     // create a new player and add it to our players object
@@ -84,6 +93,7 @@ function create() {
         mouse: false
       }
     };
+
     // add player to server
     addPlayer(self, players[socket.id]);
     // send the players object to the new player
@@ -109,6 +119,7 @@ function create() {
       handlePlayerInput(self, socket.id, inputData);
     });
 
+    // Die gesendeten Mausinputs von den Clients werden mit den Variablen des Serves geleichgesetzt
     socket.on('mouse', function (mouseData) {
       self.mouseInfo.x = mouseData.x;
       self.mouseInfo.y = mouseData.y;
@@ -116,48 +127,43 @@ function create() {
       self.mouseInfo.tileY = mouseData.tileY;
     });
 
+    // Die gesendeten Keyboardinputs von den Clients werden mit den Variablen des Serves geleichgesetzt
     socket.on('pressed', function (presesdData) {
       self.presesdInfo.pressed = presesdData.pressed;
     });
   });
 }
 
+// Methode die 60/s ausgefuehrt wird 
 function update(time) {
+
+  // Die Inputs fuer jeden Client werden verarbeitet 
   this.players.getChildren().forEach((player) => {
-    const input = players[player.playerId].input;  
-   
+    const input = players[player.playerId].input;
+
     /*
     if(input.mouse && this.presesdInfo.pressed == "s" && !onRestrictedTile) {
         addImage(this);
     }
     */
 
-    if(input.mouse && this.presesdInfo.pressed == "s" ) {
+    if (input.mouse && this.presesdInfo.pressed == "s") {
       addImage(this);
-  }
-   
+    }
+
     if (input.mouse) {
       console.log(players[player.playerId].team);
       this.team.name = players[player.playerId].team
       io.emit('team', this.team);
       this.presesdInfo.pressed = "none";
+
     } else if (input.a) {
       console.log("A");
+
     } else {
       player.setAngularVelocity(0);
     }
-
-    if (input.up) {
-      this.physics.velocityFromRotation(player.rotation + 1.5, 200, player.body.acceleration);
-    } else {
-      player.setAcceleration(0);
-    }
-
-    players[player.playerId].x = player.x;
-    players[player.playerId].y = player.y;
-    players[player.playerId].rotation = player.rotation;
   });
-  this.physics.world.wrap(this.players, 5);
   io.emit('playerUpdates', players);
 
   this.times.milSec = time;
@@ -167,10 +173,7 @@ function update(time) {
   isPlacingAllowed(this);
 }
 
-function randomPosition(max) {
-  return Math.floor(Math.random() * max) + 50;
-}
-
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
 function handlePlayerInput(self, playerId, input) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
@@ -179,21 +182,23 @@ function handlePlayerInput(self, playerId, input) {
   });
 }
 
+// Spieler wird hinzugefuegt und mit einer ID versehen 
 function addPlayer(self, playerInfo) {
   const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-  player.setDrag(100);
-  player.setAngularDrag(100);
-  player.setMaxVelocity(200);
   player.playerId = playerInfo.playerId;
   self.players.add(player);
 }
 
-function addImage(self) { 
-  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' '  + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+// Erster Versuch das HQ zu platzieren 
+function addImage(self) {
+  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
-  io.emit('starLocation2', { x: test.x, y: test.y });
+  io.emit('starLocation2', {
+    x: test.x,
+    y: test.y
+  });
   var hq = {
     "id": "1",
     "name": "Hauptquartier",
@@ -210,18 +215,20 @@ function addImage(self) {
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
 }
 
+// Gleiche wie in Engine
 function isPlacingAllowed(self) {
- 
-      if ( self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 &&  self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY <= IsometricMap.buildingMap.length) {
-         
-          if ((IsometricMap.buildingMap[ self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 || IsometricMap.map[ self.mouseInfo.tileX][self.mouseInfo.tileY].id === 2)) {
-              onRestrictedTile = true;
-          } else {
-              onRestrictedTile = false
-          }
-      }
+
+  if (self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 && self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY <= IsometricMap.buildingMap.length) {
+
+    if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 || IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY].id === 2)) {
+      onRestrictedTile = true;
+    } else {
+      onRestrictedTile = false
+    }
+  }
 }
 
+// Spieler wird entfernt 
 function removePlayer(self, playerId) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {

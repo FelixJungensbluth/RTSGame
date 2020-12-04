@@ -1,12 +1,20 @@
-// Darstellung des Hauptquartier
+/*
+  Darstellung des HQ
+
+  Die Position im 2D Array der Map wird in X & Y Koordinaten umgerechnet 
+  Das Bild des HQ besitzt eine ID welche auch im Array gespeichret ist 
+
+  Alle Infomationen ueber das HQ werden in einem Objekt gespeichert
+  ID im Array wird durch das Objekt ersezt, damit man immer auf die Infos zugreifen kann
+
+  Xi = X-Koordninate im Array der Map
+  Yi = Y-Koordninate im Array der Map
+*/
 function drawHq(Xi, Yi) {
   var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
   var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
   
-  if (teamname == "red") {
-    building = scene.add.image(offX, offY, 'turm2').setInteractive();
-    console.log("sdfsdfsdf");
-  }
+  building = scene.add.image(offX, offY, 'turm2').setInteractive();
 
   var hq = {
     "id": "1",

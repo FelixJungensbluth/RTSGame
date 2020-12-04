@@ -1,4 +1,8 @@
-//Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
+/*
+  Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
+  Wenn man mit dem Mauszeiger an einen Rand kommt bewegt sich die Kamera 
+  in die jeweilige Richtung 
+*/
 function moveCamera(szene, cam) {
     szene.input.on('pointermove', function (pointer) {
         if (pointer.y < 50) {

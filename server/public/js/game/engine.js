@@ -56,6 +56,7 @@ var structureName;
 var mausInfo;
 var time;
 
+// Mauskoordianten fuer die Bewegung des Vorschaubildes des platzierten Objektes
 var mausX;
 var mausY;
 
@@ -63,40 +64,42 @@ var isSelected = false; // Boolean ob Gebaude ausgewaehlt ist
 
 var lastClicked = new Array(); // Array um Werte des letzten Mausklicks zu speichern 
 
-var pressed = "none";
-
 var selectedStructure;
+
+// Timer Variablen 
 var minutes;
 var seconds;
 
-var timeBar;
-var timeBarBackGround;
+// Anzeige fuer die Bauszeit
+var timeBar; // Zeitanzeige
+var timeBarBackGround; // Hintergrund
+var healthBarArray = new Array(); // Speicherung aller Bauzeitanzeigen
+var healthBarBackGroundArray = new Array(); // Speicherung aller Bauzeitanzeigen Backgrounds
 
-var timedEvent;
+var timedEvent; // Variable fuer ein Timer
 
-var c = 0;
+var clicked = false; // Boolean ob eine Maustaste benutzt wurde
 
-var clicked = false;
+// Keyinput
+let keyA; // Variable fuer die Taste A
+let keyS; // Variable fuer die Taste S
+var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
-var healthBarArray = new Array();
-var healthBarBackGroundArray = new Array();
-
-let keyA;
-let keyS;
-
-var teamname = "none";
-
-
+var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
 
 function preload() {
+
+  //Arrays werden initalisiert
   this.buildingPositionX = new Array();
   this.buildingPositionY = new Array();
   this.tileImages = new Array();
   this.buildingsImages = new Array();
+
+  // Bilder fuer das HQ wird geladen 
   this.load.image("star", "assets/turm.png");
   this.load.image("turm2", "assets/turm2.png");
 
-  // Load all the images before we run the app
+  // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
     this.tileImages[i] = IsometricMap.tiles[i];
     name = i;
@@ -104,12 +107,22 @@ function preload() {
   }
 }
 
+/*
+  Methode wird bei Start der anwendung ausgefuehrt 
+*/
 function create() {
   scene = this;
+
+  //SocketIO wird initalisiert 
   this.socket = io();
-  this.players = this.add.group();
+
+  //Custom Cursor wird festeglegt 
   this.input.setDefaultCursor('url(http://labs.phaser.io/assets/input/cursors/blue.cur), pointer');
 
+  // Oeffnen des Rechtsklickmenue wird disabled
+  this.input.mouse.disableContextMenu();
+
+  // Timer wrid erzeugt
   timedEvent = this.time.addEvent({
     delay: 500,
     callback: onEvent,
@@ -117,8 +130,8 @@ function create() {
     loop: true
   });
 
-  this.input.mouse.disableContextMenu();
-
+  // Anzahl der Tiles in X und Y Richtung wird festgelegt 
+  // Basierend auf dem 2D Array der Map
   this.Xtiles = IsometricMap.map.length;
   this.Ytiles = IsometricMap.map[0].length;
 
@@ -166,21 +179,28 @@ function create() {
 
   // Bestimming des aktuellen Tiles 
   this.input.on('pointermove', function (pointer) {
+    // InfoText
     mousePosition.setText('Mouse X: ' + pointer.x + ' Mouse Y: ' + pointer.y);
+
+    // Mauspositon wird den Variablen zugewiesen
     mausX = pointer.x;
     mausY = pointer.y;
 
+    // Wenn S gedreuckt wird die Position des Vorschaugebaudes auf die Mausposition gleichgezsetzt
+    // Die Differenz vom Mittlepunkt der Szene zu der Distanz welche sich die Kamera bewegt hat wird mit einberechent  
     if (pressed == "s") {
       selectedStructure.x = (mausX + camMoveX);
       selectedStructure.y = (mausY + camMoveY);
     }
 
-
+    // Die Mausposition wird in eine Positon im 2D Array der Map umgerechnet 
+    // Die Differenz vom Mittlepunkt der Szene zu der Distanz welche sich die Kamera bewegt hat wird mit einberechent  
     pointer.x = (pointer.x - tileColumnOffset / 2 - originX) + camMoveX;
     pointer.y = (pointer.y - tileRowOffset / 2 - originY) + camMoveY;
     tileX = Math.round(pointer.x / tileColumnOffset - pointer.y / tileRowOffset);
     tileY = Math.round(pointer.x / tileColumnOffset + pointer.y / tileRowOffset);
 
+    // Aktuelle Positon im 2D Array wird in den jeweiligen Variablen gespiechert
     selectedTileX = tileX;
     selectedTileY = tileY + 1;
 
@@ -190,23 +210,29 @@ function create() {
 
   // Platzierung der Gebäude
   if (IsometricMap.map[selectedTileX][selectedTileY].id !== 2) {
-
     placeBuilding(this);
   }
 
-
-  // Map wrid gezeichnet   
+  /*
+    Das 2D Array der Map wird mit hilfe von 2 for-Schleifen durchlaufen 
+    Die Indexe der forschleifen dienen als Koordinaten fuer die Tiles 
+  */
   for (var Xi = (this.Xtiles - 1); Xi >= 0; Xi--) {
     for (var Yi = 0; Yi < this.Ytiles; Yi++) {
       drawTile(Xi, Yi);
     }
   }
 
+  // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
   this.aKeyPressed = false;
   this.sKeyPressed = false;
 
+  /*
+  Anzeige der Gebaeude fuer den CLient
+  Daten von starLocation2 werden Empfangen und verarbeitet
+  */
   this.socket.on('starLocation2', function (starLocation) {
     if (teamname == "red") {
       scene.star = scene.add.image(starLocation.x, starLocation.y, 'turm2');
@@ -216,17 +242,22 @@ function create() {
 
   });
 
+  /*
+   Mausinformationen werden von jedem Spieler an den Server gesendet 
+   Im Moment werden die Daten nur fuer die Linke Maustaste gesendet
 
-
+   X & Y Koordinaten 
+   TileX & TileY Koordanitan 
+   Clicked = Setzt ein Boolean auf True wenn die Maustaste gedrueckt worden ist
+   */
   this.input.on('pointerdown', function (pointer) {
     console.log(teamname);
     if (pointer.leftButtonDown()) {
-
       if (!onRestrictedTile && !isSelected && pressed == "s") {
-
         drawHq(selectedTileX, selectedTileY);
       }
 
+      // Mausinfos werden an den Server gesendend 
       this.socket.emit('mouse', {
         x: pointer.x,
         y: pointer.y,
@@ -239,18 +270,26 @@ function create() {
     }
   }, this);
 
+  // Wenn die Maustaste nicht mehr gedrueckt wird, wird cliecked auf false gesetzt 
   this.input.on('pointerup', function (pointer) {
     clicked = false;
   }, this);
 
+  // Daten fuer die Spielzeit anzeige werden vom Server empfangen und in der Methode displattime() verarbeitet
   this.socket.on('updateTime', function (times) {
     displayTime(times.milSec);
   });
 
+  // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
+  // Der Teamname jedes Spielers wird in der Variable gespeichert 
   this.socket.on('team', function (team) {
     teamname = team.name;
   });
 
+  /*
+    Wenn ein spieler disconnected wird das Spielerobjekt entfernt 
+    Jeder Spieler besitzt eine ID und kann so identifiziert werden
+  */
   this.socket.on('disconnect', function (playerId) {
     self.players.getChildren().forEach(function (player) {
       if (playerId === player.playerId) {
@@ -260,38 +299,58 @@ function create() {
   });
 }
 
-// Ein Tile wird gezeichnet 
+/*
+  Die Position im 2D Array der Map wird in X & Y Koordinaten umgerechnet 
+  Das Bild der jeweiligen Tiles besitzt eine ID welche auch im Array gespeichret ist 
+
+  Die Id des Tiles wird durch ein Objekt mit Infomtionen ueber die ID und des jweiligen Bildes erstezt,
+  da man so immer auf das zugehoerige Bild zugreifen kann 
+
+  Xi = X-Koordninate im Array der Map
+  Yi = Y-Koordninate im Array der Map
+*/
 function drawTile(Xi, Yi) {
+
+  // Umrechnung der Koordinaten
   var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
   var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
 
+  // Anzeige des Bildes
   var imageIndex = IsometricMap.map[Xi][Yi];
   var tileImage = scene.add.image(offX, offY, imageIndex).setInteractive();
+
+  // Erstellung eines Objktes mit Infomtionen ueber jedes Tile
   var tileObject = {
     "id": imageIndex,
     "image": tileImage,
   }
+
+  // Diese Objekt wird in das Array der Map eingefuegt 
   IsometricMap.map[Xi][Yi] = tileObject;
 }
 
+// Methode die 60/s ausgefuehrt wird 
 function update(time) {
-
-
-  test2();
+  checkTileStatus();
   isPlacingAllowed();
   displayTime(time);
+
+  // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
     mouse: clicked
   });
 
+  //KeyboardInput
   const a = this.keyApressed;
   const s = this.keySpressed;
 
+  // Wenn A gedrueckt ist
   if (keyA.isDown) {
     this.keyApressed = true;
     this.socket.emit('pressed', {
       pressed: "a"
     });
+    // Wenn S gedrueckt ist
   } else if (keyS.isDown) {
     if (pressed == "none") {
       selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'star').setInteractive();
@@ -305,6 +364,8 @@ function update(time) {
     this.keyApressed = false;
     this.keySpressed = false;
   }
+
+  // Daten ueber KeyboardInput werden an den Server geschickt 
   if (a !== this.keyApressed || s !== this.keySpressed) {
     this.socket.emit('playerInput', {
       a: this.keyApressed,
@@ -313,8 +374,16 @@ function update(time) {
   }
 }
 
-function test2() {
+/*
+Check zuerst ob die Mauspositon auf der dargestellten Map ist 
+Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
+*/
+function checkTileStatus() {
+
+  //Check ob Mauspositon auf der Map ist
   if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
+
+    // Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
     if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
       belegt.setText('Tile Status: Belegt');
       isSelected = true;
@@ -325,20 +394,39 @@ function test2() {
   }
 }
 
+/*
+  Die Update Methode bietet die Moeglichkeit die vergangene Zeit seit Start der Anwenung in Milisec auszugeben 
+  Die Zeit wird vom Server an die jeweiligen Clients gesendet 
+  Umrechnung der Milisec in Minuten und Sekunde
+*/
 function displayTime(milSec) {
+  
+  //  Umrechnung der Milisec in Minuten und Sekunde
   minutes = Math.floor((milSec / 1000) / 60);
   seconds = Math.floor((milSec / 1000) - (minutes * 60));
+
+  // Zeitinfomrationen werden vom Client empfangen
   scene.socket.on('updateTime', function (times) {
+    
+    // Text wird gesetzt 
     time.setText('Timer: ' + minutes + ':' + seconds);
   });
 }
 
+/*
+  Mehtode fuer die Anzeige der Bauzeit 
+  Besteht aus 2 Teilen: Anzeige und Hintergrund
+  Informationen fuer die Anzeige wird in einem Objekt gespeichert
+  Alle Anzeigen werden in einem Array gespeichert 
+*/
 function buildingTime(scene, sec) {
 
+  // Hintergrund
   timeBarBackGround = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     100, 10, 0xffffff);
 
+  // Anzeige 
   timeBar = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     0, 10, 0x39ff14);
@@ -354,10 +442,14 @@ function buildingTime(scene, sec) {
 
 }
 
+/*
+Check zuerst ob die Mauspositon auf der dargestellten Map ist 
+Objekte koenne nur platziert werden wenn die Tile ID nicht 2 ist oder das Tile schon belegt ist 
+Wenn das Tile belegt ist wird die Vorschauobjekt rot gefaerbt
+*/
 function isPlacingAllowed() {
   if (pressed == "s") {
     if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-
       if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 || IsometricMap.map[selectedTileX][selectedTileY].id === 2)) {
         selectedStructure.setTint(0xFF0040, 0.5);
         onRestrictedTile = true;
@@ -367,10 +459,11 @@ function isPlacingAllowed() {
       }
     }
   }
-
-  console.log(onRestrictedTile);
 }
 
+/*
+Animation der Bauzeitanzeige 
+*/
 function onEvent() {
   if (timeBar) {
     for (var i = 0; i < healthBarArray.length; i++) {
