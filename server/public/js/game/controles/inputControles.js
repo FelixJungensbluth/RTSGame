@@ -24,7 +24,7 @@ function placeBuilding(szene) {
         }
             // Auswahl wird entfernt 
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
-                IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
+               IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
             }
         }
@@ -32,8 +32,8 @@ function placeBuilding(szene) {
         if (pointer.rightButtonDown()) {
             // Auswahl wird hinzugefuegt.
             if (isSelected && IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
-
-                IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0x00BFFF, 0.05);
+                console.log( IsometricMap.buildingMap[selectedTileX][selectedTileY]);
+               IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
 
 

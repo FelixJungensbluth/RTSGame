@@ -238,25 +238,7 @@ function create() {
   this.aKeyPressed = false;
   this.sKeyPressed = false;
 
-  /*
-  Anzeige der Gebaeude fuer den CLient
-  Daten von starLocation2 werden Empfangen und verarbeitet
-  */
-  this.socket.on('starLocation2', function (starLocation) {
-    if (teamname == "red") {
-      scene.star = scene.add.image(starLocation.x, starLocation.y, 'turm2');
-    } else {
-      scene.star = scene.add.image(starLocation.x, starLocation.y, 'star');
-    }
-
-  });
-
-  this.socket.on('checkTileStatus', function (tileStatus) {
-    tileStatus = tileStatus;
-
-  });
-
-  /*
+   /*
    Mausinformationen werden von jedem Spieler an den Server gesendet 
    Im Moment werden die Daten nur fuer die Linke Maustaste gesendet
 
@@ -267,10 +249,7 @@ function create() {
   this.input.on('pointerdown', function (pointer) {
     console.log(teamname);
     if (pointer.leftButtonDown()) {
-      if (!onRestrictedTile && !isSelected && pressed == "s") {
-        drawHq(selectedTileX, selectedTileY);
-      }
-
+  
       // Mausinfos werden an den Server gesendend 
       this.socket.emit('mouse', {
         x: pointer.x,
@@ -282,7 +261,28 @@ function create() {
     } else {
       clicked = false;
     }
+
   }, this);
+
+  /*
+  Anzeige der Gebaeude fuer den CLient
+  Daten von starLocation2 werden Empfangen und verarbeitet
+  */
+  this.socket.on('starLocation2', function (starLocation) {
+    if (teamname == "red") {
+      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'turm2').setInteractive();
+      drawHq(selectedTileX,selectedTileY);
+    } else {
+      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'star').setInteractive();
+      drawHq(selectedTileX,selectedTileY);
+    }
+
+  });
+
+  this.socket.on('checkTileStatus', function (status) {
+    tileStatus = status;
+
+  });
 
   // Wenn die Maustaste nicht mehr gedrueckt wird, wird cliecked auf false gesetzt 
   this.input.on('pointerup', function (pointer) {
@@ -334,9 +334,6 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time) {
-
-  console.log(tileStatus);
-
 
   checkTileStatus(this);
   isPlacingAllowed();
