@@ -87,6 +87,8 @@ var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
 
+var tileStatus = false;
+
 function preload() {
 
   //Arrays werden initalisiert
@@ -206,6 +208,13 @@ function create() {
 
     // InfoText
     tilePosition.setText('Tile X: ' + selectedTileX + ' Tile Y: ' + selectedTileY);
+
+     this.socket.emit('mouse', {
+        x: pointer.x,
+        y: pointer.y,
+        tileX: selectedTileX,
+        tileY: selectedTileY
+      });
   }, this);
 
   // Platzierung der Gebäude
@@ -239,6 +248,11 @@ function create() {
     } else {
       scene.star = scene.add.image(starLocation.x, starLocation.y, 'star');
     }
+
+  });
+
+  this.socket.on('checkTileStatus', function (tileStatus) {
+    tileStatus = tileStatus;
 
   });
 
@@ -286,17 +300,6 @@ function create() {
     teamname = team.name;
   });
 
-  /*
-    Wenn ein spieler disconnected wird das Spielerobjekt entfernt 
-    Jeder Spieler besitzt eine ID und kann so identifiziert werden
-  */
-  this.socket.on('disconnect', function (playerId) {
-    self.players.getChildren().forEach(function (player) {
-      if (playerId === player.playerId) {
-        player.destroy();
-      }
-    });
-  });
 }
 
 /*
@@ -331,7 +334,11 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time) {
-  checkTileStatus();
+
+  console.log(tileStatus);
+
+
+  checkTileStatus(this);
   isPlacingAllowed();
   displayTime(time);
 
@@ -380,18 +387,14 @@ Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird diese
 */
 function checkTileStatus() {
 
-  //Check ob Mauspositon auf der Map ist
-  if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-
     // Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
-    if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
+    if (tileStatus) {
       belegt.setText('Tile Status: Belegt');
       isSelected = true;
     } else {
       isSelected = false;
       belegt.setText('Tile Status: frei');
     }
-  }
 }
 
 /*

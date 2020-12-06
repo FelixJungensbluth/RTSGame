@@ -147,15 +147,17 @@ function update(time) {
     }
     */
 
-    if (input.mouse && this.presesdInfo.pressed == "s") {
+    if (input.mouse && this.presesdInfo.pressed == "s" &&  !onRestrictedTile) {
       addImage(this);
     }
 
     if (input.mouse) {
-      console.log(players[player.playerId].team);
+      //console.log(players[player.playerId].team);
       this.team.name = players[player.playerId].team
       io.emit('team', this.team);
+      if(!onRestrictedTile) { 
       this.presesdInfo.pressed = "none";
+    }
 
     } else if (input.a) {
       console.log("A");
@@ -219,13 +221,16 @@ function addImage(self) {
 function isPlacingAllowed(self) {
 
   if (self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 && self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY <= IsometricMap.buildingMap.length) {
-
-    if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 || IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY].id === 2)) {
+    if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 || IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 2)) {
       onRestrictedTile = true;
+      io.emit('checkTileStatus', onRestrictedTile);
     } else {
+      io.emit('checkTileStatus', onRestrictedTile);
       onRestrictedTile = false
     }
   }
+ 
+ // console.log(onRestrictedTile);
 }
 
 // Spieler wird entfernt 
