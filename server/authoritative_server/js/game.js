@@ -141,12 +141,6 @@ function update(time) {
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
 
-    /*
-    if(input.mouse && this.presesdInfo.pressed == "s" && !onRestrictedTile) {
-        addImage(this);
-    }
-    */
-
     if (input.mouse && this.presesdInfo.pressed == "s" &&  !onRestrictedTile) {
       addImage(this);
     }
@@ -158,8 +152,8 @@ function update(time) {
       if(!onRestrictedTile) { 
       this.presesdInfo.pressed = "none";
     }
-
-    } else if (input.a) {
+    
+    } else if ( this.presesdInfo.pressed == "a") {
       console.log("A");
 
     } else {
@@ -230,7 +224,7 @@ function isPlacingAllowed(self) {
     }
   }
  
- // console.log(onRestrictedTile);
+  console.log(onRestrictedTile);
 }
 
 // Spieler wird entfernt 
