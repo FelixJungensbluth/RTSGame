@@ -33,6 +33,8 @@ var Ytiles = 0; // Number of tiles in Y-dimension
 
 var buildingArray = new Array();
 
+var team = 0;
+
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
   this.load.image('star', 'assets/star_gold.png');
@@ -80,6 +82,7 @@ function create() {
   */
   io.on('connection', function (socket) {
     console.log('a user connected');
+    team++;
     // create a new player and add it to our players object
     players[socket.id] = {
       rotation: 0,
@@ -87,6 +90,7 @@ function create() {
       y: Math.floor(Math.random() * 500) + 50,
       playerId: socket.id,
       team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
+      team1: team,
       input: {
         a: false,
         s: false,
@@ -140,15 +144,14 @@ function update(time) {
   // Die Inputs fuer jeden Client werden verarbeitet 
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
-
+    this.team.name = players[player.playerId].team1
+    io.emit('team', this.team);
     if (input.mouse && this.presesdInfo.pressed == "s" &&  !onRestrictedTile) {
       addImage(this);
     }
 
     if (input.mouse) {
       //console.log(players[player.playerId].team);
-      this.team.name = players[player.playerId].team
-      io.emit('team', this.team);
       if(!onRestrictedTile) { 
       this.presesdInfo.pressed = "none";
     }
@@ -224,7 +227,7 @@ function isPlacingAllowed(self) {
     }
   }
  
-  console.log(onRestrictedTile);
+ // console.log(onRestrictedTile);
 }
 
 // Spieler wird entfernt 

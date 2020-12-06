@@ -238,6 +238,12 @@ function create() {
   this.aKeyPressed = false;
   this.sKeyPressed = false;
 
+  // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
+  // Der Teamname jedes Spielers wird in der Variable gespeichert 
+  this.socket.on('team', function (team) {
+    teamname = team.name;
+  });
+
    /*
    Mausinformationen werden von jedem Spieler an den Server gesendet 
    Im Moment werden die Daten nur fuer die Linke Maustaste gesendet
@@ -269,7 +275,7 @@ function create() {
   Daten von starLocation2 werden Empfangen und verarbeitet
   */
   this.socket.on('starLocation2', function (starLocation) {
-    if (teamname == "red") {
+    if (teamname === 1) {
       buildingTest = scene.add.image(starLocation.x, starLocation.y, 'turm2').setInteractive();
       drawHq(selectedTileX,selectedTileY);
     } else {
@@ -292,12 +298,6 @@ function create() {
   // Daten fuer die Spielzeit anzeige werden vom Server empfangen und in der Methode displattime() verarbeitet
   this.socket.on('updateTime', function (times) {
     displayTime(times.milSec);
-  });
-
-  // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
-  // Der Teamname jedes Spielers wird in der Variable gespeichert 
-  this.socket.on('team', function (team) {
-    teamname = team.name;
   });
 
 }
