@@ -100,6 +100,9 @@ function preload() {
   // Bilder fuer das HQ wird geladen 
   this.load.image("star", "assets/turm.png");
   this.load.image("turm2", "assets/turm2.png");
+  this.load.image("mine", "assets/mine.png");
+  this.load.image("unit1", "assets/unit1.png");
+  this.load.image("worker", "assets/worker.png");
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -144,7 +147,6 @@ function create() {
   zoomCamera(this, cam);
 
   // Controles
-  delteStructure(this);
   getLastClicked(this);
 
   // Infotext
@@ -209,12 +211,12 @@ function create() {
     // InfoText
     tilePosition.setText('Tile X: ' + selectedTileX + ' Tile Y: ' + selectedTileY);
 
-     this.socket.emit('mouse', {
-        x: pointer.x,
-        y: pointer.y,
-        tileX: selectedTileX,
-        tileY: selectedTileY
-      });
+    this.socket.emit('mouse', {
+      x: pointer.x,
+      y: pointer.y,
+      tileX: selectedTileX,
+      tileY: selectedTileY
+    });
   }, this);
 
   // Platzierung der Gebäude
@@ -244,18 +246,18 @@ function create() {
     teamname = team.name;
   });
 
-   /*
-   Mausinformationen werden von jedem Spieler an den Server gesendet 
-   Im Moment werden die Daten nur fuer die Linke Maustaste gesendet
+  /*
+  Mausinformationen werden von jedem Spieler an den Server gesendet 
+  Im Moment werden die Daten nur fuer die Linke Maustaste gesendet
 
-   X & Y Koordinaten 
-   TileX & TileY Koordanitan 
-   Clicked = Setzt ein Boolean auf True wenn die Maustaste gedrueckt worden ist
-   */
+  X & Y Koordinaten 
+  TileX & TileY Koordanitan 
+  Clicked = Setzt ein Boolean auf True wenn die Maustaste gedrueckt worden ist
+  */
   this.input.on('pointerdown', function (pointer) {
     console.log(teamname);
     if (pointer.leftButtonDown()) {
-  
+
       // Mausinfos werden an den Server gesendend 
       this.socket.emit('mouse', {
         x: pointer.x,
@@ -276,11 +278,11 @@ function create() {
   */
   this.socket.on('starLocation2', function (starLocation) {
     if (teamname === 1) {
-      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'turm2').setInteractive();
-      drawHq(selectedTileX,selectedTileY);
-    } else {
       buildingTest = scene.add.image(starLocation.x, starLocation.y, 'star').setInteractive();
-      drawHq(selectedTileX,selectedTileY);
+      drawHq(selectedTileX, selectedTileY);
+    } else {
+      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'turm2').setInteractive();
+      drawHq(selectedTileX, selectedTileY);
     }
 
   });
@@ -384,14 +386,14 @@ Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird diese
 */
 function checkTileStatus() {
 
-    // Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
-    if (tileStatus) {
-      belegt.setText('Tile Status: Belegt');
-      isSelected = true;
-    } else {
-      isSelected = false;
-      belegt.setText('Tile Status: frei');
-    }
+  // Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
+  if (tileStatus) {
+    belegt.setText('Tile Status: Belegt');
+    isSelected = true;
+  } else {
+    isSelected = false;
+    belegt.setText('Tile Status: frei');
+  }
 }
 
 /*
@@ -400,14 +402,14 @@ function checkTileStatus() {
   Umrechnung der Milisec in Minuten und Sekunde
 */
 function displayTime(milSec) {
-  
+
   //  Umrechnung der Milisec in Minuten und Sekunde
   minutes = Math.floor((milSec / 1000) / 60);
   seconds = Math.floor((milSec / 1000) - (minutes * 60));
 
   // Zeitinfomrationen werden vom Client empfangen
   scene.socket.on('updateTime', function (times) {
-    
+
     // Text wird gesetzt 
     time.setText('Timer: ' + minutes + ':' + seconds);
   });

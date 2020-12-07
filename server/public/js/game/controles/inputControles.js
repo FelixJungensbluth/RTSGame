@@ -11,20 +11,19 @@ function placeBuilding(szene) {
         pressed = "s"
     });
     szene.input.on('pointerdown', function (pointer) {
-        if(!onRestrictedTile){
-        if (pointer.leftButtonDown()) {
-            if (!isSelected && pressed == "s") {
-                pressed = "none"
-             
-                drawHq(selectedTileX, selectedTileY);
-               
-                buildingTime(szene);
-                selectedStructure.destroy();
+        if (!onRestrictedTile) {
+            if (pointer.leftButtonDown()) {
+                if (!isSelected && pressed == "s") {
+                    pressed = "none"
+
+                    drawHq(selectedTileX, selectedTileY);
+                    buildingTime(szene);
+                    selectedStructure.destroy();
+                }
             }
-        }
             // Auswahl wird entfernt 
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
-               IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
+                IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
             }
         }
@@ -32,8 +31,8 @@ function placeBuilding(szene) {
         if (pointer.rightButtonDown()) {
             // Auswahl wird hinzugefuegt.
             if (isSelected && IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
-                console.log( IsometricMap.buildingMap[selectedTileX][selectedTileY]);
-               IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
+                console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
+                IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
 
 
@@ -42,18 +41,6 @@ function placeBuilding(szene) {
         }
     }, this);
 
-}
-
-// Ausgewaeltes Gebaeude wird geloescht wenn A gedrueckt wird  
-function delteStructure(szene) {
-    szene.input.keyboard.on('keydown-A', function (event) {
-        if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
-
-            // Bild wird geloescht
-            IsometricMap.buildingMap[selectedTileX][selectedTileY].image.destroy();
-            IsometricMap.buildingMap[selectedTileX][selectedTileY] = 0;
-        }
-    });
 }
 
 // Infos zum letzten klick werden zwischengespeichert 
@@ -102,7 +89,7 @@ function getLastClicked(szene) {
 function isPlacingAllowed() {
     if (pressed == "s") {
         if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-           
+
             if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 || IsometricMap.map[selectedTileX][selectedTileY].id === 2)) {
                 selectedStructure.setTint(0xFF0040, 0.5);
                 onRestrictedTile = true;

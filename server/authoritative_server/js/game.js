@@ -146,17 +146,17 @@ function update(time) {
     const input = players[player.playerId].input;
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
-    if (input.mouse && this.presesdInfo.pressed == "s" &&  !onRestrictedTile) {
+    if (input.mouse && this.presesdInfo.pressed == "s" && !onRestrictedTile) {
       addImage(this);
     }
 
     if (input.mouse) {
       //console.log(players[player.playerId].team);
-      if(!onRestrictedTile) { 
-      this.presesdInfo.pressed = "none";
-    }
-    
-    } else if ( this.presesdInfo.pressed == "a") {
+      if (!onRestrictedTile) {
+        this.presesdInfo.pressed = "none";
+      }
+
+    } else if (this.presesdInfo.pressed == "a") {
       console.log("A");
 
     } else {
@@ -226,8 +226,8 @@ function isPlacingAllowed(self) {
       onRestrictedTile = false
     }
   }
- 
- // console.log(onRestrictedTile);
+
+  // console.log(onRestrictedTile);
 }
 
 // Spieler wird entfernt 
