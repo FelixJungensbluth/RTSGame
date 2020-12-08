@@ -25,6 +25,7 @@ function placeBuilding(szene) {
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
+                szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
             }
         }
 
@@ -34,10 +35,8 @@ function placeBuilding(szene) {
                 console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
-
-
+                szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
             }
-
         }
     }, this);
 

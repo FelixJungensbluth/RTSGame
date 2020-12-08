@@ -32,3 +32,20 @@ function drawHq(Xi, Yi) {
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[Xi][Yi] = hq;
 }
+
+/*
+Anzeige der Gebaeude fuer den CLient
+Daten von starLocation2 werden Empfangen und verarbeitet
+*/
+function addHq(scene) {
+  scene.socket.on('hq', function (hqLocation) {
+    if (teamname === 1) {
+      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
+      drawHq(selectedTileX, selectedTileY);
+    } else {
+      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
+      drawHq(selectedTileX, selectedTileY);
+    }
+
+  });
+}

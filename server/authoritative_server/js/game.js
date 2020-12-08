@@ -35,6 +35,8 @@ var buildingArray = new Array();
 
 var team = 0;
 
+selectedStatus = false
+
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
   this.load.image('star', 'assets/star_gold.png');
@@ -135,11 +137,17 @@ function create() {
     socket.on('pressed', function (presesdData) {
       self.presesdInfo.pressed = presesdData.pressed;
     });
+
+    socket.on('structureSelected', function (selected) {
+      selectedStatus = selected;
+
+    });
   });
 }
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time) {
+
 
   // Die Inputs fuer jeden Client werden verarbeitet 
   this.players.getChildren().forEach((player) => {
@@ -147,7 +155,13 @@ function update(time) {
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
     if (input.mouse && this.presesdInfo.pressed == "s" && !onRestrictedTile) {
-      addImage(this);
+      addHq(this);
+    }
+
+    if (input.a && selectedStatus) {
+      addWorker(this);
+      console.log("dsfsfsdfsd");
+      this.presesdInfo.pressed == "none"
     }
 
     if (input.mouse) {
@@ -157,10 +171,7 @@ function update(time) {
       }
 
     } else if (this.presesdInfo.pressed == "a") {
-      console.log("A");
 
-    } else {
-      player.setAngularVelocity(0);
     }
   });
   io.emit('playerUpdates', players);
@@ -189,12 +200,12 @@ function addPlayer(self, playerInfo) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addImage(self) {
+function addHq(self) {
   console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
-  io.emit('starLocation2', {
+  io.emit('hq', {
     x: test.x,
     y: test.y
   });
@@ -212,6 +223,14 @@ function addImage(self) {
 
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+}
+
+function addWorker(self) {
+  var test = self.physics.add.image(Phaser.Math.RND.between(300, 800), Phaser.Math.RND.between(300, 500), 'star');
+  io.emit('workerLocation', {
+    x: test.x,
+    y: test.y
+  });
 }
 
 // Gleiche wie in Engine
