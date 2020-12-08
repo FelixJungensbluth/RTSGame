@@ -43,8 +43,6 @@ var camMoveY = 0 // Wert wie weit sich die Kamera in Y-Richtung bewegt hat
 var selectionRectWidth = 0; // Breite des Auswahlrechteckes
 var selectionRectHeight = 0; // Höhe  des Auswahlrechteckes
 
-var selectionRectangle; // Auswahlrechteck
-
 var buildingArray = new Array(); // Array indem die platzierten Gebäude gespeichert werden
 
 // Debug Text
@@ -95,6 +93,8 @@ var test = 0;
 
 var workerX;
 var workerY;
+
+var unitsArray = new Array();
 
 function preload() {
 
@@ -188,10 +188,18 @@ function create() {
     }
   }, this);
 
+  createSelectionRectangle(scene);
+
   // Bestimming des aktuellen Tiles 
   this.input.on('pointermove', function (pointer) {
     // InfoText
     mousePosition.setText('Mouse X: ' + pointer.x + ' Mouse Y: ' + pointer.y);
+    if (lastClicked.length != 0) {
+      if (lastClicked[0].button == "rechts") {
+        selectionRectangle.width = (pointer.x - lastClicked[0].positionX) + camMoveX;
+        selectionRectangle.height = (pointer.y - lastClicked[0].positionY) + camMoveY;
+      }
+    }
 
     // Mauspositon wird den Variablen zugewiesen
     mausX = pointer.x;
@@ -275,7 +283,6 @@ function create() {
     } else {
       clicked = false;
     }
-
   }, this);
 
   // Fuegt das HQ zu der Scene hinzu
@@ -297,7 +304,6 @@ function create() {
   this.socket.on('updateTime', function (times) {
     displayTime(times.milSec);
   });
-
 }
 
 /*
@@ -332,6 +338,9 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time) {
+
+  console.log(unitsArray.length);
+  checkUnitsInSelection();
 
   checkTileStatus(this);
   isPlacingAllowed();
