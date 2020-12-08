@@ -89,6 +89,13 @@ var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot 
 
 var tileStatus = false;
 
+var selectedStatus = false;
+
+var test = 0;
+
+var workerX;
+var workerY;
+
 function preload() {
 
   //Arrays werden initalisiert
@@ -255,7 +262,6 @@ function create() {
   Clicked = Setzt ein Boolean auf True wenn die Maustaste gedrueckt worden ist
   */
   this.input.on('pointerdown', function (pointer) {
-    console.log(teamname);
     if (pointer.leftButtonDown()) {
 
       // Mausinfos werden an den Server gesendend 
@@ -272,24 +278,14 @@ function create() {
 
   }, this);
 
-  /*
-  Anzeige der Gebaeude fuer den CLient
-  Daten von starLocation2 werden Empfangen und verarbeitet
-  */
-  this.socket.on('starLocation2', function (starLocation) {
-    if (teamname === 1) {
-      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'star').setInteractive();
-      drawHq(selectedTileX, selectedTileY);
-    } else {
-      buildingTest = scene.add.image(starLocation.x, starLocation.y, 'turm2').setInteractive();
-      drawHq(selectedTileX, selectedTileY);
-    }
+  // Fuegt das HQ zu der Scene hinzu
+  addHq(scene);
 
-  });
+  // Fuegt den Arbeiter zu der Scene hinzu
+  addWorker(scene);
 
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
-
   });
 
   // Wenn die Maustaste nicht mehr gedrueckt wird, wird cliecked auf false gesetzt 
@@ -372,10 +368,9 @@ function update(time) {
   }
 
   // Daten ueber KeyboardInput werden an den Server geschickt 
-  if (a !== this.keyApressed || s !== this.keySpressed) {
+  if (a !== this.keyApressed) {
     this.socket.emit('playerInput', {
       a: this.keyApressed,
-      s: this.keySpressed
     });
   }
 }
