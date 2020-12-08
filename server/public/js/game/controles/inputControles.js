@@ -1,4 +1,5 @@
 var onRestrictedTile = false;
+var selectionRectangle; // Auswahlrechteck
 
 
 // Gebaeude werden durch linksklick platziert
@@ -78,7 +79,7 @@ function getLastClicked(szene) {
         lastClickInfo.tilePositionY = selectedTileY;
 
         lastClickInfo.positionX = pointer.x;
-        lastClickInfo.positionY = pointer.Y;
+        lastClickInfo.positionY = pointer.y;
 
         this.lastClicked.push(lastClickInfo);
     }, this);
@@ -100,4 +101,33 @@ function isPlacingAllowed() {
     }
 
     console.log(onRestrictedTile);
+}
+
+function createSelectionRectangle(scene) {
+
+    scene.input.on('pointerdown', function (pointer) {
+        if (pointer.rightButtonDown()) {
+            selectionRectangle = scene.add.rectangle(pointer.x, pointer.y, 0, 0, 0xffffff, 0.5);
+        }
+    }, this);
+
+    scene.input.on('pointerup', function (pointer) {
+        if (pointer.rightButtonDown()) {
+            selectionRectangle.x = -1000;
+            selectionRectangle.destroy();
+        }
+    }, this);
+}
+
+function checkUnitsInSelection() {
+    if (unitsArray.length != 0) {
+        unitsArray.forEach(unit => {
+            if (unit.x >= selectionRectangle.x && unit.x <= selectionRectangle.x + selectionRectangle.width) {
+                unit.setTint(0xFFFFFF, 0.05);
+                unit.setData({
+                    isSelected: true,
+                });
+            }
+        });
+    }
 }

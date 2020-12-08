@@ -11,6 +11,8 @@ function drawWorker() {
         timeToBuild: 40,
         isSelected: false,
     });
+
+    unitsArray.push(worker);
 }
 
 function addWorker(scene) {
