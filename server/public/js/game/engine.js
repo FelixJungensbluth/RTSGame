@@ -11,6 +11,10 @@ var config = {
 };
 var game = new Phaser.Game(config);
 
+var follower;
+var path;
+var graphics;
+
 var tileWidthHalf;
 var tileHeightHalf;
 
@@ -53,6 +57,7 @@ var belegt;
 var structureName;
 var mausInfo;
 var time;
+var resources;
 
 // Mauskoordianten fuer die Bewegung des Vorschaubildes des platzierten Objektes
 var mausX;
@@ -94,7 +99,15 @@ var test = 0;
 var workerX;
 var workerY;
 
-var unitsArray = new Array();
+var unitsArray1 = new Array();
+var unitsArray1 = new Array();
+
+var resourceCounter = 0;
+var easystar;
+
+var testArray = new Array();
+var testArray2 = new Array();
+var testArray3 = new Array();
 
 function preload() {
 
@@ -124,6 +137,11 @@ function preload() {
 */
 function create() {
   scene = this;
+  graphics = this.add.graphics();
+  follower = { t: 0, vec: new Phaser.Math.Vector2() };
+  path = this.add.path();
+  this.players = this.add.group();
+  easystar = new EasyStar.js();  
 
   //SocketIO wird initalisiert 
   this.socket = io();
@@ -133,6 +151,17 @@ function create() {
 
   // Oeffnen des Rechtsklickmenue wird disabled
   this.input.mouse.disableContextMenu();
+
+  this.socket.on('currentPlayers', function (players) {
+    Object.keys(players).forEach(function (id) {
+
+      if (players[id].playerId === scene.socket.id) {
+        //console.log("test");
+      } else {
+       // console.log("test1");
+      }
+    });
+  });
 
   // Timer wrid erzeugt
   timedEvent = this.time.addEvent({
@@ -177,6 +206,11 @@ function create() {
   time = this.add.text(1750, 20, 'Timer: ', {
     fontSize: '20px',
     fill: '#39ff14'
+  });
+
+  resources = this.add.text(1750, 60, 'Resources: 0 ', {
+    fontSize: '20px',
+    fill: '#0cbfe9'
   });
 
   // Bestimmung des ausgewählten Tiles
@@ -255,6 +289,8 @@ function create() {
   this.aKeyPressed = false;
   this.sKeyPressed = false;
 
+
+
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
   // Der Teamname jedes Spielers wird in der Variable gespeichert 
   this.socket.on('team', function (team) {
@@ -290,7 +326,8 @@ function create() {
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
-
+  handelSelectedUnits(scene);
+  
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
   });
@@ -304,6 +341,29 @@ function create() {
   this.socket.on('updateTime', function (times) {
     displayTime(times.milSec);
   });
+
+  this.resources = 0;
+  this.timer = 0;
+}
+
+function rotate(matrix) {
+  // reverse the individual rows
+  matrix = matrix.reverse();
+  
+
+  // swap the symmetric elements
+  for (var i = 0; i < matrix.length; i++) {
+    for (var j = 0; j < i; j++) {
+      var temp = matrix[i][j];
+      matrix[i][j] = matrix[j][i];
+      matrix[j][i] = temp;
+    }
+  }
+
+  matrix = matrix.map(function(row) {
+    return row.reverse();
+  });
+  
 }
 
 /*
@@ -330,6 +390,8 @@ function drawTile(Xi, Yi) {
   var tileObject = {
     "id": imageIndex,
     "image": tileImage,
+    "positionX": offX,
+    "positionY": offY,
   }
 
   // Diese Objekt wird in das Array der Map eingefuegt 
@@ -337,14 +399,27 @@ function drawTile(Xi, Yi) {
 }
 
 // Methode die 60/s ausgefuehrt wird 
-function update(time) {
-
-  console.log(unitsArray.length);
+function update(time, delta) {
   checkUnitsInSelection();
-
   checkTileStatus(this);
   isPlacingAllowed();
   displayTime(time);
+
+  for (var i = 0; i < IsometricMap.grid.length; i++) {
+    for (var j = 0; j <  IsometricMap.grid.length; j++) {
+      if(IsometricMap.grid[i][j] == 5) {
+        IsometricMap.map[j][i].image.setTint(0xFF0040, 0.5);
+      }
+    }
+  }
+  handleUnitMovment(this);
+
+  this.timer += delta;
+    while (this.timer > 1000) {
+       resourceCounter += onResource;
+        this.timer -= 1000;
+    }
+    resources.setText("Resources: " +  resourceCounter);
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
@@ -382,6 +457,7 @@ function update(time) {
       a: this.keyApressed,
     });
   }
+
 }
 
 /*

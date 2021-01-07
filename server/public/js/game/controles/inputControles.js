@@ -113,15 +113,17 @@ function createSelectionRectangle(scene) {
 
     scene.input.on('pointerup', function (pointer) {
         if (pointer.rightButtonDown()) {
+            console.log("dsfsdfsdf");
             selectionRectangle.x = -1000;
             selectionRectangle.destroy();
         }
+        
     }, this);
 }
 
 function checkUnitsInSelection() {
-    if (unitsArray.length != 0) {
-        unitsArray.forEach(unit => {
+    if (unitsArray1.length != 0) {
+        unitsArray1.forEach(unit => {
             if (unit.x >= selectionRectangle.x && unit.x <= selectionRectangle.x + selectionRectangle.width) {
                 unit.setTint(0xFFFFFF, 0.05);
                 unit.setData({

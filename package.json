@@ -13,6 +13,7 @@
   "dependencies": {
     "canvas": "^2.6.1",
     "datauri": "^1.1.0",
+    "easystarjs": "^0.4.4",
     "express": "^4.17.1",
     "jsdom": "^13.2.0",
     "socket.io": "^2.3.0"

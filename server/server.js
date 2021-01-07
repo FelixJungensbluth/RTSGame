@@ -8,7 +8,6 @@ const io = require('socket.io').listen(server);
 const Datauri = require('datauri');
 const datauri = new Datauri();
 const { JSDOM } = jsdom;
-
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
