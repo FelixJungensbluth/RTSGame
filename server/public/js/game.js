@@ -30,9 +30,9 @@ function create() {
   this.socket.on('currentPlayers', function (players) {
     Object.keys(players).forEach(function (id) {
       if (players[id].playerId === self.socket.id) {
-        displayPlayers(self, players[id], 'ship');
+       console.log(players[id].playerId);
       } else {
-        displayPlayers(self, players[id], 'otherPlayer');
+        console.log(players[id].playerId);
       }
     });
   });

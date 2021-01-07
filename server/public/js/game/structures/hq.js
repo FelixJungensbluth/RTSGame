@@ -31,7 +31,23 @@ function drawHq(Xi, Yi) {
 
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[Xi][Yi] = hq;
+  IsometricMap.grid[Yi][Xi] = hq;
+
+  easystar.setAcceptableTiles([0]);
+  easystar.setGrid(IsometricMap.grid);
+  
 }
+
+function updatetest(Xi, Yi) {
+  IsometricMap.test[Xi][Yi] = "Belegt";
+  IsometricMap.grid = IsometricMap.test;
+
+  console.log(IsometricMap.grid);
+  console.log(IsometricMap.test);
+  rotate(IsometricMap.grid);
+  easystar.setGrid(IsometricMap.test);
+}
+
 
 /*
 Anzeige der Gebaeude fuer den CLient
@@ -42,9 +58,11 @@ function addHq(scene) {
     if (teamname === 1) {
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
       drawHq(selectedTileX, selectedTileY);
+     // updatetest(selectedTileX, selectedTileY);
     } else {
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
       drawHq(selectedTileX, selectedTileY);
+     // updatetest(selectedTileX, selectedTileY);
     }
 
   });

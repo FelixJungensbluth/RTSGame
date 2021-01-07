@@ -1,4 +1,6 @@
 const players = {};
+const units = {};
+var worker = "worker";
 
 const config = {
   type: Phaser.HEADLESS,
@@ -36,6 +38,7 @@ var buildingArray = new Array();
 var team = 0;
 
 selectedStatus = false
+var easystar;
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -48,6 +51,9 @@ function preload() {
 function create() {
   const self = this;
   this.players = this.physics.add.group();
+  easystar = new EasyStar.js();
+  easystar.setAcceptableTiles([0]);
+  easystar.setGrid(IsometricMap.grid);
 
   // Objekt mit Mausinfos
   this.mouseInfo = {
@@ -74,6 +80,11 @@ function create() {
     name: "none"
   }
 
+  this.workerPosition = {
+    x: 0,
+    y: 0,
+  }
+
   self.times.milSec = 10;
 
   // Das Zeit objekt wird an die Clients gesended 
@@ -97,7 +108,12 @@ function create() {
         a: false,
         s: false,
         mouse: false
-      }
+      },
+      test: {
+        pressed: "none"
+      },
+      unit: testArray = new Array(),
+      path: pathArray = new Array()
     };
 
     // add player to server
@@ -135,39 +151,54 @@ function create() {
 
     // Die gesendeten Keyboardinputs von den Clients werden mit den Variablen des Serves geleichgesetzt
     socket.on('pressed', function (presesdData) {
-      self.presesdInfo.pressed = presesdData.pressed;
+      handleKeyPressed(self, socket.id, presesdData)
     });
 
     socket.on('structureSelected', function (selected) {
       selectedStatus = selected;
-
     });
+
+    socket.on('pathInfo', function (path) {
+      handelPathInfo(self, socket.id, path)
+    });
+
+    
+    socket.on('unitInfo', function (unit) {
+      handelUnitInfo(self, socket.id, unit)
+    });
+
   });
 }
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time) {
-
-
   // Die Inputs fuer jeden Client werden verarbeitet 
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
+    const pressed = players[player.playerId].test.pressed;
+    const path = players[player.playerId].path;
+    const units =  players[player.playerId].unit
+
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
-    if (input.mouse && this.presesdInfo.pressed == "s" && !onRestrictedTile) {
+
+    if (input.mouse && pressed == "s" && !onRestrictedTile) {
       addHq(this);
     }
 
     if (input.a && selectedStatus) {
-      addWorker(this);
+      addWorker(this, players[player.playerId].unit, this.team);
       console.log("dsfsfsdfsd");
       this.presesdInfo.pressed == "none"
     }
 
+
+   calculatePath(this, players[player.playerId].playerId, units);
+
     if (input.mouse) {
       //console.log(players[player.playerId].team);
       if (!onRestrictedTile) {
-        this.presesdInfo.pressed = "none";
+        players[player.playerId].test.pressed = "none";
       }
 
     } else if (this.presesdInfo.pressed == "a") {
@@ -192,6 +223,31 @@ function handlePlayerInput(self, playerId, input) {
   });
 }
 
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handleKeyPressed(self, playerId, pressedData) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].test = pressedData;
+    }
+  });
+}
+
+function handelPathInfo(self, playerId, path) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].path = path;
+    }
+  });
+}
+
+function handelUnitInfo(self, playerId, unit) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].unit = unit;
+    }
+  });
+}
+
 // Spieler wird hinzugefuegt und mit einer ID versehen 
 function addPlayer(self, playerInfo) {
   const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
@@ -206,8 +262,8 @@ function addHq(self) {
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('hq', {
-    x: test.x,
-    y: test.y
+    x: offX,
+    y: offY
   });
   var hq = {
     "id": "1",
@@ -225,13 +281,64 @@ function addHq(self) {
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
 }
 
-function addWorker(self) {
-  var test = self.physics.add.image(Phaser.Math.RND.between(300, 800), Phaser.Math.RND.between(300, 500), 'star');
+function addWorker(self, array, team) {
+  worker = self.add.image(Phaser.Math.RND.between(300, 800), Phaser.Math.RND.between(300, 500), 'star').setInteractive();
   io.emit('workerLocation', {
-    x: test.x,
-    y: test.y
+    x: worker.x,
+    y: worker.y
   });
+  var workerObject = {
+    name: 'worker',
+    x: worker.x,
+    y: worker.y,
+    id: 'Link',
+    hp: 50,
+    timeToBuild: 40,
+    isSelected: false,
+    image: worker,
+    on: false,
+    tileX: 0,
+    tileY: 0,
+    canMove: false,
+    team: team,
+  }
+  io.emit('updateArray', array);
+
 }
+
+function calculatePath(self, playerId, array) {
+
+  
+
+  self.players.getChildren().forEach((player) => {
+    console.log(array.length + " " + playerId  + " " + player.playerId  );
+    if (playerId === player.playerId) {
+      array.forEach(unit => {
+        var toX =  unit.toX
+        var toY =  unit.toY;
+        var fromX = unit.fromX;
+        var fromY = unit.fromY;
+  
+        easystar.findPath(fromX, fromY, toX, toY, function (path) {
+          if (path === null) {
+            console.warn("Path was not found.");
+          } else {
+            console.log(path);
+            for (var i = 0; i < path.length - 1; i++) {
+              var offX = path[i + 1].x * this.tileColumnOffset / 2 + path[i + 1].y * this.tileColumnOffset / 2 + this.originX;
+              var offY = path[i + 1].y * this.tileRowOffset / 2 - path[i + 1].x * this.tileRowOffset / 2 + this.originY;
+              io.emit('pathFinding', {x: offX, y: offY, path: path});
+          }
+          }
+        });
+        
+      });
+    }
+  });
+  easystar.calculate();
+}
+
+
 
 // Gleiche wie in Engine
 function isPlacingAllowed(self) {
