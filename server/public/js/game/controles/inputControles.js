@@ -33,7 +33,7 @@ function placeBuilding(szene) {
         if (pointer.rightButtonDown()) {
             // Auswahl wird hinzugefuegt.
             if (isSelected && IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
-                console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
+                //cole.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
                 szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
@@ -100,7 +100,7 @@ function isPlacingAllowed() {
         }
     }
 
-    console.log(onRestrictedTile);
+   // console.log(onRestrictedTile);
 }
 
 function createSelectionRectangle(scene) {
@@ -113,7 +113,7 @@ function createSelectionRectangle(scene) {
 
     scene.input.on('pointerup', function (pointer) {
         if (pointer.rightButtonDown()) {
-            console.log("dsfsdfsdf");
+           // console.log("dsfsdfsdf");
             selectionRectangle.x = -1000;
             selectionRectangle.destroy();
         }

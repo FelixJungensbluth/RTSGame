@@ -1,6 +1,4 @@
 const players = {};
-const units = {};
-var worker = "worker";
 
 const config = {
   type: Phaser.HEADLESS,
@@ -39,6 +37,14 @@ var team = 0;
 
 selectedStatus = false
 var easystar;
+
+var onlyOnce = true;
+
+var fuck = new Array;
+
+var mental = new Array;
+
+
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -147,6 +153,7 @@ function create() {
       self.mouseInfo.y = mouseData.y;
       self.mouseInfo.tileX = mouseData.tileX;
       self.mouseInfo.tileY = mouseData.tileY;
+      onlyOnce = true;
     });
 
     // Die gesendeten Keyboardinputs von den Clients werden mit den Variablen des Serves geleichgesetzt
@@ -158,15 +165,13 @@ function create() {
       selectedStatus = selected;
     });
 
-    socket.on('pathInfo', function (path) {
-      handelPathInfo(self, socket.id, path)
+    socket.on('MOVE', function (move) {
+     fuck.push(move);
     });
 
-    
-    socket.on('unitInfo', function (unit) {
-      handelUnitInfo(self, socket.id, unit)
-    });
-
+    socket.on('selctedUnitID', function (sUId) {
+      mental.push(sUId);
+     });
   });
 }
 
@@ -176,9 +181,7 @@ function update(time) {
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
     const pressed = players[player.playerId].test.pressed;
-    const path = players[player.playerId].path;
-    const units =  players[player.playerId].unit
-
+    
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
 
@@ -188,12 +191,17 @@ function update(time) {
 
     if (input.a && selectedStatus) {
       addWorker(this, players[player.playerId].unit, this.team);
-      console.log("dsfsfsdfsd");
       this.presesdInfo.pressed == "none"
     }
 
-
-   calculatePath(this, players[player.playerId].playerId, units);
+    if (onlyOnce) {
+      if (input.mouse) {
+       io.emit("break", mental);
+       mental.length =0;
+       io.emit("FUCKINFO", fuck);
+        onlyOnce = false;
+      }
+    }
 
     if (input.mouse) {
       //console.log(players[player.playerId].team);
@@ -279,63 +287,47 @@ function addHq(self) {
 
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+  IsometricMap.grid[self.mouseInfo.tileY][self.mouseInfo.tileY] = hq;
+
+  easystar.setAcceptableTiles([0]);
+  easystar.setGrid(IsometricMap.grid);
 }
 
 function addWorker(self, array, team) {
-  worker = self.add.image(Phaser.Math.RND.between(300, 800), Phaser.Math.RND.between(300, 500), 'star').setInteractive();
+  worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   io.emit('workerLocation', {
     x: worker.x,
-    y: worker.y
-  });
-  var workerObject = {
-    name: 'worker',
-    x: worker.x,
     y: worker.y,
-    id: 'Link',
-    hp: 50,
-    timeToBuild: 40,
-    isSelected: false,
-    image: worker,
-    on: false,
-    tileX: 0,
-    tileY: 0,
-    canMove: false,
-    team: team,
-  }
-  io.emit('updateArray', array);
+  });
+}
 
+function testmove() {
+  io.emit('testMove', {
+    x: 1000,
+    y: 700,
+  });
 }
 
 function calculatePath(self, playerId, array) {
+  array.forEach(unit => {
+    var toX = unit.tx;
+    var toY = unit.ty;
+    var fromX = unit.fx;
+    var fromY = unit.fy;
 
-  
+    easystar.findPath(fromX, fromY, toX, toY, function (path) {
+      if (path === null) {
+        console.warn("Path was not found.");
+      } else {
+        console.log('path');
 
-  self.players.getChildren().forEach((player) => {
-    console.log(array.length + " " + playerId  + " " + player.playerId  );
-    if (playerId === player.playerId) {
-      array.forEach(unit => {
-        var toX =  unit.toX
-        var toY =  unit.toY;
-        var fromX = unit.fromX;
-        var fromY = unit.fromY;
-  
-        easystar.findPath(fromX, fromY, toX, toY, function (path) {
-          if (path === null) {
-            console.warn("Path was not found.");
-          } else {
-            console.log(path);
-            for (var i = 0; i < path.length - 1; i++) {
-              var offX = path[i + 1].x * this.tileColumnOffset / 2 + path[i + 1].y * this.tileColumnOffset / 2 + this.originX;
-              var offY = path[i + 1].y * this.tileRowOffset / 2 - path[i + 1].x * this.tileRowOffset / 2 + this.originY;
-              io.emit('pathFinding', {x: offX, y: offY, path: path});
-          }
-          }
-        });
-        
-      });
-    }
+        pathTest.push(path);
+        io.emit("pathCringe", path);
+      }
+    });
+    easystar.calculate();
+
   });
-  easystar.calculate();
 }
 
 

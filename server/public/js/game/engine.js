@@ -326,7 +326,13 @@ function create() {
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
+  handleUnitMovment(scene);
   handelSelectedUnits(scene);
+  unitsSelected(scene);
+  moveTest();
+  
+ 
+  //handelSelectedUnits(scene);
   
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
@@ -400,10 +406,12 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
-  checkUnitsInSelection();
+  //checkUnitsInSelection();
   checkTileStatus(this);
   isPlacingAllowed();
   displayTime(time);
+
+  console.log('LOCAL '+selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
 
   for (var i = 0; i < IsometricMap.grid.length; i++) {
     for (var j = 0; j <  IsometricMap.grid.length; j++) {
@@ -412,14 +420,14 @@ function update(time, delta) {
       }
     }
   }
-  handleUnitMovment(this);
-
+/*
   this.timer += delta;
     while (this.timer > 1000) {
        resourceCounter += onResource;
         this.timer -= 1000;
     }
     resources.setText("Resources: " +  resourceCounter);
+    */
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
