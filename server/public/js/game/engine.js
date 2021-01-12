@@ -123,6 +123,7 @@ function preload() {
   this.load.image("mine", "assets/mine.png");
   this.load.image("unit1", "assets/unit1.png");
   this.load.image("worker", "assets/worker.png");
+  this.load.image("minimap", "assets/map.png");
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -184,6 +185,8 @@ function create() {
 
   // Controles
   getLastClicked(this);
+
+  createMap(scene);
 
   // Infotext
   tilePosition = this.add.text(20, 20, 'Tile Position:', {

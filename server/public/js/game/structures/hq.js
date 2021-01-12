@@ -32,6 +32,7 @@ function drawHq(Xi, Yi) {
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[Xi][Yi] = hq;
   IsometricMap.grid[Yi][Xi] = hq;
+  addBuilindsToMap(offY, offX);
 
   easystar.setAcceptableTiles([0]);
   easystar.setGrid(IsometricMap.grid);
