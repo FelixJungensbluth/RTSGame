@@ -125,6 +125,9 @@ function preload() {
   this.load.image("unit1", "assets/unit1.png");
   this.load.image("worker", "assets/worker.png");
   this.load.image("minimap", "assets/map.png");
+  this.load.image("olMap", "assets/HUD_map.png");
+  this.load.image("olTime", "assets/HUD_time.png");
+  this.load.image("olResource", "assets/HUD_resources.png");
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -191,33 +194,22 @@ function create() {
   getLastClicked(this);
 
   // Infotext
-  tilePosition = this.add.text(20, 20, 'Tile Position:', {
+  tilePosition = this.add.text(20, 140, 'Tile Position:', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
-  mousePosition = this.add.text(20, 40, 'Mouse Position: ', {
+  mousePosition = this.add.text(20, 160, 'Mouse Position: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
-  belegt = this.add.text(20, 60, 'Tile Status: ', {
+  belegt = this.add.text(20, 180, 'Tile Status: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
-  mausInfo = this.add.text(20, 80, 'Mausinfo: ', {
+  mausInfo = this.add.text(20, 200, 'Mausinfo: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
-
-  time = this.add.text(1750, 20, 'Timer: ', {
-    fontSize: '20px',
-    fill: '#39ff14'
-  }).setScrollFactor(0);
-
-  resources = this.add.text(1750, 60, 'Resources: 0 ', {
-    fontSize: '20px',
-    fill: '#0cbfe9'
-  }).setScrollFactor(0);
-
   addBuildingOnMap(scene);
 
   // Bestimmung des ausgewählten Tiles
@@ -291,6 +283,18 @@ function create() {
   }
 
   createMap(scene);
+  displayOverlay();
+  time = this.add.text(75, 1, '', {
+    font: "23px Arial",
+    fill: '#000000',
+  }).setScrollFactor(0);
+
+
+  resources = this.add.text(130, 35, '0', {
+    font: "20px Arial",
+    fill: '#000000',
+  }).setScrollFactor(0);
+
 
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -436,7 +440,7 @@ function update(time, delta) {
          resourceCounter += unitsOnResource;
           this.timer -= 1000;
       }
-      resources.setText("Resources: " +  resourceCounter);
+      resources.setText(resourceCounter);
       
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
@@ -509,7 +513,7 @@ function displayTime(milSec) {
   scene.socket.on('updateTime', function (times) {
 
     // Text wird gesetzt 
-    time.setText('Timer: ' + minutes + ':' + seconds);
+    time.setText(minutes + ':' + seconds);
   });
 }
 
