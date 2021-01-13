@@ -59,6 +59,8 @@ var mausInfo;
 var time;
 var resources;
 
+var resourceCounter = 0;
+
 // Mauskoordianten fuer die Bewegung des Vorschaubildes des platzierten Objektes
 var mausX;
 var mausY;
@@ -102,7 +104,6 @@ var workerY;
 var unitsArray1 = new Array();
 var unitsArray1 = new Array();
 
-var resourceCounter = 0;
 var easystar;
 
 var testArray = new Array();
@@ -418,6 +419,7 @@ function update(time, delta) {
   checkTileStatus(this);
   isPlacingAllowed();
   displayTime(time);
+  collectResources();
 
   console.log('LOCAL ' + selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
 
@@ -428,14 +430,14 @@ function update(time, delta) {
       }
     }
   }
-  /*
+  
     this.timer += delta;
       while (this.timer > 1000) {
-         resourceCounter += onResource;
+         resourceCounter += unitsOnResource;
           this.timer -= 1000;
       }
       resources.setText("Resources: " +  resourceCounter);
-      */
+      
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {

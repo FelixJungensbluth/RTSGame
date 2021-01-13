@@ -9,6 +9,11 @@ var id = 0;
 
 var globalUnits = new Array;
 
+
+var onlyOnce = true;
+
+var unitsOnResource = 0;
+
 function initWorker() {
     worker.setData({
         name: 'worker',
@@ -137,7 +142,9 @@ function moveTest() {
     scene.socket.on('FUCKINFO', function (cringe) {
 
         for (var i = 0; i < globalUnits.length; i++) {
+            if (IsometricMap.map[globalUnits[i].getData('tileX')][globalUnits[i].getData('tileY')].id !== 50) {
             moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+            }
         }
 
         console.log(cringe[cringe.length - 1].units);
@@ -171,4 +178,21 @@ function moveCharacter(path, scene, unit) {
     scene.tweens.timeline({
         tweens: tweens
     });
+}
+
+
+function collectResources(){ 
+
+    if(selectedArray.length != 0) { 
+      
+        scene.input.on('pointerdown', function (pointer) {
+            if (onlyOnce) {
+                unitsOnResource++;
+                console.log(unitsOnResource);
+                  onlyOnce = false;
+                }
+        }, this);
+        onlyOnce = true;
+    }
+
 }

@@ -302,11 +302,11 @@ function addHq(self) {
   easystar.setGrid(IsometricMap.grid);
 }
 
-function addWorker(self, array, team) {
+function addWorker(self) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   io.emit('workerLocation', {
-    x: worker.x,
-    y: worker.y,
+    x:760,
+    y: 345,
   });
 }
 
