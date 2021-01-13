@@ -44,6 +44,10 @@ var fuck = new Array;
 
 var mental = new Array;
 
+var mental = new Array;
+
+var buildingsOnMap = new Array;
+
 
 
 function preload() {
@@ -166,12 +170,16 @@ function create() {
     });
 
     socket.on('MOVE', function (move) {
-     fuck.push(move);
+      fuck.push(move);
     });
 
     socket.on('selctedUnitID', function (sUId) {
       mental.push(sUId);
-     });
+    });
+
+    socket.on('onMap', function (mapCords) {
+      buildingsOnMap.push(mapCords);
+    });
   });
 }
 
@@ -181,12 +189,13 @@ function update(time) {
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
     const pressed = players[player.playerId].test.pressed;
-    
+
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile) {
       addHq(this);
+      io.emit('allBuildingsOnMap', buildingsOnMap);
     }
 
     if (input.a && selectedStatus) {
@@ -196,9 +205,9 @@ function update(time) {
 
     if (onlyOnce) {
       if (input.mouse) {
-       io.emit("break", mental);
-       mental.length =0;
-       io.emit("FUCKINFO", fuck);
+        io.emit("break", mental);
+        mental.length = 0;
+        io.emit("FUCKINFO", fuck);
         onlyOnce = false;
       }
     }
