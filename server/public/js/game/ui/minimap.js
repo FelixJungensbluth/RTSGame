@@ -1,6 +1,7 @@
 var map
 var mapScaleX = 0;
 var mapScaleY = 0;
+var color = 0;
 
 var testMap = new Array();
 
@@ -20,7 +21,42 @@ function addBuilindsToMap(x, y) {
     var newX = x * Math.cos(-rad) - y * Math.sin(-rad);
     var newY = y * Math.cos(-rad) + x * Math.sin(-rad);
 
-    scene.add.rectangle(((newX) * mapScaleX) - 250, (-((newY * mapScaleY))) + 600, 10, 10, 0xFFFFFF, 1).setScrollFactor(0);
+    var xCor = ((newX) * mapScaleX) - 250;
+    var yCor = (-((newY * mapScaleY))) + 600;
+
+    var mapDisplay = {
+        x: xCor,
+        y: yCor,
+        team: teamname,
+    }
+
+    scene.socket.emit('onMap', mapDisplay);
+    // scene.add.rectangle(xCor, yCor, 10, 10, color, 1).setScrollFactor(0);
+}
+
+function addBuildingOnMap(scene) {
+    scene.socket.on('allBuildingsOnMap', function (rec) {
+
+        if (teamname == 1 && (rec[rec.length - 1].team != 1)) {
+            color = 0xFFFFFF;
+        } else {
+            color = 0x000080;
+        }
+        scene.add.rectangle(rec[rec.length - 1].x, rec[rec.length - 1].y, 10, 10, color, 1).setScrollFactor(0);
+        console.log(rec)
+        console.log(removeDuplicate(rec));
+    });
+}
+
+function removeDuplicate(array) {
+    var dataArr = array.map(item => {
+        return [JSON.stringify(item), item]
+    }); // creates array of array
+    var maparr = new Map(dataArr); // create key value pair from array of array
+
+    var result = [...maparr.values()]; //converting back to array from mapobject
+
+    return result;
 }
 
 

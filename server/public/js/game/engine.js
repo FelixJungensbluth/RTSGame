@@ -139,10 +139,13 @@ function preload() {
 function create() {
   scene = this;
   graphics = this.add.graphics();
-  follower = { t: 0, vec: new Phaser.Math.Vector2() };
+  follower = {
+    t: 0,
+    vec: new Phaser.Math.Vector2()
+  };
   path = this.add.path();
   this.players = this.add.group();
-  easystar = new EasyStar.js();  
+  easystar = new EasyStar.js();
 
   //SocketIO wird initalisiert 
   this.socket = io();
@@ -159,7 +162,7 @@ function create() {
       if (players[id].playerId === scene.socket.id) {
         //console.log("test");
       } else {
-       // console.log("test1");
+        // console.log("test1");
       }
     });
   });
@@ -185,8 +188,6 @@ function create() {
 
   // Controles
   getLastClicked(this);
-
-  createMap(scene);
 
   // Infotext
   tilePosition = this.add.text(20, 20, 'Tile Position:', {
@@ -215,6 +216,15 @@ function create() {
     fontSize: '20px',
     fill: '#0cbfe9'
   });
+
+  tilePosition.setScrollFactor(0);
+  mousePosition.setScrollFactor(0);
+  belegt.setScrollFactor(0);
+  mausInfo.setScrollFactor(0);
+  time.setScrollFactor(0);
+  resources.setScrollFactor(0);
+
+  addBuildingOnMap(scene);
 
   // Bestimmung des ausgewählten Tiles
   this.input.on('pointerdown', function (pointer) {
@@ -286,6 +296,8 @@ function create() {
     }
   }
 
+  createMap(scene);
+
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -333,10 +345,10 @@ function create() {
   handelSelectedUnits(scene);
   unitsSelected(scene);
   moveTest();
-  
- 
+
+
   //handelSelectedUnits(scene);
-  
+
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
   });
@@ -358,7 +370,7 @@ function create() {
 function rotate(matrix) {
   // reverse the individual rows
   matrix = matrix.reverse();
-  
+
 
   // swap the symmetric elements
   for (var i = 0; i < matrix.length; i++) {
@@ -369,10 +381,10 @@ function rotate(matrix) {
     }
   }
 
-  matrix = matrix.map(function(row) {
+  matrix = matrix.map(function (row) {
     return row.reverse();
   });
-  
+
 }
 
 /*
@@ -414,23 +426,23 @@ function update(time, delta) {
   isPlacingAllowed();
   displayTime(time);
 
-  console.log('LOCAL '+selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
+  console.log('LOCAL ' + selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
 
   for (var i = 0; i < IsometricMap.grid.length; i++) {
-    for (var j = 0; j <  IsometricMap.grid.length; j++) {
-      if(IsometricMap.grid[i][j] == 5) {
+    for (var j = 0; j < IsometricMap.grid.length; j++) {
+      if (IsometricMap.grid[i][j] == 5) {
         IsometricMap.map[j][i].image.setTint(0xFF0040, 0.5);
       }
     }
   }
-/*
-  this.timer += delta;
-    while (this.timer > 1000) {
-       resourceCounter += onResource;
-        this.timer -= 1000;
-    }
-    resources.setText("Resources: " +  resourceCounter);
-    */
+  /*
+    this.timer += delta;
+      while (this.timer > 1000) {
+         resourceCounter += onResource;
+          this.timer -= 1000;
+      }
+      resources.setText("Resources: " +  resourceCounter);
+      */
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
