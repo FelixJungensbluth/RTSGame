@@ -193,36 +193,29 @@ function create() {
   tilePosition = this.add.text(20, 20, 'Tile Position:', {
     fontSize: '15px',
     fill: '#fff'
-  });
+  }).setScrollFactor(0);
   mousePosition = this.add.text(20, 40, 'Mouse Position: ', {
     fontSize: '15px',
     fill: '#fff'
-  });
+  }).setScrollFactor(0);
   belegt = this.add.text(20, 60, 'Tile Status: ', {
     fontSize: '15px',
     fill: '#fff'
-  });
+  }).setScrollFactor(0);
   mausInfo = this.add.text(20, 80, 'Mausinfo: ', {
     fontSize: '15px',
     fill: '#fff'
-  });
+  }).setScrollFactor(0);
 
   time = this.add.text(1750, 20, 'Timer: ', {
     fontSize: '20px',
     fill: '#39ff14'
-  });
+  }).setScrollFactor(0);
 
   resources = this.add.text(1750, 60, 'Resources: 0 ', {
     fontSize: '20px',
     fill: '#0cbfe9'
-  });
-
-  tilePosition.setScrollFactor(0);
-  mousePosition.setScrollFactor(0);
-  belegt.setScrollFactor(0);
-  mausInfo.setScrollFactor(0);
-  time.setScrollFactor(0);
-  resources.setScrollFactor(0);
+  }).setScrollFactor(0);
 
   addBuildingOnMap(scene);
 
