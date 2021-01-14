@@ -43,8 +43,6 @@ function addBuildingOnMap(scene) {
             color = 0x000080;
         }
         scene.add.rectangle(rec[rec.length - 1].x, rec[rec.length - 1].y, 10, 10, color, 1).setScrollFactor(0);
-        console.log(rec)
-        console.log(removeDuplicate(rec));
     });
 }
 
