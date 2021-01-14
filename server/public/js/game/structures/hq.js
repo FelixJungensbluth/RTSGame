@@ -1,4 +1,7 @@
 var buildingTest = "dsfsdf";
+var hqPosition;
+
+var updatedHqPos;
 
 /*
   Darstellung des HQ
@@ -29,6 +32,14 @@ function drawHq(Xi, Yi) {
     "image": buildingTest,
   }
 
+  hqPosition = { // TODO Send to server
+    "x": offX,
+    "y": offY,
+    "team": teamname
+  }
+
+  scene.socket.emit('hqPosition', hqPosition);
+
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[Xi][Yi] = hq;
   IsometricMap.grid[Yi][Xi] = hq;
@@ -36,7 +47,7 @@ function drawHq(Xi, Yi) {
 
   easystar.setAcceptableTiles([0]);
   easystar.setGrid(IsometricMap.grid);
-  
+
 }
 
 function updatetest(Xi, Yi) {
@@ -49,7 +60,6 @@ function updatetest(Xi, Yi) {
   easystar.setGrid(IsometricMap.test);
 }
 
-
 /*
 Anzeige der Gebaeude fuer den CLient
 Daten von starLocation2 werden Empfangen und verarbeitet
@@ -59,12 +69,22 @@ function addHq(scene) {
     if (teamname === 1) {
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
       drawHq(selectedTileX, selectedTileY);
-     // updatetest(selectedTileX, selectedTileY);
+      // updatetest(selectedTileX, selectedTileY);
     } else {
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
       drawHq(selectedTileX, selectedTileY);
-     // updatetest(selectedTileX, selectedTileY);
+      // updatetest(selectedTileX, selectedTileY);
     }
 
+  });
+}
+
+function updateHqPosition() {
+  scene.socket.on('hqUpdate', function (hqLocation) {
+    updatedHqPos = { // TODO Send to server
+      "x": hqLocation[0].x,
+      "y": hqLocation[0].y,
+      "team": teamname
+    }
   });
 }

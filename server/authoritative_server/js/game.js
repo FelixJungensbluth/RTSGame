@@ -48,6 +48,8 @@ var mental = new Array;
 
 var buildingsOnMap = new Array;
 
+var updatedPos = new Array;
+var hq = new Array();
 
 
 function preload() {
@@ -180,6 +182,14 @@ function create() {
     socket.on('onMap', function (mapCords) {
       buildingsOnMap.push(mapCords);
     });
+
+    socket.on('updatePosResource', function (pos) {
+      updatedPos.push(pos);
+    });
+
+    socket.on('hqPosition', function (hqPos) {
+      hq.push(hqPos);
+    });
   });
 }
 
@@ -196,6 +206,7 @@ function update(time) {
     if (input.mouse && pressed == "s" && !onRestrictedTile) {
       addHq(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
+      io.emit('hqUpdate', hq);
     }
 
     if (input.a && selectedStatus) {
@@ -207,7 +218,10 @@ function update(time) {
       if (input.mouse) {
         io.emit("break", mental);
         mental.length = 0;
+        io.emit("resourcePos", updatedPos);
         io.emit("FUCKINFO", fuck);
+        updatedPos.length = 0;
+
         onlyOnce = false;
       }
     }
@@ -305,41 +319,10 @@ function addHq(self) {
 function addWorker(self) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   io.emit('workerLocation', {
-    x:760,
+    x: 760,
     y: 345,
   });
 }
-
-function testmove() {
-  io.emit('testMove', {
-    x: 1000,
-    y: 700,
-  });
-}
-
-function calculatePath(self, playerId, array) {
-  array.forEach(unit => {
-    var toX = unit.tx;
-    var toY = unit.ty;
-    var fromX = unit.fx;
-    var fromY = unit.fy;
-
-    easystar.findPath(fromX, fromY, toX, toY, function (path) {
-      if (path === null) {
-        console.warn("Path was not found.");
-      } else {
-        console.log('path');
-
-        pathTest.push(path);
-        io.emit("pathCringe", path);
-      }
-    });
-    easystar.calculate();
-
-  });
-}
-
-
 
 // Gleiche wie in Engine
 function isPlacingAllowed(self) {

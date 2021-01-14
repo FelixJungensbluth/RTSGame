@@ -12,7 +12,7 @@ var config = {
 var game = new Phaser.Game(config);
 
 var follower;
-var path;
+var path1;
 var graphics;
 
 var tileWidthHalf;
@@ -147,7 +147,7 @@ function create() {
     t: 0,
     vec: new Phaser.Math.Vector2()
   };
-  path = this.add.path();
+  path1 = this.add.path();
   this.players = this.add.group();
   easystar = new EasyStar.js();
 
@@ -336,6 +336,7 @@ function create() {
 
   // Fuegt das HQ zu der Scene hinzu
   addHq(scene);
+  updateHqPosition(scene);
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
@@ -425,7 +426,10 @@ function update(time, delta) {
   displayTime(time);
   collectResources();
 
-  console.log('LOCAL ' + selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
+  moveOnResource();
+
+
+  //console.log('LOCAL ' + selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
 
   for (var i = 0; i < IsometricMap.grid.length; i++) {
     for (var j = 0; j < IsometricMap.grid.length; j++) {
@@ -434,14 +438,14 @@ function update(time, delta) {
       }
     }
   }
-  
-    this.timer += delta;
-      while (this.timer > 1000) {
-         resourceCounter += unitsOnResource;
-          this.timer -= 1000;
-      }
-      resources.setText(resourceCounter);
-      
+
+  this.timer += delta;
+  while (this.timer > 1000) {
+    resourceCounter += unitsOnResource;
+    this.timer -= 1000;
+  }
+  resources.setText(resourceCounter);
+
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
