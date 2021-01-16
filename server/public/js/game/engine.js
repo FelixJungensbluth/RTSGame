@@ -88,6 +88,7 @@ var clicked = false; // Boolean ob eine Maustaste benutzt wurde
 // Keyinput
 let keyA; // Variable fuer die Taste A
 let keyS; // Variable fuer die Taste S
+let keyD; // Variable fuer die Taste S
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -96,7 +97,6 @@ var tileStatus = false;
 
 var selectedStatus = false;
 
-var test = 0;
 
 var workerX;
 var workerY;
@@ -107,8 +107,6 @@ var unitsArray1 = new Array();
 var easystar;
 
 var testArray = new Array();
-var testArray2 = new Array();
-var testArray3 = new Array();
 
 function preload() {
 
@@ -121,9 +119,10 @@ function preload() {
   // Bilder fuer das HQ wird geladen 
   this.load.image("star", "assets/turm.png");
   this.load.image("turm2", "assets/turm2.png");
+  this.load.image("kaserne", "assets/kaserne.png");
   this.load.image("mine", "assets/mine.png");
-  this.load.image("unit1", "assets/unit1.png");
-  this.load.image("worker", "assets/worker.png");
+  this.load.image("solider", "assets/solider.png");
+  this.load.image("worker", "assets/worker1.png");
   this.load.image("minimap", "assets/map.png");
   this.load.image("olMap", "assets/HUD_map.png");
   this.load.image("olTime", "assets/HUD_time.png");
@@ -299,8 +298,11 @@ function create() {
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+  keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
   this.aKeyPressed = false;
   this.sKeyPressed = false;
+  this.dKeyPressed = false;
+
 
 
 
@@ -455,6 +457,7 @@ function update(time, delta) {
   //KeyboardInput
   const a = this.keyApressed;
   const s = this.keySpressed;
+  const d = this.keyDpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -472,8 +475,16 @@ function update(time, delta) {
       pressed: "s"
     });
     this.keySpressed = true;
+
+  } else if (keyD.isDown) {
+    this.keyDpressed = true;
+    this.socket.emit('pressed', {
+      pressed: "d"
+    });
+    
   } else {
     this.keyApressed = false;
+    this.keyDpressed = false;
     this.keySpressed = false;
   }
 

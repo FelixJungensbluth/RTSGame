@@ -203,6 +203,8 @@ function update(time) {
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
 
+    console.log(pressed);
+
     if (input.mouse && pressed == "s" && !onRestrictedTile) {
       addHq(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
