@@ -90,6 +90,7 @@ var clicked = false; // Boolean ob eine Maustaste benutzt wurde
 let keyA; // Variable fuer die Taste A
 let keyS; // Variable fuer die Taste S
 let keyD; // Variable fuer die Taste S
+let keyQ;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -100,6 +101,9 @@ var selectedStatus = false;
 
 var workerX;
 var workerY;
+
+var soliderX;
+var soliderY;
 
 var easystar; // Pathfinnding
 
@@ -299,9 +303,11 @@ function create() {
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
   keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+  keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
+  this.qKeyPressed = false;
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
   // Der Teamname jedes Spielers wird in der Variable gespeichert 
@@ -342,6 +348,8 @@ function create() {
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
+  addSolider(scene);
+  selectUnits(scene);
   handleUnitMovment(scene);
   handelSelectedUnits(scene);
   unitsSelected(scene);
@@ -451,6 +459,7 @@ function update(time, delta) {
   const a = this.keyApressed;
   const s = this.keySpressed;
   const d = this.keyDpressed;
+  const q = this.keyQpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -479,16 +488,29 @@ function update(time, delta) {
     });
     this.keyDpressed = true;
 
-  } else {
+  } else if (keyQ.isDown) {
+    this.keyQpressed = true;
+    this.socket.emit('pressed', {
+      pressed: "q"
+    });
+  
+    } else {
     this.keyApressed = false;
     this.keyDpressed = false;
     this.keySpressed = false;
+    this.keyQpressed = false;
   }
 
   // Daten ueber KeyboardInput werden an den Server geschickt 
   if (a !== this.keyApressed) {
     this.socket.emit('playerInput', {
       a: this.keyApressed,
+    });
+  }
+
+  if (q !== this.keyQpressed) {
+    this.socket.emit('playerInput', {
+      q: this.keyQpressed,
     });
   }
 
