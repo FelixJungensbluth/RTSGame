@@ -1,5 +1,6 @@
 var buildingTest = "dsfsdf";
 var hqPosition;
+var hqPositionTest;
 
 var updatedHqPos;
 
@@ -32,22 +33,27 @@ function drawHq(Xi, Yi) {
     "image": buildingTest,
   }
 
+  // Position des HQs wird an den Server gesendet 
   hqPosition = { // TODO Send to server
     "x": offX,
     "y": offY,
+    "tileX": Xi,
+    "tileY": Yi,
     "team": teamname
   }
-
   scene.socket.emit('hqPosition', hqPosition);
 
+  // Map Arrays werden geupdated
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[Xi][Yi] = hq;
   IsometricMap.grid[Yi][Xi] = hq;
+
+  // Wird auf der Map angezeigt 
   addBuilindsToMap(offY, offX);
 
+  // Pathfinding Grid wird geupdated
   easystar.setAcceptableTiles([0]);
   easystar.setGrid(IsometricMap.grid);
-
 }
 
 function updatetest(Xi, Yi) {
@@ -62,29 +68,57 @@ function updatetest(Xi, Yi) {
 
 /*
 Anzeige der Gebaeude fuer den CLient
-Daten von starLocation2 werden Empfangen und verarbeitet
+Daten von hqLocation werden Empfangen und verarbeitet
+Resourcen weredn abgezogen
 */
 function addHq(scene) {
   scene.socket.on('hq', function (hqLocation) {
+    console.log(buildingArray.length);
     if (teamname === 1) {
+      getHq()
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
       drawHq(selectedTileX, selectedTileY);
-      // updatetest(selectedTileX, selectedTileY);
-    } else {
+      resourceCounter -= 50;
+    } else if (teamname != 1) {
+      getHq();
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
       drawHq(selectedTileX, selectedTileY);
-      // updatetest(selectedTileX, selectedTileY);
+      resourceCounter -= 50;
     }
-
   });
 }
 
+// HQ Positon wird fuer alle Spieler geupdated
 function updateHqPosition() {
   scene.socket.on('hqUpdate', function (hqLocation) {
-    updatedHqPos = { // TODO Send to server
-      "x": hqLocation[0].x,
-      "y": hqLocation[0].y,
-      "team": teamname
+    console.log(hqLocation);
+    if (teamname === 1) {
+      updatedHqPos = { // TODO Send to server
+        "x": hqLocation[0].x,
+        "y": hqLocation[0].y,
+        "team": teamname
+      }
+    } else {
+      updatedHqPos = { // TODO Send to server
+        "x": hqLocation[hqLocation.length - 1].x,
+        "y": hqLocation[hqLocation.length - 1].y,
+        "team": teamname
+      }
     }
   });
+}
+
+function getHq() {
+  for (var i = 0; i < IsometricMap.buildingMap.length; i++) {
+    for (var j = 0; j < IsometricMap.buildingMap.length; j++) {
+      if (IsometricMap.buildingMap[i][j] != 0 && IsometricMap.buildingMap[i][j] != 5) {
+        console.log(i + "   " + j);
+        hqPositionTest = { // TODO Send to server
+          "tileX": i,
+          "tileY": j,
+          "team": teamname
+        }
+      }
+    }
+  }
 }

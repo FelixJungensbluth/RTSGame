@@ -11,6 +11,7 @@ var config = {
 };
 var game = new Phaser.Game(config);
 
+// Variablen fuer die Bewegugn der Untis auf Resourcen
 var follower;
 var path1;
 var graphics;
@@ -59,7 +60,7 @@ var mausInfo;
 var time;
 var resources;
 
-var resourceCounter = 0;
+var resourceCounter = 100;
 
 // Mauskoordianten fuer die Bewegung des Vorschaubildes des platzierten Objektes
 var mausX;
@@ -97,16 +98,10 @@ var tileStatus = false;
 
 var selectedStatus = false;
 
-
 var workerX;
 var workerY;
 
-var unitsArray1 = new Array();
-var unitsArray1 = new Array();
-
-var easystar;
-
-var testArray = new Array();
+var easystar; // Pathfinnding
 
 function preload() {
 
@@ -120,6 +115,7 @@ function preload() {
   this.load.image("star", "assets/turm.png");
   this.load.image("turm2", "assets/turm2.png");
   this.load.image("kaserne", "assets/kaserne.png");
+  this.load.image("kaserne2", "assets/kaserne2.png");
   this.load.image("mine", "assets/mine.png");
   this.load.image("solider", "assets/solider.png");
   this.load.image("worker", "assets/worker1.png");
@@ -239,7 +235,7 @@ function create() {
 
     // Wenn S gedreuckt wird die Position des Vorschaugebaudes auf die Mausposition gleichgezsetzt
     // Die Differenz vom Mittlepunkt der Szene zu der Distanz welche sich die Kamera bewegt hat wird mit einberechent  
-    if (pressed == "s") {
+    if (pressed == "s" || pressed == "d") {
       selectedStructure.x = (mausX + camMoveX);
       selectedStructure.y = (mausY + camMoveY);
     }
@@ -281,19 +277,23 @@ function create() {
     }
   }
 
+  // Minimap
   createMap(scene);
+
+  // Overlay
   displayOverlay();
+
+  // Zeittext
   time = this.add.text(75, 1, '', {
     font: "23px Arial",
     fill: '#000000',
   }).setScrollFactor(0);
 
-
+  // Resourcen Text
   resources = this.add.text(130, 35, '0', {
     font: "20px Arial",
     fill: '#000000',
   }).setScrollFactor(0);
-
 
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -302,9 +302,6 @@ function create() {
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
-
-
-
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
   // Der Teamname jedes Spielers wird in der Variable gespeichert 
@@ -340,6 +337,9 @@ function create() {
   addHq(scene);
   updateHqPosition(scene);
 
+  // Fuegt das Kaserne zu der Scene hinzu
+  addBarracks(scene);
+
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
   handleUnitMovment(scene);
@@ -347,9 +347,7 @@ function create() {
   unitsSelected(scene);
   moveTest();
 
-
-  //handelSelectedUnits(scene);
-
+  // Check ob ein Tile belegt ist
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
   });
@@ -364,14 +362,15 @@ function create() {
     displayTime(times.milSec);
   });
 
-  this.resources = 0;
-  this.timer = 0;
+  // Zeigt nicht begebare Tiles auf der Map an (rot);
+  visualizeGrid();
+  updateSelect(scene);
 }
 
+// Rotiert und Spieglet die uebergebene Matrix 
 function rotate(matrix) {
   // reverse the individual rows
   matrix = matrix.reverse();
-
 
   // swap the symmetric elements
   for (var i = 0; i < matrix.length; i++) {
@@ -382,10 +381,10 @@ function rotate(matrix) {
     }
   }
 
+  // spiegeln
   matrix = matrix.map(function (row) {
     return row.reverse();
   });
-
 }
 
 /*
@@ -422,32 +421,26 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
-  //checkUnitsInSelection();
+
+  //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
-  displayTime(time);
-  collectResources();
 
+  // Zeigt die Zeit an
+  displayTime(time);
+
+  // Sammeln von Resourcen | Bewegen der Units zwischen HQ und Resourcen
+  collectResources();
   moveOnResource();
 
-
-  //console.log('LOCAL ' + selectedArray.length + '  UNITS ' + unitsArray1.length + ' GLOBAL ' + globalUnits.length);
-
-  for (var i = 0; i < IsometricMap.grid.length; i++) {
-    for (var j = 0; j < IsometricMap.grid.length; j++) {
-      if (IsometricMap.grid[i][j] == 5) {
-        IsometricMap.map[j][i].image.setTint(0xFF0040, 0.5);
-      }
-    }
-  }
-
+  // Update Resourceanzeige
   this.timer += delta;
   while (this.timer > 1000) {
     resourceCounter += unitsOnResource;
     this.timer -= 1000;
   }
+  this.socket.emit('resource', resourceCounter);
   resources.setText(resourceCounter);
-
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   this.socket.emit('playerInput', {
@@ -477,11 +470,15 @@ function update(time, delta) {
     this.keySpressed = true;
 
   } else if (keyD.isDown) {
-    this.keyDpressed = true;
+    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'kaserne').setInteractive();
+    }
+    pressed = "d"
     this.socket.emit('pressed', {
       pressed: "d"
     });
-    
+    this.keyDpressed = true;
+
   } else {
     this.keyApressed = false;
     this.keyDpressed = false;
@@ -538,7 +535,7 @@ function displayTime(milSec) {
   Informationen fuer die Anzeige wird in einem Objekt gespeichert
   Alle Anzeigen werden in einem Array gespeichert 
 */
-function buildingTime(scene, sec) {
+function buildingTime(scene) {
 
   // Hintergrund
   timeBarBackGround = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
@@ -567,9 +564,12 @@ Objekte koenne nur platziert werden wenn die Tile ID nicht 2 ist oder das Tile s
 Wenn das Tile belegt ist wird die Vorschauobjekt rot gefaerbt
 */
 function isPlacingAllowed() {
-  if (pressed == "s") {
+  if (pressed == "s" || pressed == "d") {
     if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-      if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 || IsometricMap.map[selectedTileX][selectedTileY].id === 2)) {
+      if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 ||
+        IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 ||
+        IsometricMap.map[selectedTileX][selectedTileY].id === 2 ||
+        IsometricMap.map[selectedTileX][selectedTileY].id === 50) {
         selectedStructure.setTint(0xFF0040, 0.5);
         onRestrictedTile = true;
       } else {
@@ -594,6 +594,18 @@ function onEvent() {
         IsometricMap.buildingMap[healthBarArray[i].buildingX][healthBarArray[i].buildingY].canBeSelected = true;
         healthBarArray[i].progress.destroy();
         healthBarArray[i].background.destroy();
+      }
+    }
+  }
+}
+/*
+Visualisieren des Grids
+*/
+function visualizeGrid() {
+  for (var i = 0; i < IsometricMap.grid.length; i++) {
+    for (var j = 0; j < IsometricMap.grid.length; j++) {
+      if (IsometricMap.grid[i][j] == 5) {
+        IsometricMap.map[j][i].image.setTint(0xFF0040, 0.5);
       }
     }
   }

@@ -35,7 +35,8 @@ var buildingArray = new Array();
 
 var team = 0;
 
-selectedStatus = false
+var selectedStatus = false;
+var selectedStatusBarracks = false;
 var easystar;
 
 var onlyOnce = true;
@@ -124,8 +125,10 @@ function create() {
       test: {
         pressed: "none"
       },
-      unit: testArray = new Array(),
-      path: pathArray = new Array()
+      resources: 100,
+      hqCount: 0,
+      hqSelected: false,
+
     };
 
     // add player to server
@@ -168,7 +171,12 @@ function create() {
     });
 
     socket.on('structureSelected', function (selected) {
-      selectedStatus = selected;
+      // selectedStatus = selected;
+      handlSelectedStatus(self, socket.id, selected)
+    });
+
+    socket.on('structureSelectedBarracks', function (selected) {
+      selectedStatusBarracks = selected;
     });
 
     socket.on('MOVE', function (move) {
@@ -190,6 +198,10 @@ function create() {
     socket.on('hqPosition', function (hqPos) {
       hq.push(hqPos);
     });
+
+    socket.on('resource', function (counter) {
+      handlePlayerResouces(self, socket.id, counter)
+    });
   });
 }
 
@@ -199,16 +211,25 @@ function update(time) {
   this.players.getChildren().forEach((player) => {
     const input = players[player.playerId].input;
     const pressed = players[player.playerId].test.pressed;
+    const resource = players[player.playerId].resources;
+    const test = players[player.playerId].hqSelected;
 
     this.team.name = players[player.playerId].team1
     io.emit('team', this.team);
 
-    console.log(pressed);
+    if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
+      addHq(this, this.team);
+      players[player.playerId].hqCount++;
+      console.log(players[player.playerId].hqCount);
 
-    if (input.mouse && pressed == "s" && !onRestrictedTile) {
-      addHq(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('hqUpdate', hq);
+    }
+
+    if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
+      //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
+      addBarracks(this);
+      io.emit('allBuildingsOnMap', buildingsOnMap);
     }
 
     if (input.a && selectedStatus) {
@@ -229,7 +250,6 @@ function update(time) {
     }
 
     if (input.mouse) {
-      //console.log(players[player.playerId].team);
       if (!onRestrictedTile) {
         players[player.playerId].test.pressed = "none";
       }
@@ -265,18 +285,20 @@ function handleKeyPressed(self, playerId, pressedData) {
   });
 }
 
-function handelPathInfo(self, playerId, path) {
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handlePlayerResouces(self, playerId, counter) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
-      players[player.playerId].path = path;
+      players[player.playerId].resources = counter;
     }
   });
 }
 
-function handelUnitInfo(self, playerId, unit) {
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handlSelectedStatus(self, playerId, status) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
-      players[player.playerId].unit = unit;
+      players[player.playerId].hqSelected = status;
     }
   });
 }
@@ -289,14 +311,16 @@ function addPlayer(self, playerInfo) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addHq(self) {
+function addHq(self, test1) {
   console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('hq', {
     x: offX,
-    y: offY
+    y: offY,
+    team: test1
+
   });
   var hq = {
     "id": "1",
@@ -312,10 +336,32 @@ function addHq(self) {
 
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
-  IsometricMap.grid[self.mouseInfo.tileY][self.mouseInfo.tileY] = hq;
+}
 
-  easystar.setAcceptableTiles([0]);
-  easystar.setGrid(IsometricMap.grid);
+// Erster Versuch das HQ zu platzieren 
+function addBarracks(self) {
+  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+  var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
+  var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
+  var test = self.physics.add.image(offX, offY, 'star');
+  io.emit('barracks', {
+    x: offX,
+    y: offY,
+  });
+  var hq = {
+    "id": "2",
+    "name": "Kaserne",
+    "positionX": offX,
+    "positionY": offY,
+    "AnzhalTilesX": "1",
+    "AnzhalTilesY": "1",
+    "isSelected": false,
+    "image": test,
+    "canBeSelected": false,
+  }
+
+  this.buildingArray.push(hq);
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
 }
 
 function addWorker(self) {
@@ -338,8 +384,6 @@ function isPlacingAllowed(self) {
       onRestrictedTile = false
     }
   }
-
-  // console.log(onRestrictedTile);
 }
 
 // Spieler wird entfernt 
