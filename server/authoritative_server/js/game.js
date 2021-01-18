@@ -120,6 +120,7 @@ function create() {
       input: {
         a: false,
         s: false,
+        q: false,
         mouse: false
       },
       test: {
@@ -231,9 +232,14 @@ function update(time) {
       addBarracks(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
     }
-
-    if (input.a && selectedStatus) {
+  
+    if (input.a && test) {
       addWorker(this, players[player.playerId].unit, this.team);
+      this.presesdInfo.pressed == "none"
+    }
+
+    if (input.q && test) {
+      addSolider(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
     }
 
@@ -369,6 +375,14 @@ function addWorker(self) {
   io.emit('workerLocation', {
     x: 760,
     y: 345,
+  });
+}
+
+function addSolider(self) {
+  solider = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
+  io.emit('soliderLocation', {
+    x: 820,
+    y: 400,
   });
 }
 
