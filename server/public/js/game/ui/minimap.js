@@ -5,7 +5,12 @@ var color = 0;
 
 var testMap = new Array();
 
+/*
+ Map wird erstellt
+ Skalierungsfaktor wird berechnet
+*/
 function createMap(scene) {
+    // Map Image
     map = scene.add.image(0 + 200, window.innerHeight - 200, 'minimap').setScrollFactor(0);
 
     var mapWidth = isometricTo2d(IsometricMap.map.length, IsometricMap.map[0].length).x - isometricTo2d(0, 0).x;
@@ -15,6 +20,9 @@ function createMap(scene) {
     mapScaleY = 600 / mapWidth;
 }
 
+/*
+ Positon auf der Karte wird berechnet 
+*/
 function addBuilindsToMap(x, y) {
     var angle = 90;
     var rad = angle * Math.PI / 180;
@@ -31,9 +39,12 @@ function addBuilindsToMap(x, y) {
     }
 
     scene.socket.emit('onMap', mapDisplay);
-    // scene.add.rectangle(xCor, yCor, 10, 10, color, 1).setScrollFactor(0);
 }
 
+/*
+ PLatzierte Strukturen werden mit Rechtecken auf der Map platziert 
+ Je nach Team haben die Rechtecke eine andere Farbe
+*/
 function addBuildingOnMap(scene) {
     scene.socket.on('allBuildingsOnMap', function (rec) {
 
@@ -46,18 +57,9 @@ function addBuildingOnMap(scene) {
     });
 }
 
-function removeDuplicate(array) {
-    var dataArr = array.map(item => {
-        return [JSON.stringify(item), item]
-    }); // creates array of array
-    var maparr = new Map(dataArr); // create key value pair from array of array
-
-    var result = [...maparr.values()]; //converting back to array from mapobject
-
-    return result;
-}
-
-
+/*
+ Umrechnung von Weltkoordinaten in 2D Koordinaten
+*/
 function isometricTo2d(Xi, Yi) {
     var offX = Xi * tileColumnOffset / 2 + Yi * tileColumnOffset / 2 + originX;
     var offY = Yi * tileRowOffset / 2 - Xi * tileRowOffset / 2 + originY;

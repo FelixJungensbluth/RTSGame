@@ -1,46 +1,67 @@
 var onRestrictedTile = false;
-var selectionRectangle; // Auswahlrechteck
+var selectionRectangle;
+
+var testSelect = false; // Auswahlrechteck
 
 
 // Gebaeude werden durch linksklick platziert
 function placeBuilding(szene) {
-
-    szene.input.keyboard.on('keydown-S', function (event) {
-        if (pressed == "none") {
-            selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'hq').setInteractive();
-        }
-        pressed = "s"
-    });
     szene.input.on('pointerdown', function (pointer) {
         if (!onRestrictedTile) {
             if (pointer.leftButtonDown()) {
+
+                //HQ
                 if (!isSelected && pressed == "s") {
                     pressed = "none"
-
                     drawHq(selectedTileX, selectedTileY);
                     buildingTime(szene);
                     selectedStructure.destroy();
                 }
+
+                // Kaserne 
+                if (!isSelected && pressed == "d" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                    pressed = "none"
+                    drawBarracks(selectedTileX, selectedTileY, szene);
+                    buildingTime(szene);
+                    selectedStructure.destroy();
+
+                    IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].image.clearTint();
+                    IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected = false;
+                }
             }
+
             // Auswahl wird entfernt 
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
+                console.log("DESELECTED");
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
                 szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = false;
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                }
             }
         }
 
         if (pointer.rightButtonDown()) {
+
+            console.log(updatedHqPos);
+
             // Auswahl wird hinzugefuegt.
-            if (isSelected && IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
-                //cole.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
+            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
+                console.log("SELECTED");
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
                 szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                }
             }
         }
     }, this);
-
 }
 
 // Infos zum letzten klick werden zwischengespeichert 
@@ -85,24 +106,7 @@ function getLastClicked(szene) {
     }, this);
 }
 
-
-function isPlacingAllowed() {
-    if (pressed == "s") {
-        if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-
-            if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 || IsometricMap.map[selectedTileX][selectedTileY].id === 2)) {
-                selectedStructure.setTint(0xFF0040, 0.5);
-                onRestrictedTile = true;
-            } else {
-                selectedStructure.clearTint();
-                onRestrictedTile = false
-            }
-        }
-    }
-
-   // console.log(onRestrictedTile);
-}
-
+// TODO Fix
 function createSelectionRectangle(scene) {
 
     scene.input.on('pointerdown', function (pointer) {
@@ -113,14 +117,15 @@ function createSelectionRectangle(scene) {
 
     scene.input.on('pointerup', function (pointer) {
         if (pointer.rightButtonDown()) {
-           // console.log("dsfsdfsdf");
+            // console.log("dsfsdfsdf");
             selectionRectangle.x = -1000;
             selectionRectangle.destroy();
         }
-        
+
     }, this);
 }
 
+// TODO Fix
 function checkUnitsInSelection() {
     if (unitsArray1.length != 0) {
         unitsArray1.forEach(unit => {
@@ -132,4 +137,11 @@ function checkUnitsInSelection() {
             }
         });
     }
+}
+
+function updateSelect(scene) {
+    scene.socket.on('testSelect', function (keinBock) {
+        testSelect = keinBock;
+        console.log(keinBock);
+    });
 }
