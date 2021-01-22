@@ -40,7 +40,7 @@ var selectedStatusBarracks = false;
 var easystar;
 
 var onlyOnce = true;
-
+var onlyOnce2 = true;
 var fuck = new Array;
 
 var mental = new Array;
@@ -51,6 +51,10 @@ var buildingsOnMap = new Array;
 
 var updatedPos = new Array;
 var hq = new Array();
+
+var attackLines = new Array();
+
+var winner;
 
 
 function preload() {
@@ -203,6 +207,14 @@ function create() {
     socket.on('resource', function (counter) {
       handlePlayerResouces(self, socket.id, counter)
     });
+
+    socket.on('attack', function (lines) {
+      attackLines.push(lines);
+    });
+
+    socket.on('win', function (win) {
+      winner = win;
+    });
   });
 }
 
@@ -216,6 +228,7 @@ function update(time) {
     const test = players[player.playerId].hqSelected;
 
     this.team.name = players[player.playerId].team1
+    console.log(players[player.playerId].team1);
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
@@ -232,7 +245,7 @@ function update(time) {
       addBarracks(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
     }
-  
+
     if (input.a && test) {
       addWorker(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
@@ -244,6 +257,13 @@ function update(time) {
     }
 
     if (onlyOnce) {
+      if (input.mouse && pressed == "x" ) {
+        console.log('ATTACL');
+        io.emit("attackBreak", attackLines);
+        onlyOnce = false;
+        attackLines.length =0;
+       
+      }
       if (input.mouse) {
         io.emit("break", mental);
         mental.length = 0;
@@ -253,6 +273,7 @@ function update(time) {
 
         onlyOnce = false;
       }
+
     }
 
     if (input.mouse) {
@@ -269,6 +290,14 @@ function update(time) {
   this.times.milSec = time;
   io.emit('updateTime', this.times);
   io.emit('currentPlayers', players);
+
+  if (onlyOnce2) {
+  if(winner) {
+    io.emit('winnerStatus', winner);
+    onlyOnce2 = false;
+  }
+}
+ 
 
   isPlacingAllowed(this);
 }
