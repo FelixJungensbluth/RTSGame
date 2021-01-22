@@ -91,6 +91,7 @@ let keyA; // Variable fuer die Taste A
 let keyS; // Variable fuer die Taste S
 let keyD; // Variable fuer die Taste S
 let keyQ;
+let keyX;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -105,7 +106,9 @@ var workerY;
 var soliderX;
 var soliderY;
 
-var easystar; // Pathfinnding
+var easystar;
+
+var testRect; // Pathfinnding
 
 function preload() {
 
@@ -127,6 +130,10 @@ function preload() {
   this.load.image("olMap", "assets/HUD_map.png");
   this.load.image("olTime", "assets/HUD_time.png");
   this.load.image("olResource", "assets/HUD_resources.png");
+  this.load.image("cursur", "assets/normal.cur");
+
+  this.load.image("win", "assets/win.png");
+  this.load.image("lose", "assets/lose.png");
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -154,7 +161,6 @@ function create() {
   this.socket = io();
 
   //Custom Cursor wird festeglegt 
-  this.input.setDefaultCursor('url(http://labs.phaser.io/assets/input/cursors/blue.cur), pointer');
 
   // Oeffnen des Rechtsklickmenue wird disabled
   this.input.mouse.disableContextMenu();
@@ -255,6 +261,8 @@ function create() {
     selectedTileX = tileX;
     selectedTileY = tileY + 1;
 
+    hp();
+
     // InfoText
     tilePosition.setText('Tile X: ' + selectedTileX + ' Tile Y: ' + selectedTileY);
 
@@ -304,10 +312,12 @@ function create() {
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
   keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
   keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+  keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
   this.qKeyPressed = false;
+  this.xKeyPressed = false;
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
   // Der Teamname jedes Spielers wird in der Variable gespeichert 
@@ -350,11 +360,17 @@ function create() {
   addWorker(scene);
   addSolider(scene);
   selectUnits(scene);
+  dgfdjkgdkjflg();
   handleUnitMovment(scene);
   handelSelectedUnits(scene);
   unitsSelected(scene);
+  attack2();
   moveTest();
 
+  showAttackRange(scene);
+  
+  
+  
   // Check ob ein Tile belegt ist
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
@@ -373,6 +389,8 @@ function create() {
   // Zeigt nicht begebare Tiles auf der Map an (rot);
   visualizeGrid();
   updateSelect(scene);
+
+  setWinner();
 }
 
 // Rotiert und Spieglet die uebergebene Matrix 
@@ -433,13 +451,15 @@ function update(time, delta) {
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
-
+  updateHp();
   // Zeigt die Zeit an
   displayTime(time);
 
   // Sammeln von Resourcen | Bewegen der Units zwischen HQ und Resourcen
   collectResources();
   moveOnResource();
+
+  displayAttack();
 
   // Update Resourceanzeige
   this.timer += delta;
@@ -460,6 +480,7 @@ function update(time, delta) {
   const s = this.keySpressed;
   const d = this.keyDpressed;
   const q = this.keyQpressed;
+  const x = this.keyQpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -493,12 +514,28 @@ function update(time, delta) {
     this.socket.emit('pressed', {
       pressed: "q"
     });
-  
-    } else {
+
+  } else if (keyX.isDown) {
+    this.keyXpressed = true;
+    this.socket.emit('pressed', {
+      pressed: "x"
+    });
+    pressed = "x"
+    this.input.setDefaultCursor('url(assets/text.cur), pointer');
+    // Wenn S gedrueckt ist
+  } else {
+    if (pressed == "x") {
+      pressed = "none";
+      this.socket.emit('pressed', {
+        pressed: "none"
+      });
+    }
     this.keyApressed = false;
     this.keyDpressed = false;
     this.keySpressed = false;
     this.keyQpressed = false;
+    this.keyXpressed = false;
+    this.input.setDefaultCursor('url(assets/normal.cur), pointer');
   }
 
   // Daten ueber KeyboardInput werden an den Server geschickt 
@@ -513,7 +550,6 @@ function update(time, delta) {
       q: this.keyQpressed,
     });
   }
-
 }
 
 /*
@@ -567,7 +603,7 @@ function buildingTime(scene) {
   // Anzeige 
   timeBar = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
-    0, 10, 0x39ff14);
+    0, 10, 0x4169E1);
 
   var buildInfo = {
     "buildingX": selectedTileX,
@@ -631,4 +667,24 @@ function visualizeGrid() {
       }
     }
   }
+}
+
+function setWinner(){
+  scene.socket.on('winnerStatus', function (team) {
+
+    console.log(team);
+    console.log(win);
+    if(team && !win) {
+      console.log("LOISTLOSTLSOTSOLT");
+      var lose =scene.add.image(window.innerWidth/2, window.innerHeight/2, 'lose').setScrollFactor(0);
+      lose.setInteractive();
+      lose.on('pointerup', () => {window.open('https://www.google.com')}, this);
+    } else { 
+
+      var win = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
+      win.setInteractive();
+      win.on('pointerup', () => {window.open('https://www.google.com')}, this);
+    }
+
+  });
 }

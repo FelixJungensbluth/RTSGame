@@ -22,6 +22,8 @@ function drawHq(Xi, Yi) {
   var hq = {
     "id": "1",
     "name": "Hauptquartier",
+    "baseHp": 500,
+    "currentHp": 100,
     "positionX": offX,
     "positionY": offY,
     "tileX": Xi,
@@ -41,6 +43,8 @@ function drawHq(Xi, Yi) {
     "tileY": Yi,
     "team": teamname
   }
+
+  console.log(teamname);
   scene.socket.emit('hqPosition', hqPosition);
 
   // Map Arrays werden geupdated
@@ -59,9 +63,6 @@ function drawHq(Xi, Yi) {
 function updatetest(Xi, Yi) {
   IsometricMap.test[Xi][Yi] = "Belegt";
   IsometricMap.grid = IsometricMap.test;
-
-  console.log(IsometricMap.grid);
-  console.log(IsometricMap.test);
   rotate(IsometricMap.grid);
   easystar.setGrid(IsometricMap.test);
 }
@@ -73,7 +74,6 @@ Resourcen weredn abgezogen
 */
 function addHq(scene) {
   scene.socket.on('hq', function (hqLocation) {
-    console.log(buildingArray.length);
     if (teamname === 1) {
       getHq()
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
@@ -91,7 +91,6 @@ function addHq(scene) {
 // HQ Positon wird fuer alle Spieler geupdated
 function updateHqPosition() {
   scene.socket.on('hqUpdate', function (hqLocation) {
-    console.log(hqLocation);
     if (teamname === 1) {
       updatedHqPos = { // TODO Send to server
         "x": hqLocation[0].x,
@@ -112,7 +111,6 @@ function getHq() {
   for (var i = 0; i < IsometricMap.buildingMap.length; i++) {
     for (var j = 0; j < IsometricMap.buildingMap.length; j++) {
       if (IsometricMap.buildingMap[i][j] != 0 && IsometricMap.buildingMap[i][j] != 5) {
-        console.log(i + "   " + j);
         hqPositionTest = { // TODO Send to server
           "tileX": i,
           "tileY": j,

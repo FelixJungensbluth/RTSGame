@@ -16,6 +16,8 @@ function drawBarracks(Xi, Yi, scene) {
   var barrack = {
     "id": "2",
     "name": "Kaserne",
+    "baseHp": 1000,
+    "currentHp": 500,
     "positionX": offX,
     "positionY": offY,
     "tileX": Xi,
