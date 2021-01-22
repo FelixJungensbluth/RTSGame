@@ -55,6 +55,7 @@ var hq = new Array();
 var attackLines = new Array();
 
 var winner;
+var surrender;
 
 
 function preload() {
@@ -215,6 +216,10 @@ function create() {
     socket.on('win', function (win) {
       winner = win;
     });
+
+    socket.on('lose', function (lose) {
+      surrender = lose;
+    });
   });
 }
 
@@ -294,6 +299,11 @@ function update(time) {
   if (onlyOnce2) {
   if(winner) {
     io.emit('winnerStatus', winner);
+    onlyOnce2 = false;
+  }
+
+  if(surrender) {
+    io.emit('loserStatus', surrender);
     onlyOnce2 = false;
   }
 }

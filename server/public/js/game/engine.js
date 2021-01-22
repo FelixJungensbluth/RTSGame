@@ -294,6 +294,7 @@ function create() {
 
   // Overlay
   displayOverlay();
+  settings();
 
   // Zeittext
   time = this.add.text(75, 1, '', {
@@ -678,12 +679,30 @@ function setWinner(){
       console.log("LOISTLOSTLSOTSOLT");
       var lose =scene.add.image(window.innerWidth/2, window.innerHeight/2, 'lose').setScrollFactor(0);
       lose.setInteractive();
-      lose.on('pointerup', () => {window.open('https://www.google.com')}, this);
+      lose.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
     } else { 
 
-      var win = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
-      win.setInteractive();
-      win.on('pointerup', () => {window.open('https://www.google.com')}, this);
+      var winImg = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
+      winImg.setInteractive();
+      winImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
+    }
+
+  });
+
+  scene.socket.on('loserStatus', function (team) {
+
+    console.log(team);
+    console.log(lose);
+    if(team && lose) {
+      console.log("LOISTLOSTLSOTSOLT");
+      var loseImg =scene.add.image(window.innerWidth/2, window.innerHeight/2, 'lose').setScrollFactor(0);
+      loseImg.setInteractive();
+      loseImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
+    } else { 
+
+      var winImg = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
+      winImg.setInteractive();
+      winImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
     }
 
   });
