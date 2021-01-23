@@ -135,6 +135,10 @@ function preload() {
   this.load.image("win", "assets/win.png");
   this.load.image("lose", "assets/lose.png");
 
+  this.load.image("settings", "assets/menuBackground.png");
+  this.load.image("surrender", "assets/menuButton2.png");
+  this.load.image("range", "assets/menuButton1.png");
+
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
     this.tileImages[i] = IsometricMap.tiles[i];
@@ -193,8 +197,6 @@ function create() {
   var cam = this.cameras.main;
   cam.setZoom(1);
   moveCamera(this, cam);
-  zoomCamera(this, cam);
-
   // Controles
   getLastClicked(this);
 
@@ -369,9 +371,9 @@ function create() {
   moveTest();
 
   showAttackRange(scene);
-  
-  
-  
+
+
+
   // Check ob ein Tile belegt ist
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
@@ -461,6 +463,8 @@ function update(time, delta) {
   moveOnResource();
 
   displayAttack();
+
+  updateMap();
 
   // Update Resourceanzeige
   this.timer += delta;
@@ -670,40 +674,49 @@ function visualizeGrid() {
   }
 }
 
-function setWinner(){
+function setWinner() {
   scene.socket.on('winnerStatus', function (team) {
-
-    console.log(team);
-    console.log(win);
-    if(team && !win) {
+    canMoveCam = false;
+    if (team && !win) {
       console.log("LOISTLOSTLSOTSOLT");
-      var lose =scene.add.image(window.innerWidth/2, window.innerHeight/2, 'lose').setScrollFactor(0);
+      var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       lose.setInteractive();
-      lose.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
-    } else { 
+      lose.on('pointerdown', () => {
+        window.open('http://localhost:3000/test.html')
+      }, this);
+    } else {
 
-      var winImg = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
+      var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
+      winImg.on('pointerdown', () => {
+        window.open('http://localhost:3000/test.html')
+      }, this);
     }
-
   });
 
   scene.socket.on('loserStatus', function (team) {
-
-    console.log(team);
-    console.log(lose);
-    if(team && lose) {
+    canMoveCam = false;
+    if (team && lose) {
       console.log("LOISTLOSTLSOTSOLT");
-      var loseImg =scene.add.image(window.innerWidth/2, window.innerHeight/2, 'lose').setScrollFactor(0);
+      var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
-      loseImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
-    } else { 
+      loseImg.on('pointerdown', () => {
+        window.open('http://localhost:3000/test.html')
+      }, this);
+    } else {
 
-      var winImg = scene.add.image(window.innerWidth/2, window.innerHeight/2, 'win').setScrollFactor(0);
+      var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.on('pointerdown', () => {window.open('http://localhost:3000/test.html')}, this);
+      winImg.on('pointerdown', () => {
+        window.open('http://localhost:3000/test.html')
+      }, this);
     }
+  });
+}
+
+function updateMap() { 
+  scene.socket.on('updateMap', function (map) {
+    IsometricMap.buildingMapAll = map;
 
   });
 }

@@ -243,6 +243,7 @@ function update(time) {
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('hqUpdate', hq);
+      io.emit('updateMap', IsometricMap.buildingMap) 
     }
 
     if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
@@ -262,12 +263,12 @@ function update(time) {
     }
 
     if (onlyOnce) {
-      if (input.mouse && pressed == "x" ) {
+      if (input.mouse && pressed == "x") {
         console.log('ATTACL');
         io.emit("attackBreak", attackLines);
         onlyOnce = false;
-        attackLines.length =0;
-       
+        attackLines.length = 0;
+
       }
       if (input.mouse) {
         io.emit("break", mental);
@@ -297,17 +298,17 @@ function update(time) {
   io.emit('currentPlayers', players);
 
   if (onlyOnce2) {
-  if(winner) {
-    io.emit('winnerStatus', winner);
-    onlyOnce2 = false;
+    if (winner) {
+      io.emit('winnerStatus', winner);
+      onlyOnce2 = false;
+    }
+
+    if (surrender) {
+      io.emit('loserStatus', surrender);
+      onlyOnce2 = false;
+    }
   }
 
-  if(surrender) {
-    io.emit('loserStatus', surrender);
-    onlyOnce2 = false;
-  }
-}
- 
 
   isPlacingAllowed(this);
 }

@@ -6,9 +6,10 @@ var onlyOnce = true;
 var hpText;
 
 var hpBackground;
-var settingsPlaceHolder;
+var settingsImg;
 var showRangeButton;
 var surrender;
+var background;
 var show = true;
 
 var showRange = false;
@@ -24,6 +25,9 @@ function displayOverlay() {
 }
 
 
+/*
+ Zeigt die HP an, wenn mit der Maus uber eine Struktur gehovert wid 
+*/
 function hp() {
     if ((selectedTileX >= 0 && selectedTileX < IsometricMap.buildingMap.length) && (selectedTileY >= 0 && selectedTileY < IsometricMap.buildingMap[0].length)) {
         if (IsometricMap.buildingMap[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMap[selectedTileX][selectedTileY] != 0) {
@@ -39,17 +43,6 @@ function hp() {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
                     80, 5, 0x39ff14
                 );
-
-                /*
-                hpText = scene.add.text(
-                    IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
-                    IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 70,
-                    'HP:', {
-                        font: "15px Arial",
-                        fill: '#000000',
-                    }).setScrollFactor(0);
-                hpText.setText('HP: ' + IsometricMap.buildingMap[selectedTileX][selectedTileY].hp);
-                */
                 onlyOnce = false;
             }
         } else {
@@ -62,6 +55,10 @@ function hp() {
     }
 }
 
+/*
+Update der HP Anzeige 
+Prozentualer Berechnung aussgehend von der Width der Anzeige 
+*/
 function updateHp() {
     if (testRect) {
         var currentHp = IsometricMap.buildingMap[selectedTileX][selectedTileY].currentHp;
@@ -72,50 +69,46 @@ function updateHp() {
     }
 }
 
+/*
+Wenn die ESC Taste gedreuckt werden die Einstellungen angezeigt 
+*/
 function settings() {
     scene.input.keyboard.on('keydown_ESC', function (event) {
         show ^= true;
 
         if (!show) {
-            settingsPlaceHolder = scene.add.rectangle(
-                window.innerWidth / 2,
-                window.innerHeight / 2,
-                200, 400, 0xff0000
-            ).setScrollFactor(0);
 
-            showRangeButton = scene.add.rectangle(
-                window.innerWidth / 2,
-                window.innerHeight / 2,
-                30, 30, 0xfffff
-            ).setScrollFactor(0);
+            background = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.75).setScrollFactor(0);
+            background.setDepth(3);
 
+            settingsImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'settings').setScrollFactor(0);
+            settingsImg.setDepth(4);
+
+            showRangeButton = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) - 20, 'range').setScrollFactor(0);
             showRangeButton.setInteractive();
+            showRangeButton.setDepth(4);
             showRangeButton.on('pointerdown', function (pointer) {
                 showRange ^= true;
             }, this);
-
-            
-            surrender = scene.add.rectangle(
-                window.innerWidth / 2,
-                (window.innerHeight / 2) + 60,
-                30, 30, 0xfffff
-            ).setScrollFactor(0);
-
+         
+            surrender = scene.add.image(window.innerWidth / 2,(window.innerHeight / 2) + 40, 'surrender').setScrollFactor(0);
+            surrender.setDepth(4);
             surrender.setInteractive();
             surrender.on('pointerdown', function (pointer) {
                 lose = true;
                 scene.socket.emit('lose', lose);
-                settingsPlaceHolder.destroy();
+                settingsImg.destroy();
                 showRangeButton.destroy();
                 surrender.destroy();
+                background.destroy();
             }, this);
 
         } else if (show) {
-            settingsPlaceHolder.destroy();
+            settingsImg.destroy();
             showRangeButton.destroy();
             surrender.destroy();
+            background.destroy();
             onlyOnceSettings = true;
         }
-
     }, this);
 }

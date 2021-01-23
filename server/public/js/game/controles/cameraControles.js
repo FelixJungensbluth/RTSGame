@@ -1,3 +1,5 @@
+var canMoveCam = true;
+
 /*
   Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
   Wenn man mit dem Mauszeiger an einen Rand kommt bewegt sich die Kamera 
@@ -5,6 +7,8 @@
 */
 function moveCamera(szene, cam) {
     szene.input.on('pointermove', function (pointer) {
+        if(canMoveCam) {
+
         if (pointer.y < 50) {
             cam.scrollY -= 4;
             camMoveY -= 4;
@@ -24,14 +28,6 @@ function moveCamera(szene, cam) {
             cam.scrollX += 4;
             camMoveX += 4;
         }
-    }, this);
-}
-
-//Zoom mit dem Mausrad
-function zoomCamera(szene, cam) {
-    szene.input.on('wheel', function (pointer, gameObjects, deltaX, deltaY, deltaZ) {
-        zoom -= deltaY * 0.0005
-        cam.setZoom(zoom);
-
+    }
     }, this);
 }

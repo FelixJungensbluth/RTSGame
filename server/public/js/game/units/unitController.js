@@ -83,15 +83,6 @@ function handleUnitMovment(scene) {
 
 
 
-                        unit.setData({
-                            fromX: fromX,
-                            fromY: fromY,
-                            toX: toX,
-                            toY: toY,
-                            tileX: toX,
-                            tileY: toY,
-
-                        });
 
 
                         if (IsometricMap.map[unit.getData("tileX")][unit.getData("tileY")].id !== 50) {
@@ -102,6 +93,16 @@ function handleUnitMovment(scene) {
                                 } else {
                                     pathToUse.push(path);
                                     unitsSelected();
+                                    unit.setData({
+                                        fromX: fromX,
+                                        fromY: fromY,
+                                        toX: toX,
+                                        toY: toY,
+                                        tileX: toX,
+                                        tileY: toY,
+
+                                    });
+
                                     unit.setData({
                                         tileX: path[path.length - 1].x,
                                         tileY: path[path.length - 1].y,
@@ -177,13 +178,13 @@ function moveTest() {
 
 
                 if (globalUnits[i].getData("name") == 'solider') {
+
                     if (attackPath2.length == 0) {
                         moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
-                        console.log("move");
                         attackPath.length = 0;
+
                     }
                 } else {
-                    console.log("worker");
                     moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
                 }
             } else {
@@ -202,9 +203,9 @@ function moveTest() {
 
 function attack2() {
     scene.input.on('pointerdown', function (pointer) {
-        console.log(teamname);
+        console.log(IsometricMap.buildingMapAll[selectedTileX][selectedTileY]);
         selectedArray.forEach(unit => {
-            if (IsometricMap.buildingMap[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMap[selectedTileX][selectedTileY] != 0) {
+            if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0) {
 
                 var start = {
                     x: unit.x,
@@ -218,17 +219,17 @@ function attack2() {
                 }
 
                 scene.socket.emit('attack', pathObject);
-                
+
                 attackerUnits.push(unit.getData("id"));
 
                 if (!attackerUnits.includes(unit.getData("id")) || attackerUnits.length == 1) {
                     dmg++;
-                  
+
 
                 }
-                var lenght = lineDistance(start.x,start.y, end.x, end.y);
-               
-                if(lenght <= 200) {
+                var lenght = lineDistance(start.x, start.y, end.x, end.y);
+
+                if (lenght <= 200) {
                     console.log("WINWINWINWIWNIWININWINWINWINW");
                     win = true;
                     scene.socket.emit('win', win);
@@ -369,7 +370,6 @@ function lineDistance(x1, y1, x2, y2) {
 
 function dgfdjkgdkjflg() {
     scene.socket.on('attackBreak', function (down) {
-
         down.forEach(line => {
             var path1 = scene.add.path();
 
@@ -394,60 +394,60 @@ function dgfdjkgdkjflg() {
 
 function showAttackRange() {
     scene.input.keyboard.on('keydown_X', function (event) {
-        if(showRange) {
+        if (showRange) {
 
-      
-        selectedArray.forEach(unit => {
-           // range = scene.add.rectangle(unit.x, unit.y, 400, 400, 0xffffff, 0.5);
-          //  range.angle = 40;
-       
-        if(rangeOne){
 
-       
-        rangeGraphics = scene.add.graphics();
-        rangeGraphics.fillStyle(0xFFFFFF, 0.5);
-    
-        rangeGraphics.beginPath();
-        var p1 = {
-            x:isometricTo2d(unit.getData("tileX") +2, unit.getData("tileY") +2).x,
-            y:isometricTo2d(unit.getData("tileX") +2, unit.getData("tileY") +2).y,
-        };
-        var p2 = {
-            x:isometricTo2d(unit.getData("tileX") -2, unit.getData("tileY") +2).x,
-            y:isometricTo2d(unit.getData("tileX") -2, unit.getData("tileY") +2).y,
-        };
-        var p3 = {
-            x:isometricTo2d(unit.getData("tileX") -2, unit.getData("tileY") -2).x,
-            y:isometricTo2d(unit.getData("tileX") -2, unit.getData("tileY") -2).y,
-        };
-        var p4 = {
-            x:isometricTo2d(unit.getData("tileX") +2, unit.getData("tileY") -2).x,
-            y:isometricTo2d(unit.getData("tileX") +2, unit.getData("tileY") -2).y,
-        };
-        
+            selectedArray.forEach(unit => {
+                // range = scene.add.rectangle(unit.x, unit.y, 400, 400, 0xffffff, 0.5);
+                //  range.angle = 40;
 
-        rangeGraphics.moveTo(0 + p1.x, 0 + p1.y);
-        rangeGraphics.lineTo(0 + p2.x, 0 + p2.y);
-        rangeGraphics.lineTo(0 + p3.x, 0 + p3.y);
-        rangeGraphics.lineTo(0 + p4.x, 0 + p4.y);
-    
-       // rangeGraphics.closePath();
-    
-        
-       rangeGraphics.fillPath();
-        rangeGraphics.setDepth(1);
-        rangeOne = false;
-    }
-    });
-}
+                if (rangeOne) {
+
+
+                    rangeGraphics = scene.add.graphics();
+                    rangeGraphics.fillStyle(0xFFFFFF, 0.5);
+
+                    rangeGraphics.beginPath();
+                    var p1 = {
+                        x: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") + 2).x,
+                        y: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") + 2).y,
+                    };
+                    var p2 = {
+                        x: isometricTo2d(unit.getData("tileX") - 2, unit.getData("tileY") + 2).x,
+                        y: isometricTo2d(unit.getData("tileX") - 2, unit.getData("tileY") + 2).y,
+                    };
+                    var p3 = {
+                        x: isometricTo2d(unit.getData("tileX") - 2, unit.getData("tileY") - 2).x,
+                        y: isometricTo2d(unit.getData("tileX") - 2, unit.getData("tileY") - 2).y,
+                    };
+                    var p4 = {
+                        x: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") - 2).x,
+                        y: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") - 2).y,
+                    };
+
+
+                    rangeGraphics.moveTo(0 + p1.x, 0 + p1.y);
+                    rangeGraphics.lineTo(0 + p2.x, 0 + p2.y);
+                    rangeGraphics.lineTo(0 + p3.x, 0 + p3.y);
+                    rangeGraphics.lineTo(0 + p4.x, 0 + p4.y);
+
+                    // rangeGraphics.closePath();
+
+
+                    rangeGraphics.fillPath();
+                    rangeGraphics.setDepth(1);
+                    rangeOne = false;
+                }
+            });
+        }
     }, this);
 
     scene.input.keyboard.on('keyup_X', function (event) {
-     // range.destroy();
-     if(rangeGraphics) {
-        rangeGraphics.destroy();
-        rangeOne = true;  
-     }
-    
+        // range.destroy();
+        if (rangeGraphics) {
+            rangeGraphics.destroy();
+            rangeOne = true;
+        }
+
     }, this);
 }
