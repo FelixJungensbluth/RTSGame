@@ -14,6 +14,10 @@ var show = true;
 
 var showRange = false;
 
+var hpWidth = 80
+
+var recArray = new Array();
+
 /*
  Alle Overlays werden in die SCene platziert 
  Map, Zeit, Materialien
@@ -29,8 +33,19 @@ function displayOverlay() {
  Zeigt die HP an, wenn mit der Maus uber eine Struktur gehovert wid 
 */
 function hp() {
+
+    if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] == 0) {
+        
+        if(recArray.length !=0){
+            recArray.forEach(rec => {
+                rec.destroy();
+        });
+        }
+        
+
+    }
     if ((selectedTileX >= 0 && selectedTileX < IsometricMap.buildingMap.length) && (selectedTileY >= 0 && selectedTileY < IsometricMap.buildingMap[0].length)) {
-        if (IsometricMap.buildingMap[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMap[selectedTileX][selectedTileY] != 0) {
+        if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0) {
             if (onlyOnce && IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
                 hpBackground = scene.add.rectangle(
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
@@ -38,18 +53,18 @@ function hp() {
                     80, 5, 0xff0000
                 );
 
+                recArray.push(hpBackground);
+
                 testRect = scene.add.rectangle(
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
-                    80, 5, 0x39ff14
+                    hpWidth, 5, 0x39ff14
                 );
+                recArray.push(testRect);
                 onlyOnce = false;
             }
         } else {
-            if (testRect) {
-                testRect.destroy();
-                hpBackground.destroy();
-            }
+            
             onlyOnce = true;
         }
     }
@@ -61,11 +76,14 @@ Prozentualer Berechnung aussgehend von der Width der Anzeige
 */
 function updateHp() {
     if (testRect) {
-        var currentHp = IsometricMap.buildingMap[selectedTileX][selectedTileY].currentHp;
-        var base = IsometricMap.buildingMap[selectedTileX][selectedTileY].baseHp;
+        var currentHp = IsometricMap.buildingMapAll[selectedTileX][selectedTileY].currentHp;
+        var base = IsometricMap.buildingMapAll[selectedTileX][selectedTileY].baseHp;
 
-        var lostHp = (currentHp * 100) / base;
-        testRect.width = (80 * lostHp) / 100;
+        if(currentHp >=0){
+            var lostHp = (currentHp * 100) / base;
+            testRect.width = (80 * lostHp) / 100;
+        }
+       
     }
 }
 

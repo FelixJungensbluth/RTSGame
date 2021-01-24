@@ -20,6 +20,7 @@ var tileWidthHalf;
 var tileHeightHalf;
 
 var scene;
+var timer= 0;
 
 var tileColumnOffset = 100; // pixels
 var tileRowOffset = 50; // pixels
@@ -138,6 +139,9 @@ function preload() {
   this.load.image("settings", "assets/menuBackground.png");
   this.load.image("surrender", "assets/menuButton2.png");
   this.load.image("range", "assets/menuButton1.png");
+
+  this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: 64, frameHeight: 64, endFrame: 23 });
+  this.load.spritesheet('boom2', 'assets/dmg.png', { frameWidth: 16, frameHeight: 16, endFrame: 23 });
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -262,8 +266,6 @@ function create() {
     // Aktuelle Positon im 2D Array wird in den jeweiligen Variablen gespiechert
     selectedTileX = tileX;
     selectedTileY = tileY + 1;
-
-    hp();
 
     // InfoText
     tilePosition.setText('Tile X: ' + selectedTileX + ' Tile Y: ' + selectedTileY);
@@ -392,8 +394,9 @@ function create() {
   // Zeigt nicht begebare Tiles auf der Map an (rot);
   visualizeGrid();
   updateSelect(scene);
-
+  globalDamagePos();
   setWinner();
+ 
 }
 
 // Rotiert und Spieglet die uebergebene Matrix 
@@ -451,9 +454,11 @@ function drawTile(Xi, Yi) {
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
 
+
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
+  hp();
   updateHp();
   // Zeigt die Zeit an
   displayTime(time);
@@ -465,12 +470,14 @@ function update(time, delta) {
   displayAttack();
 
   updateMap();
-
+ 
   // Update Resourceanzeige
-  this.timer += delta;
-  while (this.timer > 1000) {
+  timer += delta;
+ 
+  while (timer > 1000) {
     resourceCounter += unitsOnResource;
-    this.timer -= 1000;
+    doDamage(this);
+    timer -= 1000;
   }
   this.socket.emit('resource', resourceCounter);
   resources.setText(resourceCounter);

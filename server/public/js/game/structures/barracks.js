@@ -1,3 +1,4 @@
+var barrackTest = "none";
 /*
   Darstellung der Kaserne
 
@@ -27,7 +28,7 @@ function drawBarracks(Xi, Yi, scene) {
     "isSelected": false,
     "barracksIsSelected": false,
     "canBeSelected": false,
-    "image": buildingTest,
+    "image": barrackTest,
   }
 
 
@@ -55,11 +56,13 @@ Daten von starLocation2 werden Empfangen und verarbeitet
 function addBarracks(scene) {
   scene.socket.on('barracks', function (hqLocation) {
     if (teamname === 1) {
-      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne').setInteractive();
+      barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne').setInteractive();
+      imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 0;
     } else if (teamname != 1) {
-      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
+      barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
+      imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 0;
     }

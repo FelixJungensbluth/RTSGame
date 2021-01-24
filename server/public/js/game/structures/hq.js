@@ -1,8 +1,10 @@
-var buildingTest = "dsfsdf";
+var buildingTest = "none";
 var hqPosition;
 var hqPositionTest;
 
 var updatedHqPos;
+
+var imageArray = new Array();
 
 /*
   Darstellung des HQ
@@ -49,6 +51,7 @@ function drawHq(Xi, Yi) {
 
   // Map Arrays werden geupdated
   this.buildingArray.push(hq);
+  
   IsometricMap.buildingMap[Xi][Yi] = hq;
   IsometricMap.grid[Yi][Xi] = hq;
 
@@ -77,12 +80,14 @@ function addHq(scene) {
     if (teamname === 1) {
       getHq()
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
-      drawHq(selectedTileX, selectedTileY);
+      imageArray.push(buildingTest);
+      drawHq(selectedTileX, selectedTileY, buildingTest);
       resourceCounter -= 50;
     } else if (teamname != 1) {
       getHq();
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
-      drawHq(selectedTileX, selectedTileY);
+      imageArray.push(buildingTest);
+      drawHq(selectedTileX, selectedTileY, buildingTest);
       resourceCounter -= 50;
     }
   });
