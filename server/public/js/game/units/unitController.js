@@ -35,6 +35,10 @@ var lose = false;
 
 var rangeOne = true;
 
+var removeDamage = false;
+
+var testSDHIJF = true;
+
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         gameObject.setData({
@@ -180,8 +184,11 @@ function moveTest() {
                 if (globalUnits[i].getData("name") == 'solider') {
 
                     if (attackPath2.length == 0) {
+                        console.log("CRIGNECSUIDJFGIUSDFIUHSDFHISIHODUF");
                         moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                        attackerUnits.length = 0;
                         attackPath.length = 0;
+                        removeDamage = true; 
 
                     }
                 } else {
@@ -203,9 +210,9 @@ function moveTest() {
 
 function attack2() {
     scene.input.on('pointerdown', function (pointer) {
-        console.log(IsometricMap.buildingMapAll[selectedTileX][selectedTileY]);
         selectedArray.forEach(unit => {
             if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0) {
+                removeDamage = false; 
 
                 var start = {
                     x: unit.x,
@@ -222,17 +229,21 @@ function attack2() {
 
                 attackerUnits.push(unit.getData("id"));
 
-                if (!attackerUnits.includes(unit.getData("id")) || attackerUnits.length == 1) {
+               
                     dmg++;
+                    IsometricMap.buildingMapAll[selectedTileX][selectedTileY].damage += 10; 
 
-
-                }
+                
+               
                 var lenght = lineDistance(start.x, start.y, end.x, end.y);
 
                 if (lenght <= 200) {
-                    console.log("WINWINWINWIWNIWININWINWINWINW");
-                    win = true;
-                    scene.socket.emit('win', win);
+
+                    console.log(IsometricMap.buildingMapAll[selectedTileX][selectedTileY]);
+                  
+                        destroyBuilding(selectedTileX,selectedTileY, scene);
+                  //  win = true;
+                    //scene.socket.emit('win', win);
                 }
             }
         });

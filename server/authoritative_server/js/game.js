@@ -57,6 +57,10 @@ var attackLines = new Array();
 var winner;
 var surrender;
 
+var dmg = new Array();
+
+var globalStructurs = new Array();
+
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -220,6 +224,17 @@ function create() {
     socket.on('lose', function (lose) {
       surrender = lose;
     });
+
+    socket.on('damagePositon', function (pos) {
+      dmg.push(pos);
+    });
+
+    socket.on('updateBuildings', function (buildings) {
+      buildings.forEach(sdfg => {
+        globalStructurs.push(sdfg);
+      })
+     
+    });
   });
 }
 
@@ -237,19 +252,22 @@ function update(time) {
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
-      addHq(this, this.team);
+      addHq(this, this.team,players[player.playerId].team1);
       players[player.playerId].hqCount++;
       console.log(players[player.playerId].hqCount);
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('hqUpdate', hq);
-      io.emit('updateMap', IsometricMap.buildingMap) 
+      io.emit('updateMap', IsometricMap.buildingMap);
+      io.emit('global', globalStructurs); 
     }
 
     if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addBarracks(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
+      io.emit('updateMap', IsometricMap.buildingMap); 
+      io.emit('global', globalStructurs); 
     }
 
     if (input.a && test) {
@@ -266,6 +284,7 @@ function update(time) {
       if (input.mouse && pressed == "x") {
         console.log('ATTACL');
         io.emit("attackBreak", attackLines);
+        io.emit("testDmg", dmg);
         onlyOnce = false;
         attackLines.length = 0;
 
@@ -357,7 +376,7 @@ function addPlayer(self, playerInfo) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addHq(self, test1) {
+function addHq(self, test1, teamNum) {
   console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
@@ -370,14 +389,20 @@ function addHq(self, test1) {
   });
   var hq = {
     "id": "1",
-    "name": "Hauptquartier",
+    "name": "hq",
+    "team": teamNum,
     "positionX": offX,
     "positionY": offY,
+    "baseHp": 100,
+    "currentHp": 100,
+    "tileX": self.mouseInfo.tileX,
+    "tileY": self.mouseInfo.tileY,
     "AnzhalTilesX": "1",
     "AnzhalTilesY": "1",
     "isSelected": false,
     "image": test,
     "canBeSelected": false,
+    "damage": 0,
   }
 
   this.buildingArray.push(hq);
@@ -399,11 +424,16 @@ function addBarracks(self) {
     "name": "Kaserne",
     "positionX": offX,
     "positionY": offY,
+    "baseHp": 100,
+    "currentHp": 100,
+    "tileX": self.mouseInfo.tileX,
+    "tileY": self.mouseInfo.tileY,
     "AnzhalTilesX": "1",
     "AnzhalTilesY": "1",
     "isSelected": false,
     "image": test,
     "canBeSelected": false,
+    "damage": 0,
   }
 
   this.buildingArray.push(hq);
