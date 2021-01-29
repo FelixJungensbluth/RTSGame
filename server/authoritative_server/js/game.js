@@ -61,6 +61,8 @@ var dmg = new Array();
 
 var globalStructurs = new Array();
 
+var attackedUnits = new Array();
+
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -233,7 +235,12 @@ function create() {
       buildings.forEach(sdfg => {
         globalStructurs.push(sdfg);
       })
-     
+
+    });
+
+    socket.on('unitsAttacked', function (units) {
+      attackedUnits.push(units);
+
     });
   });
 }
@@ -252,22 +259,22 @@ function update(time) {
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
-      addHq(this, this.team,players[player.playerId].team1);
+      addHq(this, this.team, players[player.playerId].team1);
       players[player.playerId].hqCount++;
       console.log(players[player.playerId].hqCount);
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('hqUpdate', hq);
       io.emit('updateMap', IsometricMap.buildingMap);
-      io.emit('global', globalStructurs); 
+      io.emit('global', globalStructurs);
     }
 
     if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addBarracks(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
-      io.emit('updateMap', IsometricMap.buildingMap); 
-      io.emit('global', globalStructurs); 
+      io.emit('updateMap', IsometricMap.buildingMap);
+      io.emit('global', globalStructurs);
     }
 
     if (input.a && test) {
@@ -285,6 +292,7 @@ function update(time) {
         console.log('ATTACL');
         io.emit("attackBreak", attackLines);
         io.emit("testDmg", dmg);
+        io.emit("attackedUnits", attackedUnits);
         onlyOnce = false;
         attackLines.length = 0;
 

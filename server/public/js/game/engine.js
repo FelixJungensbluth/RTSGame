@@ -20,7 +20,7 @@ var tileWidthHalf;
 var tileHeightHalf;
 
 var scene;
-var timer= 0;
+var timer = 0;
 
 var tileColumnOffset = 100; // pixels
 var tileRowOffset = 50; // pixels
@@ -140,8 +140,16 @@ function preload() {
   this.load.image("surrender", "assets/menuButton2.png");
   this.load.image("range", "assets/menuButton1.png");
 
-  this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: 64, frameHeight: 64, endFrame: 23 });
-  this.load.spritesheet('boom2', 'assets/dmg.png', { frameWidth: 16, frameHeight: 16, endFrame: 23 });
+  this.load.spritesheet('boom', 'assets/explosion.png', {
+    frameWidth: 64,
+    frameHeight: 64,
+    endFrame: 23
+  });
+  this.load.spritesheet('boom2', 'assets/dmg.png', {
+    frameWidth: 16,
+    frameHeight: 16,
+    endFrame: 23
+  });
 
   // Alle Bilder der Tiles werden geladen 
   for (var i = 0; i < IsometricMap.tiles.length; i++) {
@@ -369,7 +377,9 @@ function create() {
   handleUnitMovment(scene);
   handelSelectedUnits(scene);
   unitsSelected(scene);
+  attackTest();
   attack2();
+  unitAttack(scene);
   moveTest();
 
   showAttackRange(scene);
@@ -396,7 +406,7 @@ function create() {
   updateSelect(scene);
   globalDamagePos();
   setWinner();
- 
+
 }
 
 // Rotiert und Spieglet die uebergebene Matrix 
@@ -453,30 +463,28 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
-
-
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
-  hp();
+  //hp();
   updateHp();
   // Zeigt die Zeit an
   displayTime(time);
 
   // Sammeln von Resourcen | Bewegen der Units zwischen HQ und Resourcen
-  collectResources();
   moveOnResource();
 
   displayAttack();
 
   updateMap();
- 
+
   // Update Resourceanzeige
   timer += delta;
- 
+
   while (timer > 1000) {
-    resourceCounter += unitsOnResource;
+    resourceCounter += unitsOnResourceArray.length;
     doDamage(this);
+    doDamageUnits();
     timer -= 1000;
   }
   this.socket.emit('resource', resourceCounter);
@@ -684,9 +692,12 @@ function visualizeGrid() {
 function setWinner() {
   scene.socket.on('winnerStatus', function (team) {
     canMoveCam = false;
+    backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
+    backgroundEnd.setDepth(3);
     if (team && !win) {
       console.log("LOISTLOSTLSOTSOLT");
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
+      lose.setDepth(4);
       lose.setInteractive();
       lose.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
@@ -695,6 +706,7 @@ function setWinner() {
 
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
+      winImg.setDepth(4);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -703,10 +715,13 @@ function setWinner() {
 
   scene.socket.on('loserStatus', function (team) {
     canMoveCam = false;
+    backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
+    backgroundEnd.setDepth(3);
     if (team && lose) {
       console.log("LOISTLOSTLSOTSOLT");
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
+      loseImg.setDepth(4);
       loseImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -714,6 +729,7 @@ function setWinner() {
 
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
+      winImg.setDepth(4);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -721,7 +737,7 @@ function setWinner() {
   });
 }
 
-function updateMap() { 
+function updateMap() {
   scene.socket.on('updateMap', function (map) {
     IsometricMap.buildingMapAll = map;
 
