@@ -51,7 +51,7 @@ function drawHq(Xi, Yi) {
 
   // Map Arrays werden geupdated
   this.buildingArray.push(hq);
-  
+
   IsometricMap.buildingMap[Xi][Yi] = hq;
   IsometricMap.grid[Yi][Xi] = hq;
 

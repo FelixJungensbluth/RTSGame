@@ -39,6 +39,11 @@ var removeDamage = false;
 
 var testSDHIJF = true;
 
+var workerAttack = new Array();
+var attackedUnits = new Array();
+
+var woAtt = false;
+
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         gameObject.setData({
@@ -85,11 +90,7 @@ function handleUnitMovment(scene) {
                         var fromX = unit.getData('tileX');
                         var fromY = unit.getData('tileY');
 
-
-
-
-
-                        if (IsometricMap.map[unit.getData("tileX")][unit.getData("tileY")].id !== 50) {
+                        if (IsometricMap.map[unit.getData("tileX")][unit.getData("tileY")].id !== 6) {
 
                             easystar.findPath(fromX, fromY, toX, toY, function (path) {
                                 if (path === null) {
@@ -178,7 +179,8 @@ function moveTest() {
 
     scene.socket.on('FUCKINFO', function (cringe) {
         for (var i = 0; i < globalUnits.length; i++) {
-            if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id !== 50) {
+            console.log(IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id);
+            if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id !== 6) {
 
 
                 if (globalUnits[i].getData("name") == 'solider') {
@@ -188,15 +190,21 @@ function moveTest() {
                         moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
                         attackerUnits.length = 0;
                         attackPath.length = 0;
-                        removeDamage = true; 
+
+                        removeDamage = true;
 
                     }
                 } else {
-                    moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                    if (workerAttack.length == 0) {
+                        moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                    }
+
                 }
+                workerAttack.length = 0;
             } else {
-                if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id == 50 && globalUnits[i].getData("name") == 'worker') {
-                    moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+
+                if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id == 6 && globalUnits[i].getData("name") == 'worker') {
+
                     moveCharacterTest(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
                 }
             }
@@ -208,11 +216,29 @@ function moveTest() {
     });
 }
 
+function attackTest() {
+
+    scene.input.keyboard.on('keydown_X', function (event) {
+        woAtt = true
+    }, this);
+
+    scene.input.keyboard.on('keyup_X', function (event) {
+        woAtt = false
+    }, this);
+    scene.input.on('gameobjectdown', function (pointer, gameObject) {
+        if (woAtt) {
+            if (gameObject.getData("name") == "worker" || gameObject.getData("name") == "solider") {
+                workerAttack.push(gameObject);
+            }
+
+        }
+    }, scene);
+}
+
 function attack2() {
     scene.input.on('pointerdown', function (pointer) {
         selectedArray.forEach(unit => {
-            if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0) {
-                removeDamage = false; 
+            if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0 || workerAttack.length != 0) {
 
                 var start = {
                     x: unit.x,
@@ -229,31 +255,58 @@ function attack2() {
 
                 attackerUnits.push(unit.getData("id"));
 
-               
-                    dmg++;
-                    IsometricMap.buildingMapAll[selectedTileX][selectedTileY].damage += 10; 
+                dmg++;
+                IsometricMap.buildingMapAll[selectedTileX][selectedTileY].damage += 10;
 
-                
-               
                 var lenght = lineDistance(start.x, start.y, end.x, end.y);
-
                 if (lenght <= 200) {
-
-                    console.log(IsometricMap.buildingMapAll[selectedTileX][selectedTileY]);
-                  
-                        destroyBuilding(selectedTileX,selectedTileY, scene);
-                  //  win = true;
-                    //scene.socket.emit('win', win);
+                    // 
+                    destroyBuilding(selectedTileX, selectedTileY, scene);
+                    workerAttack.forEach(test => {
+                        if (end.x == test.x) {
+                            scene.socket.emit('unitsAttacked', test.getData("id"));
+                        }
+                    });
                 }
             }
         });
     }, this);
 }
 
+
+function unitAttack(scene) {
+    scene.socket.on('attackedUnits', function (down) {
+        unitsArray1.forEach(unit => {
+            down.forEach(ids => {
+                if (unit.getData('id') == ids) { //  TODO
+                    attackedUnits.push(unit);
+                }
+            });
+        });
+        attackedUnits.forEach(element => {
+            // element.destroy();
+        });
+    });
+}
+
+function doDamageUnits() {
+    if (attackedUnits.length != 0) {
+        attackedUnits.forEach(unit => {
+            unit.setData({
+                currentHp: unit.getData('currentHp') - 5
+            });
+            if (unit.getData('currentHp') <= 0) {
+                unit.destroy();
+            }
+
+        });
+    }
+}
+
 function displayAttack() {
     graphics.clear();
     graphics.setDepth(2);
-
+    removeDamage = false;
     if (attackPath.length != 0) {
         for (var b = 0; b < attackPath.length; b++) {
             if (attackPath[b].distance <= 200) {
@@ -284,11 +337,11 @@ function moveCharacter(path, scene, unit) {
             y: {
                 value: offY,
                 duration: 200
-            }
+            },
         });
     }
 
-    scene.tweens.timeline({
+    var test = scene.tweens.timeline({
         tweens: tweens
     });
 }
@@ -303,14 +356,18 @@ function updateUnits(unit) {
 
 function moveCharacterTest(path, scene, unit) {
     unitsOnResourceArray.push(unit);
-
+    console.log(unitsOnResourceArray);
     var follower1 = {
         t: 0,
         vec: new Phaser.Math.Vector2()
     };
 
     var path1 = scene.add.path();
-    resourcePathArray.push(path1);
+    var rePA = {
+        path: path1,
+        counter: 0,
+    }
+    resourcePathArray.push(rePA);
 
     var Xi = unit.getData('tileX');
     var Yi = unit.getData('tileY');
@@ -328,7 +385,7 @@ function moveCharacterTest(path, scene, unit) {
         ease: 'Linear',
         duration: 4000,
         yoyo: true,
-        repeat: 2
+        repeat: -1
     });
 
     vectorArray.push(follower1);
@@ -340,18 +397,31 @@ function moveOnResource() {
     graphics.fillStyle(0xff0000, 1);
     graphics.setDepth(1);
     for (var b = 0; b < resourcePathArray.length; b++) {
-        resourcePathArray[b].draw(graphics);
-        graphics.fillRect(vectorArray[b].vec.x - 5, vectorArray[b].vec.y - 5, 10, 10);
-        unitsOnResourceArray[b].x = vectorArray[b].vec.x;
-        unitsOnResourceArray[b].y = vectorArray[b].vec.y;
-        resourcePathArray[b].getPoint(vectorArray[b].t, vectorArray[b].vec);
+        if (unitsOnResourceArray.length != 0) {
 
-        if (vectorArray[b].vec.x == updatedHqPos.x) {
-            stopUnit++;
+
+            resourcePathArray[b].path.draw(graphics);
+            graphics.fillRect(vectorArray[b].vec.x - 5, vectorArray[b].vec.y - 5, 10, 10);
+            unitsOnResourceArray[b].x = vectorArray[b].vec.x;
+            unitsOnResourceArray[b].y = vectorArray[b].vec.y;
+            resourcePathArray[b].path.getPoint(vectorArray[b].t, vectorArray[b].vec);
         }
-        if (stopUnit == 3) { // TODO
-            resourceCounter--;
+        if (vectorArray[b].vec.x == updatedHqPos.x) {
+            resourcePathArray[b].counter++;
+        }
+        if (resourcePathArray[b].counter == 3) { // TODO
+            if (unitsOnResource >= 0) {
+
+                if (unitsOnResource < 0) {
+                    unitsOnResource = 0;
+                }
+
+            }
+
             unitsOnResourceArray[b].destroy();
+            unitsOnResourceArray.splice(b, 1);
+            resourcePathArray.splice(b, 1);
+            vectorArray.splice(b, 1);
             stopUnit = 0;
         }
     }

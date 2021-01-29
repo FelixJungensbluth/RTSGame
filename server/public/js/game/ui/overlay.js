@@ -35,13 +35,13 @@ function displayOverlay() {
 function hp() {
 
     if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] == 0) {
-        
-        if(recArray.length !=0){
+
+        if (recArray.length != 0) {
             recArray.forEach(rec => {
                 rec.destroy();
-        });
+            });
         }
-        
+
 
     }
     if ((selectedTileX >= 0 && selectedTileX < IsometricMap.buildingMap.length) && (selectedTileY >= 0 && selectedTileY < IsometricMap.buildingMap[0].length)) {
@@ -64,7 +64,7 @@ function hp() {
                 onlyOnce = false;
             }
         } else {
-            
+
             onlyOnce = true;
         }
     }
@@ -79,11 +79,11 @@ function updateHp() {
         var currentHp = IsometricMap.buildingMapAll[selectedTileX][selectedTileY].currentHp;
         var base = IsometricMap.buildingMapAll[selectedTileX][selectedTileY].baseHp;
 
-        if(currentHp >=0){
+        if (currentHp >= 0) {
             var lostHp = (currentHp * 100) / base;
             testRect.width = (80 * lostHp) / 100;
         }
-       
+
     }
 }
 
@@ -108,8 +108,8 @@ function settings() {
             showRangeButton.on('pointerdown', function (pointer) {
                 showRange ^= true;
             }, this);
-         
-            surrender = scene.add.image(window.innerWidth / 2,(window.innerHeight / 2) + 40, 'surrender').setScrollFactor(0);
+
+            surrender = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) + 40, 'surrender').setScrollFactor(0);
             surrender.setDepth(4);
             surrender.setInteractive();
             surrender.on('pointerdown', function (pointer) {

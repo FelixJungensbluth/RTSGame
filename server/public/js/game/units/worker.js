@@ -7,6 +7,7 @@ function initWorker() {
         x: workerX,
         y: workerY,
         hp: 50,
+        currentHp: 50,
         timeToBuild: 40,
         isSelected: true,
         canBeSelected: true,
