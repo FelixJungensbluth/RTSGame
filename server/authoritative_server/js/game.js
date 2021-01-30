@@ -63,6 +63,8 @@ var globalStructurs = new Array();
 
 var attackedUnits = new Array();
 
+var readyPlayers = new Array();
+
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -243,6 +245,12 @@ function create() {
       attackedUnits.push(units);
 
     });
+
+    socket.on('ready', function (team) {
+      // selectedStatus = selected;
+      handleReadyCheck(self, socket.id)
+    });
+
   });
 }
 
@@ -312,6 +320,7 @@ function update(time) {
 
       }
       if (input.mouse) {
+       
         io.emit("break", mental);
         mental.length = 0;
         io.emit("resourcePos", updatedPos);
@@ -350,7 +359,6 @@ function update(time) {
     }
   }
 
-
   isPlacingAllowed(this);
 }
 
@@ -387,6 +395,25 @@ function handlSelectedStatus(self, playerId, status) {
     if (playerId === player.playerId) {
       players[player.playerId].hqSelected = status;
     }
+  });
+}
+
+function handleReadyCheck(self, playerId) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+    //  console.log(players[player.playerId].team1);
+      readyPlayers.push(players[player.playerId].team1);
+      readyPlayers = uniq(readyPlayers);
+
+      io.emit('readyRec', readyPlayers.length);
+    }
+  });
+}
+
+function uniq(a) {
+  var seen = {};
+  return a.filter(function(item) {
+      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
   });
 }
 

@@ -16,6 +16,7 @@ var unitsOnResource = 0;
 var vectorArray = new Array();
 var resourcePathArray = new Array();
 var unitsOnResourceArray = new Array();
+var unitsOnResourceArray2 = new Array();
 
 var test = new Array();
 
@@ -41,7 +42,6 @@ var testSDHIJF = true;
 
 var workerAttack = new Array();
 var attackedUnits = new Array();
-
 var woAtt = false;
 
 function selectUnits(scene) {
@@ -75,8 +75,8 @@ function handleUnitMovment(scene) {
     scene.input.on('pointerdown', function (pointer) {
 
         if (pointer.leftButtonDown()) {
-            if (selectedArray.length != 0) {
-                selectedArray.forEach(unit => {
+            if (unitsArray1.length != 0) {
+                unitsArray1.forEach(unit => {
                     if (unit.getData('isSelected')) {
                         unit.setData({
                             isSelected: false,
@@ -116,36 +116,6 @@ function handleUnitMovment(scene) {
                             });
 
                             easystar.calculate();
-                        } else {
-                            updateUnits(unit);
-
-                            var fromX = 1;
-                            var fromY = 1;
-                            var toX = unit.getData("tileX");
-                            var toY = unit.getData("tileY");
-
-                            unit.setData({
-                                fromX: fromX,
-                                fromY: fromY,
-                                toX: toX,
-                                toY: toY,
-                            });
-
-                            easystar.findPath(fromX, fromY, toX, toY, function (path) {
-                                if (path === null) {
-                                    console.warn("Path was not found.");
-                                } else {
-                                    pathToUse.push(path);
-                                    unitsSelected();
-
-                                    unit.setData({
-                                        tileX: path[path.length - 1].x,
-                                        tileY: path[path.length - 1].y,
-                                    });
-                                }
-                            });
-
-                            easystar.calculate();
                         }
                     }
                 });
@@ -165,28 +135,27 @@ function unitsSelected() {
 
 
 function moveTest() {
-    scene.socket.on('resourcePos', function (pos) {
-        test.push(pos[pos.length - 1]);
-        for (var i = 0; i < globalUnits.length; i++) {
-            globalUnits[i].setData({
-                tileX: test[test.length - 1].x,
-                tileY: test[test.length - 1].y,
-            });
-        }
-        test.length = 0;
-
-    });
-
     scene.socket.on('FUCKINFO', function (cringe) {
+
         for (var i = 0; i < globalUnits.length; i++) {
-            console.log(IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id);
-            if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id !== 6) {
+            //console.log(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1]);
+            console.log(isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y));
+            var endPos = {
+                x:isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y).x,
+                y:isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y).y,
+            };
+            
+            if(!resourcePosX.includes(endPos.x)){
+                console.log("ICHWEINEGLEICH");
+            }
+
+            if (!resourcePosX.includes(endPos.x)) {
 
 
                 if (globalUnits[i].getData("name") == 'solider' || globalUnits[i].getData("name") == 'tank') {
 
                     if (attackPath2.length == 0) {
-                        console.log("CRIGNECSUIDJFGIUSDFIUHSDFHISIHODUF");
+                      
                         moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
                         attackerUnits.length = 0;
                         attackPath.length = 0;
@@ -203,9 +172,15 @@ function moveTest() {
                 workerAttack.length = 0;
             } else {
 
+                if (globalUnits[i].getData("name") == 'worker') {
+                    console.log(updatedHqPos);
+                    moveCharacterTest(endPos, scene, globalUnits[i]);
+                }
+
                 if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id == 6 && globalUnits[i].getData("name") == 'worker') {
 
-                    moveCharacterTest(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                    console.log("CRIGNECSUIDJFGIUSDFIUHSDFHISIHODUF");
+                    collect(globalUnits[i]);
                 }
             }
         }
@@ -214,6 +189,10 @@ function moveTest() {
         globalUnits.length = 0;
         attackPath2.length = 0;
     });
+}
+
+function collect(unit) {
+    unitsOnResourceArray2.push(unit);
 }
 
 function attackTest() {
@@ -284,7 +263,6 @@ function unitAttack(scene) {
             });
         });
         attackedUnits.forEach(element => {
-            // element.destroy();
         });
     });
 }
@@ -356,7 +334,6 @@ function updateUnits(unit) {
 
 function moveCharacterTest(path, scene, unit) {
     unitsOnResourceArray.push(unit);
-    console.log(unitsOnResourceArray);
     var follower1 = {
         t: 0,
         vec: new Phaser.Math.Vector2()
@@ -369,12 +346,7 @@ function moveCharacterTest(path, scene, unit) {
     }
     resourcePathArray.push(rePA);
 
-    var Xi = unit.getData('tileX');
-    var Yi = unit.getData('tileY');
-    var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
-    var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
-
-    var line1 = new Phaser.Curves.Line([offX, offY, updatedHqPos.x, updatedHqPos.y]);
+    var line1 = new Phaser.Curves.Line([path.x, path.y, updatedHqPos.x, updatedHqPos.y]);
 
     //var line1 = new Phaser.Curves.Line([500,500, 1000, 1000]);
     path1.add(line1);
@@ -420,6 +392,7 @@ function moveOnResource() {
 
             unitsOnResourceArray[b].destroy();
             unitsOnResourceArray.splice(b, 1);
+            unitsOnResourceArray2.splice(b, 1);
             resourcePathArray.splice(b, 1);
             vectorArray.splice(b, 1);
             stopUnit = 0;

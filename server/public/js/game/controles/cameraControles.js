@@ -1,4 +1,4 @@
-var canMoveCam = true;
+var canMoveCam = false;
 
 /*
   Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
@@ -9,7 +9,6 @@ function moveCamera(szene, cam) {
 
     szene.input.on('pointermove', function (pointer) {
         
-        console.log(teamname)
         if(canMoveCam) {
 
         if (pointer.y < 50) {
