@@ -28,6 +28,17 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].image.clearTint();
                     IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected = false;
                 }
+
+                  // Labor 
+                  if (!isSelected && pressed == "e" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                    pressed = "none"
+                    drawLabor(selectedTileX, selectedTileY, szene);
+                    buildingTime(szene);
+                    selectedStructure.destroy();
+
+                    IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].image.clearTint();
+                    IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected = false;
+                }
             }
 
             // Auswahl wird entfernt 

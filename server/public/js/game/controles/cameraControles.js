@@ -6,7 +6,10 @@ var canMoveCam = true;
   in die jeweilige Richtung 
 */
 function moveCamera(szene, cam) {
+
     szene.input.on('pointermove', function (pointer) {
+        
+        console.log(teamname)
         if(canMoveCam) {
 
         if (pointer.y < 50) {

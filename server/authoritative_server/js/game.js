@@ -255,7 +255,7 @@ function update(time) {
     const test = players[player.playerId].hqSelected;
 
     this.team.name = players[player.playerId].team1
-    console.log(players[player.playerId].team1);
+
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
@@ -272,6 +272,14 @@ function update(time) {
     if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addBarracks(this);
+      io.emit('allBuildingsOnMap', buildingsOnMap);
+      io.emit('updateMap', IsometricMap.buildingMap);
+      io.emit('global', globalStructurs);
+    }
+
+    if (input.mouse && pressed == "e" && !onRestrictedTile && test) {
+      //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
+      addLabor(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
@@ -424,6 +432,37 @@ function addBarracks(self) {
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('barracks', {
+    x: offX,
+    y: offY,
+  });
+  var hq = {
+    "id": "2",
+    "name": "Kaserne",
+    "positionX": offX,
+    "positionY": offY,
+    "baseHp": 100,
+    "currentHp": 100,
+    "tileX": self.mouseInfo.tileX,
+    "tileY": self.mouseInfo.tileY,
+    "AnzhalTilesX": "1",
+    "AnzhalTilesY": "1",
+    "isSelected": false,
+    "image": test,
+    "canBeSelected": false,
+    "damage": 0,
+  }
+
+  this.buildingArray.push(hq);
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+}
+
+// Erster Versuch das HQ zu platzieren 
+function addLabor(self) {
+  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+  var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
+  var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
+  var test = self.physics.add.image(offX, offY, 'star');
+  io.emit('labor', {
     x: offX,
     y: offY,
   });
