@@ -49,7 +49,7 @@ function selectUnits(scene) {
         gameObject.setData({
             isSelected: true
         });
-        if (gameObject.getData('isSelected') && (gameObject.getData('name') == 'solider' || gameObject.getData('name') == 'worker')) {
+        if (gameObject.getData('isSelected') && (gameObject.getData('name') == 'solider' || gameObject.getData('name') == 'worker' || gameObject.getData('name') == 'tank')) {
             gameObject.setTint(0xFFFFFF, 0.05);
             selectedArray.push(gameObject);
 
@@ -183,7 +183,7 @@ function moveTest() {
             if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id !== 6) {
 
 
-                if (globalUnits[i].getData("name") == 'solider') {
+                if (globalUnits[i].getData("name") == 'solider' || globalUnits[i].getData("name") == 'tank') {
 
                     if (attackPath2.length == 0) {
                         console.log("CRIGNECSUIDJFGIUSDFIUHSDFHISIHODUF");
@@ -227,7 +227,7 @@ function attackTest() {
     }, this);
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         if (woAtt) {
-            if (gameObject.getData("name") == "worker" || gameObject.getData("name") == "solider") {
+            if (gameObject.getData("name") == "worker" || gameObject.getData("name") == "solider" || gameObject.getData("name") == "tank") {
                 workerAttack.push(gameObject);
             }
 
