@@ -93,6 +93,7 @@ let keyS; // Variable fuer die Taste S
 let keyD; // Variable fuer die Taste S
 let keyQ;
 let keyX;
+let keyE;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -125,8 +126,13 @@ function preload() {
   this.load.image("kaserne", "assets/kaserne.png");
   this.load.image("kaserne2", "assets/kaserne2.png");
   this.load.image("mine", "assets/mine.png");
+  this.load.image("labor", "assets/labor.png");
+  this.load.image("labor2", "assets/labor2.png");
+
+
   this.load.image("solider", "assets/solider.png");
   this.load.image("worker", "assets/worker1.png");
+
   this.load.image("minimap", "assets/map.png");
   this.load.image("olMap", "assets/HUD_map.png");
   this.load.image("olTime", "assets/HUD_time.png");
@@ -208,6 +214,7 @@ function create() {
   // Kamera
   var cam = this.cameras.main;
   cam.setZoom(1);
+ 
   moveCamera(this, cam);
   // Controles
   getLastClicked(this);
@@ -259,7 +266,7 @@ function create() {
 
     // Wenn S gedreuckt wird die Position des Vorschaugebaudes auf die Mausposition gleichgezsetzt
     // Die Differenz vom Mittlepunkt der Szene zu der Distanz welche sich die Kamera bewegt hat wird mit einberechent  
-    if (pressed == "s" || pressed == "d") {
+    if (pressed == "s" || pressed == "d" || pressed == "e") {
       selectedStructure.x = (mausX + camMoveX);
       selectedStructure.y = (mausY + camMoveY);
     }
@@ -326,11 +333,15 @@ function create() {
   keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
   keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+  keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
   this.qKeyPressed = false;
   this.xKeyPressed = false;
+  this.eKeyPressed = false;
+
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
   // Der Teamname jedes Spielers wird in der Variable gespeichert 
@@ -368,6 +379,9 @@ function create() {
 
   // Fuegt das Kaserne zu der Scene hinzu
   addBarracks(scene);
+
+  // Fuegt das Labor zu der Scene hinzu
+  addLabor(scene);
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
@@ -500,7 +514,8 @@ function update(time, delta) {
   const s = this.keySpressed;
   const d = this.keyDpressed;
   const q = this.keyQpressed;
-  const x = this.keyQpressed;
+  const x = this.keyXpressed;
+  const E = this.keyEpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -543,6 +558,16 @@ function update(time, delta) {
     pressed = "x"
     this.input.setDefaultCursor('url(assets/text.cur), pointer');
     // Wenn S gedrueckt ist
+  } else if (keyE.isDown) {
+    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'labor').setInteractive();
+    }
+    pressed = "e"
+    this.socket.emit('pressed', {
+      pressed: "e"
+    });
+    this.keyEpressed = true;
+
   } else {
     if (pressed == "x") {
       pressed = "none";
@@ -555,6 +580,7 @@ function update(time, delta) {
     this.keySpressed = false;
     this.keyQpressed = false;
     this.keyXpressed = false;
+    this.keyEpressed = false;
     this.input.setDefaultCursor('url(assets/normal.cur), pointer');
   }
 
