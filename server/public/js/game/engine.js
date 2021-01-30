@@ -116,6 +116,10 @@ var easystar;
 
 var testRect; // Pathfinnding
 
+var countdownText;
+
+var timeOnce = true;
+
 function preload() {
 
   //Arrays werden initalisiert
@@ -143,6 +147,8 @@ function preload() {
   this.load.image("olTime", "assets/HUD_time.png");
   this.load.image("olResource", "assets/HUD_resources.png");
   this.load.image("cursur", "assets/normal.cur");
+  this.load.image("playButton", "assets/play.png");
+  this.load.image("readyBackground", "assets/acceptBackground.png");
 
   this.load.image("win", "assets/win.png");
   this.load.image("lose", "assets/lose.png");
@@ -219,10 +225,12 @@ function create() {
   // Kamera
   var cam = this.cameras.main;
   cam.setZoom(1);
- 
+  readyUp(scene);
+
   moveCamera(this, cam);
   // Controles
   getLastClicked(this);
+  getResourcePosition();
 
   // Infotext
   tilePosition = this.add.text(20, 140, 'Tile Position:', {
@@ -332,6 +340,15 @@ function create() {
     fill: '#000000',
   }).setScrollFactor(0);
 
+  countdownText = this.add.text(-30 + window.innerWidth / 2, -120 + window.innerHeight / 2, '', {
+    font: "200px Arial",
+    fill: '#ff0000',
+    stroke: '#ff0000',
+    strokeThickness: 3,
+  }).setScrollFactor(0);
+
+  countdownText.setDepth(5);
+
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -420,7 +437,13 @@ function create() {
 
   // Daten fuer die Spielzeit anzeige werden vom Server empfangen und in der Methode displattime() verarbeitet
   this.socket.on('updateTime', function (times) {
-    displayTime(times.milSec);
+
+
+    if (gameStart) {
+    //  seconds = 0;
+     // minutes = 0;
+      displayTime(times.milSec);
+    }
   });
 
   // Zeigt nicht begebare Tiles auf der Map an (rot);
@@ -491,7 +514,6 @@ function update(time, delta) {
   //hp();
   updateHp();
   // Zeigt die Zeit an
-  displayTime(time);
 
   // Sammeln von Resourcen | Bewegen der Units zwischen HQ und Resourcen
   moveOnResource();
@@ -504,9 +526,22 @@ function update(time, delta) {
   timer += delta;
 
   while (timer > 1000) {
-    resourceCounter += unitsOnResourceArray.length;
+    resourceCounter += unitsOnResourceArray2.length;
     doDamage(this);
     doDamageUnits();
+
+    if (countdown) {
+      console.log(secsPassed);
+      secsPassed -= 1;
+      countdownText.setText(secsPassed);
+      if (secsPassed == 0) {
+        backgroundDark.destroy();
+        countdown = false;
+        countdownText.destroy();
+        canMoveCam = true;
+        gameStart = true;
+      }
+    }
     timer -= 1000;
   }
   this.socket.emit('resource', resourceCounter);
@@ -565,7 +600,7 @@ function update(time, delta) {
       pressed: "x"
     });
     pressed = "x"
-    this.input.setDefaultCursor('url(assets/text.cur), pointer');
+    this.input.setDefaultCursor('url(assets/attack.cur), pointer');
     // Wenn S gedrueckt ist
   } else if (keyE.isDown) {
     if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
@@ -608,7 +643,7 @@ function update(time, delta) {
   }
 
   if (q !== this.keyQpressed) {
-   
+
     this.socket.emit('playerInput', {
       q: this.keyQpressed,
     });
@@ -643,18 +678,15 @@ function checkTileStatus() {
   Die Zeit wird vom Server an die jeweiligen Clients gesendet 
   Umrechnung der Milisec in Minuten und Sekunde
 */
-function displayTime(milSec) {
+function displayTime(milSec, minusTime) {
 
   //  Umrechnung der Milisec in Minuten und Sekunde
   minutes = Math.floor((milSec / 1000) / 60);
-  seconds = Math.floor((milSec / 1000) - (minutes * 60));
+  seconds = Math.floor((milSec / 1000) - (minutes * 60)) - 10;
 
-  // Zeitinfomrationen werden vom Client empfangen
-  scene.socket.on('updateTime', function (times) {
+  // Text wird gesetzt 
+  time.setText(minutes + ':' + seconds);
 
-    // Text wird gesetzt 
-    time.setText(minutes + ':' + seconds);
-  });
 }
 
 /*

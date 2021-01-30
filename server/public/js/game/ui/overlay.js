@@ -12,11 +12,22 @@ var surrender;
 var background;
 var show = true;
 
+var readyBackground;
+var backgroundDark;
+var playButton;
+var ready1;
+var ready2;
+
+var countdown = false;
+var secsPassed = 6;
+
 var showRange = false;
 
 var hpWidth = 80
 
 var recArray = new Array();
+
+var gameStart = false;
 
 /*
  Alle Overlays werden in die SCene platziert 
@@ -95,7 +106,7 @@ function settings() {
         show ^= true;
 
         if (!show) {
-
+            canMoveCam = false;
             background = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.75).setScrollFactor(0);
             background.setDepth(3);
 
@@ -122,6 +133,7 @@ function settings() {
             }, this);
 
         } else if (show) {
+            canMoveCam = true;
             settingsImg.destroy();
             showRangeButton.destroy();
             surrender.destroy();
@@ -129,4 +141,46 @@ function settings() {
             onlyOnceSettings = true;
         }
     }, this);
+}
+
+function readyUp(scene) {
+    backgroundDark = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.9).setScrollFactor(0);
+    backgroundDark.setDepth(3);
+
+    readyBackground = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'readyBackground').setScrollFactor(0);
+    readyBackground.setDepth(4);
+
+    playButton = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) + 35, 'playButton').setScrollFactor(0);
+    playButton.setInteractive();
+    playButton.setDepth(4);
+
+    playButton.on('pointerdown', function (pointer) {
+        console.log(teamname);
+        scene.socket.emit("ready", "test");
+    }, this);
+
+    scene.socket.on('readyRec', function (recCount) {
+
+        if (recCount == 1) {
+            ready1 = scene.add.rectangle(-44 + window.innerWidth / 2, -19 + window.innerHeight / 2, 76, 20, 0xff0000, 1).setScrollFactor(0);
+            ready1.setDepth(5);
+        }
+
+        if (recCount == 1) {
+            // if (recCount == 2) {
+            ready2 = scene.add.rectangle(40 + window.innerWidth / 2, -19 + window.innerHeight / 2, 76, 20, 0xff0000, 1).setScrollFactor(0);
+            ready2.setDepth(5);
+
+            setTimeout(() => {
+                readyBackground.destroy();
+                playButton.destroy();
+                ready1.destroy();
+                ready2.destroy();
+                countdown = true;
+            }, 1000);
+
+        }
+    });
+
+
 }

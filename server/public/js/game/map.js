@@ -1,3 +1,6 @@
+var resourcePosX = new Array();
+var resourcePosY = new Array();
+
 // Map between index and filename
 var IsometricMap = {
 
@@ -107,3 +110,18 @@ var IsometricMap = {
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ],
 };
+
+function getResourcePosition() { 
+  for (var i = 0; i < IsometricMap.map.length; i++) {
+    for (var j = 0; j < IsometricMap.map.length; j++) {
+      if (IsometricMap.map[i][j] == 6) {
+       
+        resourcePosX.push(isometricTo2d(i,j).x);
+        resourcePosY.push(isometricTo2d(i,j).y);
+      }
+    }
+  }
+     
+    
+
+}

@@ -45,8 +45,6 @@ function drawHq(Xi, Yi) {
     "tileY": Yi,
     "team": teamname
   }
-
-  console.log(teamname);
   scene.socket.emit('hqPosition', hqPosition);
 
   // Map Arrays werden geupdated

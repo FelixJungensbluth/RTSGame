@@ -29,8 +29,8 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected = false;
                 }
 
-                  // Labor 
-                  if (!isSelected && pressed == "e" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                // Labor 
+                if (!isSelected && pressed == "e" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
                     pressed = "none"
                     drawLabor(selectedTileX, selectedTileY, szene);
                     buildingTime(szene);
@@ -56,8 +56,6 @@ function placeBuilding(szene) {
         }
 
         if (pointer.rightButtonDown()) {
-
-            console.log(updatedHqPos);
 
             // Auswahl wird hinzugefuegt.
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
