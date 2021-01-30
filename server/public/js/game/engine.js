@@ -94,6 +94,7 @@ let keyD; // Variable fuer die Taste S
 let keyQ;
 let keyX;
 let keyE;
+let keyW;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -107,6 +108,9 @@ var workerY;
 
 var soliderX;
 var soliderY;
+
+var tankX;
+var tankY;
 
 var easystar;
 
@@ -132,6 +136,7 @@ function preload() {
 
   this.load.image("solider", "assets/solider.png");
   this.load.image("worker", "assets/worker1.png");
+  this.load.image("tank", "assets/panzer.png");
 
   this.load.image("minimap", "assets/map.png");
   this.load.image("olMap", "assets/HUD_map.png");
@@ -334,6 +339,7 @@ function create() {
   keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
   keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+  keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
   this.aKeyPressed = false;
   this.sKeyPressed = false;
@@ -341,6 +347,7 @@ function create() {
   this.qKeyPressed = false;
   this.xKeyPressed = false;
   this.eKeyPressed = false;
+  this.wKeyPressed = false;
 
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
@@ -386,6 +393,7 @@ function create() {
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
   addSolider(scene);
+  addTank(scene);
   selectUnits(scene);
   dgfdjkgdkjflg();
   handleUnitMovment(scene);
@@ -515,7 +523,8 @@ function update(time, delta) {
   const d = this.keyDpressed;
   const q = this.keyQpressed;
   const x = this.keyXpressed;
-  const E = this.keyEpressed;
+  const e = this.keyEpressed;
+  const w = this.keyWpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -568,6 +577,12 @@ function update(time, delta) {
     });
     this.keyEpressed = true;
 
+  } else if (keyW.isDown) {
+    this.keyWpressed = true;
+    this.socket.emit('pressed', {
+      pressed: "w"
+    });
+
   } else {
     if (pressed == "x") {
       pressed = "none";
@@ -581,6 +596,7 @@ function update(time, delta) {
     this.keyQpressed = false;
     this.keyXpressed = false;
     this.keyEpressed = false;
+    this.keyWpressed = false;
     this.input.setDefaultCursor('url(assets/normal.cur), pointer');
   }
 
@@ -592,8 +608,16 @@ function update(time, delta) {
   }
 
   if (q !== this.keyQpressed) {
+   
     this.socket.emit('playerInput', {
       q: this.keyQpressed,
+    });
+  }
+
+  if (w !== this.keyWpressed) {
+    console.log("sdfsdfsdf");
+    this.socket.emit('playerInput', {
+      w: this.keyWpressed,
     });
   }
 }

@@ -132,6 +132,7 @@ function create() {
         a: false,
         s: false,
         q: false,
+        w: false,
         mouse: false
       },
       test: {
@@ -292,6 +293,11 @@ function update(time) {
 
     if (input.q && test) {
       addSolider(this, players[player.playerId].unit, this.team);
+      this.presesdInfo.pressed == "none"
+    }
+
+    if (input.w && test) {
+      addTank(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
     }
 
@@ -502,6 +508,15 @@ function addSolider(self) {
     y: 400,
   });
 }
+
+function addTank(self) {
+  solider = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
+  io.emit('tankLocation', {
+    x: 1000,
+    y: 600,
+  });
+}
+
 
 // Gleiche wie in Engine
 function isPlacingAllowed(self) {
