@@ -264,7 +264,7 @@ function attack2() {
 
                 var lenght = lineDistance(start.x, start.y, end.x, end.y);
                 if (lenght <= 200) {
-                    // 
+                    console.log("remove");
                     destroyBuilding(selectedTileX, selectedTileY, scene);
                     workerAttack.forEach(test => {
                         if (end.x == test.x) {
