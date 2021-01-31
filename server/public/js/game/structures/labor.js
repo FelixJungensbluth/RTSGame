@@ -15,7 +15,7 @@ function drawLabor(Xi, Yi, scene) {
     var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
     var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
     var labor = {
-        "id": "3",
+        "id": "2",
         "name": "Labor",
         "baseHp": 1000,
         "currentHp": 1000,
@@ -35,8 +35,14 @@ function drawLabor(Xi, Yi, scene) {
     // Map Arrays werden geupdated
     this.buildingArray.push(labor);
     IsometricMap.buildingMap[Xi][Yi] = labor;
-    IsometricMap.grid[Yi][Xi] = labor;
+    IsometricMap.buildingMap[Xi - 1][Yi] = labor;
+    IsometricMap.buildingMap[Xi][Yi + 1] = labor;
+    IsometricMap.buildingMap[Xi - 1][Yi + 1] = labor;
 
+    IsometricMap.grid[Yi][Xi] = labor;
+    IsometricMap.grid[Yi + 1][Xi] = labor;
+    IsometricMap.grid[Yi][Xi - 1] = labor;
+    IsometricMap.grid[Yi + 1][Xi - 1] = labor;
     // Wird auf der Map angezeigt 
     addBuilindsToMap(offY, offX);
 
@@ -44,8 +50,7 @@ function drawLabor(Xi, Yi, scene) {
     easystar.setAcceptableTiles([0]);
     easystar.setGrid(IsometricMap.grid);
 
-    // selectedStatus des HQ wird an den Server gesendet 
-    //scene.socket.emit('structureSelected', IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected);
+
 
 }
 
@@ -59,7 +64,7 @@ function addLabor(scene) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor').setInteractive();
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
-           
+
         } else if (teamname != 1) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor2').setInteractive();
             imageArray.push(laborImg);
