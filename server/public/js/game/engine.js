@@ -95,6 +95,7 @@ let keyQ;
 let keyX;
 let keyE;
 let keyW;
+let keyF;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
@@ -135,6 +136,8 @@ function preload() {
   this.load.image("kaserne2", "assets/kaserneT2.png");
   this.load.image("labor", "assets/laborT1.png");
   this.load.image("labor2", "assets/laborT2.png");
+  this.load.image("factory", "assets/fabrikT1.png");
+  this.load.image("factory2", "assets/fabrikT2.png");
 
   this.load.image("solider", "assets/solider.png");
   this.load.image("soliderN", "assets/soliderN.png");
@@ -282,7 +285,7 @@ function create() {
 
     // Wenn S gedreuckt wird die Position des Vorschaugebaudes auf die Mausposition gleichgezsetzt
     // Die Differenz vom Mittlepunkt der Szene zu der Distanz welche sich die Kamera bewegt hat wird mit einberechent  
-    if (pressed == "s" || pressed == "d" || pressed == "e") {
+    if (pressed == "s" || pressed == "d" || pressed == "e" || pressed == "f") {
       selectedStructure.x = (mausX + camMoveX);
       selectedStructure.y = (mausY + camMoveY);
     }
@@ -360,6 +363,7 @@ function create() {
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
   keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
   keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+  keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
 
   this.aKeyPressed = false;
   this.sKeyPressed = false;
@@ -368,6 +372,7 @@ function create() {
   this.xKeyPressed = false;
   this.eKeyPressed = false;
   this.wKeyPressed = false;
+  this.fKeyPressed = false;
 
 
   // Daten fuer die Informationen ueber das Team werden vom Server empfangen 
@@ -409,6 +414,9 @@ function create() {
 
   // Fuegt das Labor zu der Scene hinzu
   addLabor(scene);
+
+  // Fuegt das Labor zu der Scene hinzu
+  addFactory(scene)
 
   // Fuegt den Arbeiter zu der Scene hinzu
   addWorker(scene);
@@ -558,6 +566,7 @@ function update(time, delta) {
   const x = this.keyXpressed;
   const e = this.keyEpressed;
   const w = this.keyWpressed;
+  const f = this.keyFpressed;
 
   // Wenn A gedrueckt ist
   if (keyA.isDown) {
@@ -616,6 +625,16 @@ function update(time, delta) {
       pressed: "w"
     });
 
+  } else if (keyF.isDown) {
+    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'factory').setInteractive();
+    }
+    pressed = "f"
+    this.socket.emit('pressed', {
+      pressed: "f"
+    });
+    this.keyFpressed = true;
+
   } else {
     if (pressed == "x") {
       pressed = "none";
@@ -630,6 +649,7 @@ function update(time, delta) {
     this.keyXpressed = false;
     this.keyEpressed = false;
     this.keyWpressed = false;
+    this.keyFpressed = false;
     this.input.setDefaultCursor('url(assets/normal.cur), pointer');
   }
 
@@ -680,7 +700,7 @@ function displayTime(milSec, minusTime) {
 
   //  Umrechnung der Milisec in Minuten und Sekunde
   minutes = Math.floor((milSec / 1000) / 60);
-  seconds = Math.floor((milSec / 1000) - (minutes * 60)) - 10;
+  seconds = Math.floor((milSec / 1000) - (minutes * 60));
 
   // Text wird gesetzt 
   time.setText(minutes + ':' + seconds);
@@ -788,6 +808,45 @@ function isPlacingAllowed() {
         onRestrictedTile = false
       }
     }
+  }
+
+  if (pressed == "f" /*|| pressed == "f"*/ ) {
+    if (selectedTileX >= 0 && selectedTileY >= 1 && selectedTileX < IsometricMap.buildingMap.length - 3 && selectedTileY <= IsometricMap.buildingMap.length) {
+
+      if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX + 1][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX + 1][selectedTileY].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX + 1][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX + 2][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX + 2][selectedTileY].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX + 2][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX][selectedTileY - 1].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY - 1].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY - 1].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX + 1][selectedTileY - 1].id == 1 ||
+          IsometricMap.map[selectedTileX + 1][selectedTileY - 1].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX + 1][selectedTileY - 1].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX + 2][selectedTileY - 1].id == 1 ||
+          IsometricMap.map[selectedTileX + 2][selectedTileY - 1].id === 2 ||
+          IsometricMap.buildingMap[selectedTileX + 2][selectedTileY - 1].id == 2)) {
+
+
+        selectedStructure.setTint(0xFF0040, 0.5);
+        onRestrictedTile = true;
+      } else {
+        selectedStructure.clearTint();
+        onRestrictedTile = false
+      }
+
+    }
+
   }
 }
 

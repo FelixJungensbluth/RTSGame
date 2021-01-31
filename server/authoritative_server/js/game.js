@@ -294,6 +294,14 @@ function update(time) {
       io.emit('global', globalStructurs);
     }
 
+    if (input.mouse && pressed == "f" && !onRestrictedTile && test) {
+      //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
+      addFactory(this);
+      io.emit('allBuildingsOnMap', buildingsOnMap);
+      io.emit('updateMap', IsometricMap.buildingMap);
+      io.emit('global', globalStructurs);
+    }
+
     if (input.a && test) {
       addWorker(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
@@ -539,6 +547,43 @@ function addLabor(self) {
   IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 1] = hq;
 }
 
+// Erster Versuch das HQ zu platzieren 
+function addFactory(self) {
+  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+  var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
+  var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
+  var test = self.physics.add.image(offX, offY, 'star');
+  io.emit('factory', {
+    x: offX,
+    y: offY,
+  });
+  var factory = {
+    "id": "4",
+    "name": "Fabrik",
+    "positionX": offX,
+    "positionY": offY,
+    "baseHp": 100,
+    "currentHp": 100,
+    "tileX": self.mouseInfo.tileX,
+    "tileY": self.mouseInfo.tileY,
+    "AnzhalTilesX": "1",
+    "AnzhalTilesY": "1",
+    "isSelected": false,
+    "image": test,
+    "canBeSelected": false,
+    "damage": 0,
+  }
+
+  this.buildingArray.push(factory);
+
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = factory;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY] = factory;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY] = factory;
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY + 1] = factory;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 1] = factory;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY + 1] = factory;
+}
+
 function addWorker(self) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   io.emit('workerLocation', {
@@ -571,6 +616,7 @@ function isPlacingAllowed(self) {
     if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 ||
         IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 2 ||
         IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 3 ||
+        IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 4 ||
         IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 2)) {
       onRestrictedTile = true;
       io.emit('checkTileStatus', onRestrictedTile);
