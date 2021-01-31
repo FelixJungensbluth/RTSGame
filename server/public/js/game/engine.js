@@ -129,21 +129,24 @@ function preload() {
   this.buildingsImages = new Array();
 
   // Bilder fuer das HQ wird geladen 
-  this.load.image("star", "assets/turm.png");
-  this.load.image("turm2", "assets/turm2.png");
-  this.load.image("kaserne", "assets/kaserne.png");
-  this.load.image("kaserne2", "assets/kaserne2.png");
-  this.load.image("mine", "assets/mine.png");
-  this.load.image("labor", "assets/labor.png");
-  this.load.image("labor2", "assets/labor2.png");
-
+  this.load.image("star", "assets/hqT1.png");
+  this.load.image("turm2", "assets/hqT2.png");
+  this.load.image("kaserne", "assets/kaserneT1.png");
+  this.load.image("kaserne2", "assets/kaserneT2.png");
+  this.load.image("labor", "assets/laborT1.png");
+  this.load.image("labor2", "assets/laborT2.png");
 
   this.load.image("solider", "assets/solider.png");
+  this.load.image("soliderN", "assets/soliderN.png");
+  this.load.image("soliderR", "assets/soliderR.png");
+  this.load.image("soliderL", "assets/soliderL.png");
+
   this.load.image("worker", "assets/worker1.png");
   this.load.image("tank", "assets/panzer.png");
 
   this.load.image("minimap", "assets/map.png");
   this.load.image("olMap", "assets/HUD_map.png");
+  this.load.image("olOptions", "assets/HUD_options.png");
   this.load.image("olTime", "assets/HUD_time.png");
   this.load.image("olResource", "assets/HUD_resources.png");
   this.load.image("cursur", "assets/normal.cur");
@@ -438,12 +441,7 @@ function create() {
   // Daten fuer die Spielzeit anzeige werden vom Server empfangen und in der Methode displattime() verarbeitet
   this.socket.on('updateTime', function (times) {
 
-
-    if (gameStart) {
-    //  seconds = 0;
-     // minutes = 0;
-      displayTime(times.milSec);
-    }
+    displayTime(times.milSec);
   });
 
   // Zeigt nicht begebare Tiles auf der Map an (rot);
@@ -701,11 +699,12 @@ function buildingTime(scene) {
   timeBarBackGround = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     100, 10, 0xffffff);
-
+  timeBarBackGround.setDepth(10);
   // Anzeige 
   timeBar = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     0, 10, 0x4169E1);
+  timeBar.setDepth(10);
 
   var buildInfo = {
     "buildingX": selectedTileX,
@@ -724,12 +723,64 @@ Objekte koenne nur platziert werden wenn die Tile ID nicht 2 ist oder das Tile s
 Wenn das Tile belegt ist wird die Vorschauobjekt rot gefaerbt
 */
 function isPlacingAllowed() {
-  if (pressed == "s" || pressed == "d") {
+  if (pressed == "s") {
     if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
-      if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 ||
-        IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 ||
-        IsometricMap.map[selectedTileX][selectedTileY].id === 2 ||
-        IsometricMap.map[selectedTileX][selectedTileY].id === 50) {
+      if ((
+          IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX - 1][selectedTileY].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX - 2][selectedTileY].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY + 1].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].id == 1 ||
+          IsometricMap.map[selectedTileX - 1][selectedTileY + 1].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].id == 1 ||
+          IsometricMap.map[selectedTileX - 2][selectedTileY + 1].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].id == 2
+
+
+        )) {
+        selectedStructure.setTint(0xFF0040, 0.5);
+        onRestrictedTile = true;
+      } else {
+        selectedStructure.clearTint();
+        onRestrictedTile = false
+      }
+    }
+  }
+
+  if (pressed == "d" || pressed == "e") {
+    if (selectedTileX >= 0 && selectedTileY >= 0 && selectedTileX < IsometricMap.buildingMap.length && selectedTileY <= IsometricMap.buildingMap.length) {
+
+      if ((IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].id == 1 ||
+          IsometricMap.map[selectedTileX - 1][selectedTileY].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].id == 1 ||
+          IsometricMap.map[selectedTileX][selectedTileY + 1].id === 5 ||
+          IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].id == 2 ||
+
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].id == 1 ||
+          IsometricMap.map[selectedTileX - 1][selectedTileY + 1].id === 4 ||
+          IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].id == 2)) {
+
+
         selectedStructure.setTint(0xFF0040, 0.5);
         onRestrictedTile = true;
       } else {

@@ -34,8 +34,9 @@ function drawBarracks(Xi, Yi, scene) {
 
   // Map Arrays werden geupdated
   this.buildingArray.push(barrack);
-  IsometricMap.buildingMap[Xi][Yi] = barrack;
-  IsometricMap.grid[Yi][Xi] = barrack;
+
+
+  
 
   // Wird auf der Map angezeigt 
   addBuilindsToMap(offY, offX);

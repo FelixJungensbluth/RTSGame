@@ -320,7 +320,7 @@ function update(time) {
 
       }
       if (input.mouse) {
-       
+
         io.emit("break", mental);
         mental.length = 0;
         io.emit("resourcePos", updatedPos);
@@ -401,7 +401,7 @@ function handlSelectedStatus(self, playerId, status) {
 function handleReadyCheck(self, playerId) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
-    //  console.log(players[player.playerId].team1);
+      //  console.log(players[player.playerId].team1);
       readyPlayers.push(players[player.playerId].team1);
       readyPlayers = uniq(readyPlayers);
 
@@ -412,8 +412,8 @@ function handleReadyCheck(self, playerId) {
 
 function uniq(a) {
   var seen = {};
-  return a.filter(function(item) {
-      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+  return a.filter(function (item) {
+    return seen.hasOwnProperty(item) ? false : (seen[item] = true);
   });
 }
 
@@ -455,7 +455,19 @@ function addHq(self, test1, teamNum) {
   }
 
   this.buildingArray.push(hq);
+
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY] = hq;
+
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY + 1] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 1] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY + 1] = hq;
+
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY + 2] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 2] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY + 2] = hq;
+
 }
 
 // Erster Versuch das HQ zu platzieren 
@@ -487,6 +499,9 @@ function addBarracks(self) {
 
   this.buildingArray.push(hq);
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY + 1] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 1] = hq;
 }
 
 // Erster Versuch das HQ zu platzieren 
@@ -500,7 +515,7 @@ function addLabor(self) {
     y: offY,
   });
   var hq = {
-    "id": "2",
+    "id": "3",
     "name": "Kaserne",
     "positionX": offX,
     "positionY": offY,
@@ -517,7 +532,11 @@ function addLabor(self) {
   }
 
   this.buildingArray.push(hq);
+
   IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY + 1] = hq;
+  IsometricMap.buildingMap[self.mouseInfo.tileX - 1][self.mouseInfo.tileY + 1] = hq;
 }
 
 function addWorker(self) {
@@ -549,7 +568,10 @@ function addTank(self) {
 function isPlacingAllowed(self) {
 
   if (self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 && self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY <= IsometricMap.buildingMap.length) {
-    if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 || IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 2)) {
+    if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 ||
+        IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 2 ||
+        IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 3 ||
+        IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 2)) {
       onRestrictedTile = true;
       io.emit('checkTileStatus', onRestrictedTile);
     } else {

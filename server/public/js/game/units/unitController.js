@@ -44,6 +44,22 @@ var workerAttack = new Array();
 var attackedUnits = new Array();
 var woAtt = false;
 
+var directions = {
+    '-180': 'w',
+    '-135': 'nw',
+    '-90': 'n',
+    '-45': 'ne',
+    '0': 'e',
+    '45': 'se',
+    '90': 's',
+    '135': 'sw',
+    '180': 'w'
+  };
+
+  var origin, arrow, arrowSnap, text;
+
+var SNAP_INTERVAL = Phaser.Math.PI2 / 8;
+
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         gameObject.setData({
@@ -133,29 +149,38 @@ function unitsSelected() {
     scene.socket.emit('MOVE', info);
 }
 
+function getDirection(pos,unit) {
+    var screenCenterX = isometricTo2d(8,8).x;
+    var screenCenterY = isometricTo2d(8,8).y; 
+    var angle = Phaser.Math.Angle.Between(screenCenterX, screenCenterY, pos.x, pos.y);
+    var angleSnap = Phaser.Math.Snap.To(angle, SNAP_INTERVAL);
+    var angleSnapDeg = Phaser.Math.RadToDeg(angleSnap);
+    var direct = directions[angleSnapDeg];
+
+    console.log(direct);
+}
+
 
 function moveTest() {
     scene.socket.on('FUCKINFO', function (cringe) {
 
         for (var i = 0; i < globalUnits.length; i++) {
-            //console.log(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1]);
-            console.log(isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y));
+            console.log(cringe[cringe.length - 1].path[i]);
+            if(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1]){
             var endPos = {
-                x:isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y).x,
-                y:isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].x,cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length-1].y).y,
+                x: isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].x, cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].y).x,
+                y: isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].x, cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].y).y,
             };
-            
-            if(!resourcePosX.includes(endPos.x)){
-                console.log("ICHWEINEGLEICH");
-            }
+            getDirection(endPos, globalUnits[i]);
+        }
+          
 
             if (!resourcePosX.includes(endPos.x)) {
-
 
                 if (globalUnits[i].getData("name") == 'solider' || globalUnits[i].getData("name") == 'tank') {
 
                     if (attackPath2.length == 0) {
-                      
+
                         moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
                         attackerUnits.length = 0;
                         attackPath.length = 0;
@@ -262,8 +287,7 @@ function unitAttack(scene) {
                 }
             });
         });
-        attackedUnits.forEach(element => {
-        });
+        attackedUnits.forEach(element => {});
     });
 }
 

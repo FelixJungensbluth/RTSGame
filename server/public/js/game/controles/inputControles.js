@@ -56,17 +56,50 @@ function placeBuilding(szene) {
         }
 
         if (pointer.rightButtonDown()) {
-
             // Auswahl wird hinzugefuegt.
+            console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
-                console.log("SELECTED");
+
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
                 szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
 
-                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].barracksIsSelected = true;
+
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].barracksIsSelected = true;
+
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].barracksIsSelected = true;
+
                     szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].barracksIsSelected);
+
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].barracksIsSelected);
+
+
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].barracksIsSelected);
+                }
+
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 || IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = true;
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected);
+                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected);
                 }
             }
         }

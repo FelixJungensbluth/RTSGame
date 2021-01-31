@@ -51,7 +51,28 @@ function drawHq(Xi, Yi) {
   this.buildingArray.push(hq);
 
   IsometricMap.buildingMap[Xi][Yi] = hq;
+  IsometricMap.buildingMap[Xi - 1][Yi] = hq;
+  IsometricMap.buildingMap[Xi - 2][Yi] = hq;
+
+  IsometricMap.buildingMap[Xi][Yi + 1] = hq;
+  IsometricMap.buildingMap[Xi - 1][Yi + 1] = hq;
+  IsometricMap.buildingMap[Xi - 2][Yi + 1] = hq;
+
+  IsometricMap.buildingMap[Xi][Yi + 2] = hq;
+  IsometricMap.buildingMap[Xi - 1][Yi + 2] = hq;
+  IsometricMap.buildingMap[Xi - 2][Yi + 2] = hq;
+
   IsometricMap.grid[Yi][Xi] = hq;
+  IsometricMap.grid[Yi + 1][Xi] = hq;
+  IsometricMap.grid[Yi + 2][Xi] = hq;
+
+  IsometricMap.grid[Yi][Xi - 1] = hq;
+  IsometricMap.grid[Yi + 1][Xi - 1] = hq;
+  IsometricMap.grid[Yi + 2][Xi - 1] = hq;
+
+  IsometricMap.grid[Yi][Xi - 2] = hq;
+  IsometricMap.grid[Yi + 1][Xi - 2] = hq;
+  IsometricMap.grid[Yi + 2][Xi - 2] = hq;
 
   // Wird auf der Map angezeigt 
   addBuilindsToMap(offY, offX);
