@@ -333,6 +333,7 @@ function update(time) {
         mental.length = 0;
         io.emit("resourcePos", updatedPos);
         io.emit("FUCKINFO", fuck);
+        fuck.length = 0;
         updatedPos.length = 0;
 
         onlyOnce = false;

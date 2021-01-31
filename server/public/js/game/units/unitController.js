@@ -61,7 +61,6 @@ function selectUnits(scene) {
 
             scene.socket.emit('selctedUnitID', gameObject.getData('id'));
         }
-      
     }, scene);
 }
 
@@ -96,17 +95,14 @@ function handleUnitMovment(scene) {
                         var fromX = unit.getData('tileX');
                         var fromY = unit.getData('tileY');
 
-                        console.log("From: " + fromX + " "+ fromY + "TO: " + toX + " "+ toY);
-
                         if (IsometricMap.map[unit.getData("tileX")][unit.getData("tileY")].id !== 6) {
 
                             easystar.findPath(fromX, fromY, toX, toY, function (path) {
                                 if (path === null) {
                                     console.warn("Path was not found.");
                                 } else {
-                                    console.log(path);
                                     pathToUse.push(path);
-                                    unitsSelected();
+                                    scene.socket.emit('MOVE', path);
                                     unit.setData({
                                         fromX: fromX,
                                         fromY: fromY,
@@ -134,14 +130,6 @@ function handleUnitMovment(scene) {
     }, this);
 }
 
-function unitsSelected() {
-    var info = {
-        path: pathToUse,
-        units: selectedArray,
-    }
-    scene.socket.emit('MOVE', info);
-}
-
 function getDirection(path, unit) {
     for (let i = 0; i < path.length; i++) {
 
@@ -152,33 +140,26 @@ function getDirection(path, unit) {
             dx = path[i].x - path[i - 1].x;
             dy = path[i].y - path[i - 1].y;
         }
-        // this logic is the same except we determine
-        // if a key is down based on dx and dy
+
         const leftDown = dx < 0
         const rightDown = dx > 0
         const upDown = dy < 0
         const downDown = dy > 0
 
-        const speed = 100
-
         if (leftDown) {
             direction = "l";
-            //console.log("l");
         } else if (rightDown) {
-            //console.log("rechts");
             direction = "r";
         } else if (upDown) {
-            // console.log("up");
             direction = "u";
         } else if (downDown) {
-            //  console.log("oben");
             direction = "o";
         }
 
         directons.push(direction);
     }
 
-    var finalDirection = directons[directons.length - 1];
+    var finalDirection = directons[directons.length - 1]
 
     if (finalDirection == "l") {
         if (unit.getData("name") == "worker") {
@@ -188,7 +169,6 @@ function getDirection(path, unit) {
         } else if (unit.getData("name") == "tank") {
             unit.setTexture('tankL');
         }
-
 
     } else if (finalDirection == "r") {
         if (unit.getData("name") == "worker") {
@@ -200,7 +180,6 @@ function getDirection(path, unit) {
             unit.setTexture('tankR');
         }
 
-
     } else if (finalDirection == "o") {
         if (unit.getData("name") == "worker") {
 
@@ -210,7 +189,6 @@ function getDirection(path, unit) {
         } else if (unit.getData("name") == "tank") {
             unit.setTexture('tankU');
         }
-
 
     } else if (finalDirection == "u") {
         if (unit.getData("name") == "worker") {
@@ -223,52 +201,42 @@ function getDirection(path, unit) {
     }
 }
 
-
-
 function moveTest() {
-    scene.socket.on('FUCKINFO', function (cringe) {
+    scene.socket.on('FUCKINFO', function (paths) {
 
         for (var i = 0; i < globalUnits.length; i++) {
-            console.log(cringe[cringe.length - 1].path[i]);
-            if (cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1]) {
+            if (attackPath2.length == 0) {
                 var endPos = {
-                    x: isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].x, cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].y).x,
-                    y: isometricTo2d(cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].x, cringe[cringe.length - 1].path[i][cringe[cringe.length - 1].path[i].length - 1].y).y,
+                    x: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).x,
+                    y: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).y,
                 };
-                getDirection(cringe[cringe.length - 1].path[i], globalUnits[i]);
+                getDirection(paths[i], globalUnits[i]);
+            } else {
+                var endPos = {
+                    x: 0,
+                    y: 0,
+                };
             }
 
-
             if (!resourcePosX.includes(endPos.x)) {
-
                 if (globalUnits[i].getData("name") == 'solider' || globalUnits[i].getData("name") == 'tank') {
-
                     if (attackPath2.length == 0) {
-
-                        moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                        moveCharacter(paths[i], scene, globalUnits[i]);
                         attackerUnits.length = 0;
                         attackPath.length = 0;
-
                         removeDamage = true;
-
                     }
                 } else {
                     if (workerAttack.length == 0) {
-                        moveCharacter(cringe[cringe.length - 1].path[i], scene, globalUnits[i]);
+                        moveCharacter(paths[i], scene, globalUnits[i]);
                     }
-
                 }
                 workerAttack.length = 0;
             } else {
-
                 if (globalUnits[i].getData("name") == 'worker') {
-                   
                     moveCharacterTest(endPos, scene, globalUnits[i]);
                 }
-
                 if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id == 6 && globalUnits[i].getData("name") == 'worker') {
-
-                   
                     collect(globalUnits[i]);
                 }
             }
@@ -286,7 +254,6 @@ function collect(unit) {
 }
 
 function attackTest() {
-
     scene.input.keyboard.on('keydown_X', function (event) {
         woAtt = true
     }, this);
@@ -294,12 +261,12 @@ function attackTest() {
     scene.input.keyboard.on('keyup_X', function (event) {
         woAtt = false
     }, this);
+
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         if (woAtt) {
             if (gameObject.getData("name") == "worker" || gameObject.getData("name") == "solider" || gameObject.getData("name") == "tank") {
                 workerAttack.push(gameObject);
             }
-
         }
     }, scene);
 }
@@ -308,12 +275,13 @@ function attack2() {
     scene.input.on('pointerdown', function (pointer) {
         selectedArray.forEach(unit => {
             if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0 || workerAttack.length != 0) {
-
                 var start = {
                     x: unit.x,
                     y: unit.y,
                 }
+
                 var end = isometricTo2d(selectedTileX, selectedTileY);
+
                 var pathObject = {
                     start: start,
                     end: end,
@@ -321,15 +289,12 @@ function attack2() {
                 }
 
                 scene.socket.emit('attack', pathObject);
-
                 attackerUnits.push(unit.getData("id"));
-
                 dmg++;
                 IsometricMap.buildingMapAll[selectedTileX][selectedTileY].damage += 10;
-
                 var lenght = lineDistance(start.x, start.y, end.x, end.y);
+
                 if (lenght <= 200) {
-                   
                     destroyBuilding(selectedTileX, selectedTileY, scene);
                     workerAttack.forEach(test => {
                         if (end.x == test.x) {
@@ -341,7 +306,6 @@ function attack2() {
         });
     }, this);
 }
-
 
 function unitAttack(scene) {
     scene.socket.on('attackedUnits', function (down) {
@@ -365,7 +329,6 @@ function doDamageUnits() {
             if (unit.getData('currentHp') <= 0) {
                 unit.destroy();
             }
-
         });
     }
 }
@@ -381,11 +344,9 @@ function displayAttack() {
             } else {
                 graphics.lineStyle(5, 0xD35400, 1);
             }
-
             attackPath[b].path.draw(graphics);
         }
     }
-
 }
 
 function moveCharacter(path, scene, unit) {
@@ -407,7 +368,6 @@ function moveCharacter(path, scene, unit) {
             },
         });
     }
-
     var test = scene.tweens.timeline({
         tweens: tweens
     });
@@ -448,7 +408,6 @@ function moveCharacterTest(path, scene, unit) {
         yoyo: true,
         repeat: -1
     });
-
     vectorArray.push(follower1);
 }
 
@@ -459,7 +418,6 @@ function moveOnResource() {
     graphics.setDepth(1);
     for (var b = 0; b < resourcePathArray.length; b++) {
         if (unitsOnResourceArray.length != 0) {
-
 
             resourcePathArray[b].path.draw(graphics);
             graphics.fillRect(vectorArray[b].vec.x - 5, vectorArray[b].vec.y - 5, 10, 10);
@@ -476,9 +434,7 @@ function moveOnResource() {
                 if (unitsOnResource < 0) {
                     unitsOnResource = 0;
                 }
-
             }
-
             unitsOnResourceArray[b].destroy();
             unitsOnResourceArray.splice(b, 1);
             unitsOnResourceArray2.splice(b, 1);
@@ -488,7 +444,6 @@ function moveOnResource() {
         }
     }
 }
-
 
 // Worker nur eine bestimmte Anzahl zwischen HQ und Resource hinunterher gehen lassen 
 function collectResources() {
@@ -534,23 +489,15 @@ function dgfdjkgdkjflg() {
     });
 }
 
-
 function showAttackRange() {
     scene.input.keyboard.on('keydown_X', function (event) {
         if (showRange) {
-
-
             selectedArray.forEach(unit => {
-                // range = scene.add.rectangle(unit.x, unit.y, 400, 400, 0xffffff, 0.5);
-                //  range.angle = 40;
-
                 if (rangeOne) {
-
-
                     rangeGraphics = scene.add.graphics();
                     rangeGraphics.fillStyle(0xFFFFFF, 0.5);
-
                     rangeGraphics.beginPath();
+
                     var p1 = {
                         x: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") + 2).x,
                         y: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") + 2).y,
@@ -568,15 +515,10 @@ function showAttackRange() {
                         y: isometricTo2d(unit.getData("tileX") + 2, unit.getData("tileY") - 2).y,
                     };
 
-
                     rangeGraphics.moveTo(0 + p1.x, 0 + p1.y);
                     rangeGraphics.lineTo(0 + p2.x, 0 + p2.y);
                     rangeGraphics.lineTo(0 + p3.x, 0 + p3.y);
                     rangeGraphics.lineTo(0 + p4.x, 0 + p4.y);
-
-                    // rangeGraphics.closePath();
-
-
                     rangeGraphics.fillPath();
                     rangeGraphics.setDepth(1);
                     rangeOne = false;
@@ -586,11 +528,9 @@ function showAttackRange() {
     }, this);
 
     scene.input.keyboard.on('keyup_X', function (event) {
-        // range.destroy();
         if (rangeGraphics) {
             rangeGraphics.destroy();
             rangeOne = true;
         }
-
     }, this);
 }
