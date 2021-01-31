@@ -32,7 +32,7 @@ function addTank(scene) {
         id++;
         tankX = tankLocation.x;
         tankY = tankLocation.y;
-        tank = scene.add.image(tankLocation.x, tankLocation.y, 'tank').setInteractive();
+        tank = scene.add.image(tankLocation.x, tankLocation.y, 'tankU').setInteractive();
         initTank();
     });
 }

@@ -144,8 +144,13 @@ function preload() {
   this.load.image("soliderR", "assets/soliderR.png");
   this.load.image("soliderL", "assets/soliderL.png");
 
+  this.load.image("tankO", "assets/tankO.png");
+  this.load.image("tankU", "assets/tankU.png");
+  this.load.image("tankL", "assets/tankL.png");
+  this.load.image("tankR", "assets/tankR.png");
+
   this.load.image("worker", "assets/worker1.png");
-  this.load.image("tank", "assets/panzer.png");
+ 
 
   this.load.image("minimap", "assets/map.png");
   this.load.image("olMap", "assets/HUD_map.png");
@@ -554,6 +559,9 @@ function update(time, delta) {
   resources.setText(resourceCounter);
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
+ if(gameStart) {
+
+ 
   this.socket.emit('playerInput', {
     mouse: clicked
   });
@@ -673,6 +681,7 @@ function update(time, delta) {
       w: this.keyWpressed,
     });
   }
+}
 }
 
 /*
