@@ -21,6 +21,7 @@ var unitsOnResourceArray2 = new Array();
 var test = new Array();
 
 var stopUnit = 0;
+var c = 0;
 
 var attackPath = new Array();
 var attackPath2 = new Array();
@@ -130,6 +131,7 @@ function handleUnitMovment(scene) {
     }, this);
 }
 
+/*
 function getDirection(path, unit) {
     for (let i = 0; i < path.length; i++) {
 
@@ -200,6 +202,71 @@ function getDirection(path, unit) {
         }
     }
 }
+*/
+
+function getDirection(path, i, unit) {
+    if (i == 0) {
+        dx = 0 - path[i].x;
+        dy = 0 - path[i].y;
+    } else {
+        dx = path[i].x - path[i - 1].x;
+        dy = path[i].y - path[i - 1].y;
+    }
+
+    const leftDown = dx < 0
+    const rightDown = dx > 0
+    const upDown = dy < 0
+    const downDown = dy > 0
+
+    if (leftDown) {
+        direction = "l";
+    } else if (rightDown) {
+        direction = "r";
+    } else if (upDown) {
+        direction = "u";
+    } else if (downDown) {
+        direction = "o";
+    }
+
+    if (direction == "l") {
+        if (unit.getData("name") == "worker") {
+
+        } else if (unit.getData("name") == "solider") {
+            unit.setTexture('soliderL');
+        } else if (unit.getData("name") == "tank") {
+            unit.setTexture('tankL');
+        }
+
+    } else if (direction == "r") {
+        if (unit.getData("name") == "worker") {
+
+        } else if (unit.getData("name") == "solider") {
+            unit.setTexture('soliderR');
+
+        } else if (unit.getData("name") == "tank") {
+            unit.setTexture('tankR');
+        }
+
+    } else if (direction == "o") {
+        if (unit.getData("name") == "worker") {
+
+        } else if (unit.getData("name") == "solider") {
+            unit.setTexture('solider');
+
+        } else if (unit.getData("name") == "tank") {
+            unit.setTexture('tankU');
+        }
+
+    } else if (direction == "u") {
+        if (unit.getData("name") == "worker") {
+
+        } else if (unit.getData("name") == "solider") {
+            unit.setTexture('soliderN');
+        } else if (unit.getData("name") == "tank") {
+            unit.setTexture('tankO');
+        }
+    }
+}
 
 function moveTest() {
     scene.socket.on('FUCKINFO', function (paths) {
@@ -210,7 +277,7 @@ function moveTest() {
                     x: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).x,
                     y: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).y,
                 };
-                getDirection(paths[i], globalUnits[i]);
+                //getDirection(paths[i, globalUnits[i]);
             } else {
                 var endPos = {
                     x: 0,
@@ -349,10 +416,14 @@ function displayAttack() {
     }
 }
 
+
+
 function moveCharacter(path, scene, unit) {
     // Sets up a list of tweens, one for each tile to walk, that will be chained by the timeline
     var tweens = [];
+
     for (var i = 0; i < path.length - 1; i++) {
+
         var offX = path[i + 1].x * this.tileColumnOffset / 2 + path[i + 1].y * this.tileColumnOffset / 2 + this.originX;
         var offY = path[i + 1].y * this.tileRowOffset / 2 - path[i + 1].x * this.tileRowOffset / 2 + this.originY;
 
@@ -365,6 +436,16 @@ function moveCharacter(path, scene, unit) {
             y: {
                 value: offY,
                 duration: 200
+            },
+            onStart: function () {
+
+                c++;
+                getDirection(path, c, unit);
+            },
+            onComplete: function (
+
+            ) {
+                c = 0
             },
         });
     }

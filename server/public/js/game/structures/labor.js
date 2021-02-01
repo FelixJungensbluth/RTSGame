@@ -31,7 +31,6 @@ function drawLabor(Xi, Yi, scene) {
         "image": laborImg,
     }
 
-
     // Map Arrays werden geupdated
     this.buildingArray.push(labor);
     IsometricMap.buildingMap[Xi][Yi] = labor;
@@ -62,11 +61,13 @@ function addLabor(scene) {
     scene.socket.on('labor', function (hqLocation) {
         if (teamname === 1) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor').setInteractive();
+            laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
 
         } else if (teamname != 1) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor2').setInteractive();
+            laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
         }

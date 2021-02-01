@@ -18,9 +18,9 @@ function drawFac(Xi, Yi) {
         "canBeSelected": false,
         "image": factoryImg,
     }
-
+    
     this.buildingArray.push(fac);
-
+    
     IsometricMap.buildingMap[Xi][Yi] = fac;
     IsometricMap.buildingMap[Xi - 1][Yi] = fac;
     IsometricMap.buildingMap[Xi - 2][Yi] = fac;
@@ -44,10 +44,12 @@ function addFactory(scene) {
     scene.socket.on('factory', function (hqLocation) {
         if (teamname === 1) {
             factoryImg = scene.add.image(hqLocation.x, hqLocation.y, 'factory').setInteractive();
+            factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
         } else if (teamname != 1) {
             factoryImg = scene.add.image(hqLocation.x, hqLocation.y, 'factory').setInteractive();
+            factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
         }

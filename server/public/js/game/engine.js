@@ -1,7 +1,7 @@
 var config = {
   type: Phaser.WEBGL,
   width: window.innerWidth - 15,
-  height: window.innerHeight - 20,
+  height: window.innerHeight - 10,
   mousewheel: true,
   scene: {
     preload: preload,
@@ -243,6 +243,8 @@ function create() {
   getLastClicked(this);
   getResourcePosition();
 
+  fillDepthSortArry(); 
+
   // Infotext
   tilePosition = this.add.text(20, 140, 'Tile Position:', {
     fontSize: '15px',
@@ -358,7 +360,7 @@ function create() {
     strokeThickness: 3,
   }).setScrollFactor(0);
 
-  countdownText.setDepth(5);
+  countdownText.setDepth(3001);
 
   // Initialisierung der Keyinput variablen 
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -431,7 +433,6 @@ function create() {
   dgfdjkgdkjflg();
   handleUnitMovment(scene);
   handelSelectedUnits(scene);
-  unitsSelected(scene);
   attackTest();
   attack2();
   unitAttack(scene);
@@ -519,6 +520,7 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
+
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
@@ -728,12 +730,12 @@ function buildingTime(scene) {
   timeBarBackGround = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     100, 10, 0xffffff);
-  timeBarBackGround.setDepth(10);
+  timeBarBackGround.setDepth(1000);
   // Anzeige 
   timeBar = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     0, 10, 0x4169E1);
-  timeBar.setDepth(10);
+  timeBar.setDepth(1000);
 
   var buildInfo = {
     "buildingX": selectedTileX,
@@ -894,11 +896,11 @@ function setWinner() {
   scene.socket.on('winnerStatus', function (team) {
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
-    backgroundEnd.setDepth(3);
+    backgroundEnd.setDepth(4000);
     if (team && !win) {
       console.log("LOISTLOSTLSOTSOLT");
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
-      lose.setDepth(4);
+      lose.setDepth(4001);
       lose.setInteractive();
       lose.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
@@ -907,7 +909,7 @@ function setWinner() {
 
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.setDepth(4);
+      winImg.setDepth(4001);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -917,12 +919,12 @@ function setWinner() {
   scene.socket.on('loserStatus', function (team) {
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
-    backgroundEnd.setDepth(3);
+    backgroundEnd.setDepth(4000);
     if (team && lose) {
       console.log("LOISTLOSTLSOTSOLT");
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
-      loseImg.setDepth(4);
+      loseImg.setDepth(4001);
       loseImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -930,7 +932,7 @@ function setWinner() {
 
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.setDepth(4);
+      winImg.setDepth(4001);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);

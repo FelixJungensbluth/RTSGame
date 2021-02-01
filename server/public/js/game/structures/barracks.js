@@ -65,11 +65,13 @@ function addBarracks(scene) {
   scene.socket.on('barracks', function (hqLocation) {
     if (teamname === 1) {
       barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne').setInteractive();
+      barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 0;
     } else if (teamname != 1) {
       barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
+      barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 0;

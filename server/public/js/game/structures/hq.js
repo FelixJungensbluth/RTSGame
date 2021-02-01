@@ -99,12 +99,14 @@ function addHq(scene) {
     if (teamname === 1) {
       getHq()
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
+      buildingTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(buildingTest);
       drawHq(selectedTileX, selectedTileY, buildingTest);
       resourceCounter -= 50;
     } else if (teamname != 1) {
       getHq();
       buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
+      buildingTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(buildingTest);
       drawHq(selectedTileX, selectedTileY, buildingTest);
       resourceCounter -= 50;

@@ -110,20 +110,20 @@ function settings() {
         if (!show) {
             canMoveCam = false;
             background = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.75).setScrollFactor(0);
-            background.setDepth(3);
+            background.setDepth(2000);
 
             settingsImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'settings').setScrollFactor(0);
-            settingsImg.setDepth(4);
+            settingsImg.setDepth(2001);
 
             showRangeButton = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) - 20, 'range').setScrollFactor(0);
             showRangeButton.setInteractive();
-            showRangeButton.setDepth(4);
+            showRangeButton.setDepth(2001);
             showRangeButton.on('pointerdown', function (pointer) {
                 showRange ^= true;
             }, this);
 
             surrender = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) + 40, 'surrender').setScrollFactor(0);
-            surrender.setDepth(4);
+            surrender.setDepth(2001);
             surrender.setInteractive();
             surrender.on('pointerdown', function (pointer) {
                 lose = true;
@@ -147,14 +147,14 @@ function settings() {
 
 function readyUp(scene) {
     backgroundDark = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.9).setScrollFactor(0);
-    backgroundDark.setDepth(3);
+    backgroundDark.setDepth(3000);
 
     readyBackground = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'readyBackground').setScrollFactor(0);
-    readyBackground.setDepth(4);
+    readyBackground.setDepth(3001);
 
     playButton = scene.add.image(window.innerWidth / 2, (window.innerHeight / 2) + 35, 'playButton').setScrollFactor(0);
     playButton.setInteractive();
-    playButton.setDepth(4);
+    playButton.setDepth(3001);
 
     playButton.on('pointerdown', function (pointer) {
         console.log(teamname);
@@ -165,13 +165,13 @@ function readyUp(scene) {
 
         if (recCount == 1) {
             ready1 = scene.add.rectangle(-44 + window.innerWidth / 2, -19 + window.innerHeight / 2, 76, 20, 0xff0000, 1).setScrollFactor(0);
-            ready1.setDepth(5);
+            ready1.setDepth(3002);
         }
 
         if (recCount == 1) {
             // if (recCount == 2) {
             ready2 = scene.add.rectangle(40 + window.innerWidth / 2, -19 + window.innerHeight / 2, 76, 20, 0xff0000, 1).setScrollFactor(0);
-            ready2.setDepth(5);
+            ready2.setDepth(3002);
 
             setTimeout(() => {
                 readyBackground.destroy();

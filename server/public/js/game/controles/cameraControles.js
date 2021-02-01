@@ -8,27 +8,30 @@ var canMoveCam = false;
 function moveCamera(szene, cam) {
 
     szene.input.on('pointermove', function (pointer) {
+
+        var camMoveThresholdX = window.innerWidth * 0.04;
+        var camMoveThresholdY= window.innerHeight * 0.04;
         
         if(canMoveCam) {
 
-        if (pointer.y < 50) {
-            cam.scrollY -= 4;
-            camMoveY -= 4;
+        if (pointer.y < camMoveThresholdY) {
+            cam.scrollY -= 10;
+            camMoveY -= 10;
         }
 
-        if (pointer.y > 880) {
-            cam.scrollY += 4;
-            camMoveY += 4;
+        if (pointer.y > window.innerHeight -camMoveThresholdY) {
+            cam.scrollY += 10;
+            camMoveY += 10;
         }
 
-        if (pointer.x < 50) {
-            cam.scrollX -= 4;
-            camMoveX -= 4;
+        if (pointer.x < camMoveThresholdX) {
+            cam.scrollX -= 10;
+            camMoveX -= 10;
         }
 
-        if (pointer.x > 1870) {
-            cam.scrollX += 4;
-            camMoveX += 4;
+        if (pointer.x > window.innerWidth -camMoveThresholdX) {
+            cam.scrollX += 10;
+            camMoveX += 10;
         }
     }
     }, this);
