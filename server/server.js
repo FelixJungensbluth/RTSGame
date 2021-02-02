@@ -7,12 +7,17 @@ const server = require('http').Server(app);
 const io = require('socket.io').listen(server);
 const Datauri = require('datauri');
 const datauri = new Datauri();
+const {MongoClient} = require('mongodb');
 const { JSDOM } = jsdom;
+
+var once  = true;
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
+
+
 
 function setupAuthoritativePhaser() {
   JSDOM.fromFile(path.join(__dirname, 'authoritative_server/index.html'), {
@@ -41,3 +46,63 @@ function setupAuthoritativePhaser() {
 }
 
 setupAuthoritativePhaser();
+
+
+
+async function main(p1,p2,time,won){
+  /**
+   * Connection URI. Update <username>, <password>, and <your-cluster-url> to reflect your cluster.
+   * See https://docs.mongodb.com/ecosystem/drivers/node/ for more details
+   */
+  const uri = "mongodb+srv://rtsUser:SCBV5rk8qzbRCM6d@rts.sisib.mongodb.net/test?retryWrites=true&w=majority";
+
+
+  const client = new MongoClient(uri);
+
+  try {
+      // Connect to the MongoDB cluster
+      await client.connect();
+
+      // Make the appropriate DB calls
+        await createListing(client,
+          {
+              spieler1: p1,
+              spieler: p2,
+              zeit: time,
+              gewonnen: won,
+            
+          }
+      );
+
+  } catch (e) {
+      console.error(e);
+  } finally {
+      await client.close();
+  }
+}
+
+
+
+async function createListing(client, newListing){
+  const result = await client.db("game").collection("games").insertOne(newListing);
+  console.log(`New listing created with the following id: ${result.insertedId}`);
+}
+
+io.on("connection", (socket) => {
+  
+  socket.on("mongo", (data) => {
+    if(once) {
+      main(data.p1,data.p2,data.time,data.won).catch(console.error);
+      once = false;
+    }
+   
+  });
+});
+
+
+
+/*
+rtsUser : USERNAME
+SCBV5rk8qzbRCM6d: PASSWORT
+
+*/

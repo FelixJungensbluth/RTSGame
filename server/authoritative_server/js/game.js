@@ -65,6 +65,10 @@ var attackedUnits = new Array();
 
 var readyPlayers = new Array();
 
+var playerArray = new Array();
+
+var sendPlayers = false;
+
 
 function preload() {
   this.load.image('ship', 'assets/spaceShips_001.png');
@@ -251,6 +255,11 @@ function create() {
       handleReadyCheck(self, socket.id)
     });
 
+    socket.on('playerName', function (players) {
+      // selectedStatus = selected;
+      playerArray.push(players);
+    });
+
   });
 }
 
@@ -264,6 +273,13 @@ function update(time) {
     const test = players[player.playerId].hqSelected;
 
     this.team.name = players[player.playerId].team1
+
+    if(playerArray.length ==2  ) {
+      if(!sendPlayers) {
+        io.emit("players", playerArray);
+        sendPlayers = true;
+      }
+    }
 
     io.emit('team', this.team);
 

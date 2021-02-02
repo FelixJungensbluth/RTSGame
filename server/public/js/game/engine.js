@@ -120,6 +120,12 @@ var testRect; // Pathfinnding
 var countdownText;
 
 var timeOnce = true;
+var elo = 1000;
+
+
+var gameEnded = false;
+var winner;
+var loser;
 
 function preload() {
 
@@ -334,6 +340,9 @@ function create() {
     }
   }
 
+
+  getPlayerName(scene);
+  testPlayers(scene);
   // Minimap
   createMap(scene);
 
@@ -440,8 +449,6 @@ function create() {
 
   showAttackRange(scene);
 
-
-
   // Check ob ein Tile belegt ist
   this.socket.on('checkTileStatus', function (status) {
     tileStatus = status;
@@ -534,6 +541,7 @@ function update(time, delta) {
   displayAttack();
 
   updateMap();
+  setGameData(this);
 
   // Update Resourceanzeige
   timer += delta;
@@ -898,7 +906,8 @@ function setWinner() {
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
     backgroundEnd.setDepth(4000);
     if (team && !win) {
-      console.log("LOISTLOSTLSOTSOLT");
+     
+
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       lose.setDepth(4001);
       lose.setInteractive();
@@ -906,7 +915,8 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
-
+      
+      winner = localStorage.getItem("username");
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
       winImg.setDepth(4001);
@@ -914,14 +924,16 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     }
+    gameEnded = true;
   });
 
   scene.socket.on('loserStatus', function (team) {
+    
+
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
     backgroundEnd.setDepth(4000);
     if (team && lose) {
-      console.log("LOISTLOSTLSOTSOLT");
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
       loseImg.setDepth(4001);
@@ -930,6 +942,8 @@ function setWinner() {
       }, this);
     } else {
 
+      winner = localStorage.getItem("username");
+      gameEnded = true;
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
       winImg.setDepth(4001);
@@ -937,6 +951,7 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     }
+    
   });
 }
 
