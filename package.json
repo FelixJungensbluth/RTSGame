@@ -16,6 +16,7 @@
     "easystarjs": "^0.4.4",
     "express": "^4.17.1",
     "jsdom": "^13.2.0",
+    "mongodb": "^3.6.3",
     "socket.io": "^2.3.0"
   },
   "engines": {
