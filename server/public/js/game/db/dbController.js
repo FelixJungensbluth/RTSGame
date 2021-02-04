@@ -1,35 +1,35 @@
 var playersArray = new Array();
-
-
+var loserIndex;
+var winIndex;
 function getPlayerName(scene) {
-    scene.input.on('pointerdown', function (pointer) {
-        var value = Phaser.Math.Between(0, 10);
-        if (pointer.leftButtonDown()) {
-            localStorage.setItem("username", "name" + value);
-        }
 
-        if (pointer.rightButtonDown()) {
-            var name = localStorage.getItem("username");
-            scene.socket.emit("playerName", name);
-        }
+    scene.socket.on('playerLost', function (players) {
+        console.log(players);
+        loserIndex = players;
+    });
 
-    }, this);
+    scene.socket.on('playerWon', function (players) {
+        console.log(players);
+        winIndex = players;
+    });
 }
 
 function testPlayers(scene) {
     scene.socket.on('players', function (players) {
-        console.log(players);
         players.forEach(element => {
             playersArray.push(element);
         });
+        console.log(playersArray);
     });
+
+   
 }
 
 
 function setGameData(scene) {
     if (gameEnded) {
+        console.log(winner);
         var gameData = {
-            
             p1: playersArray[0],
             p2: playersArray[playersArray.length-1],
             time: minutes + ":" + seconds,

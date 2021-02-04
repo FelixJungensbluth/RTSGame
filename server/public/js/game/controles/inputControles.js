@@ -53,15 +53,58 @@ function placeBuilding(szene) {
             }
 
             // Auswahl wird entfernt 
-            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected) {
+            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected ||   IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected) {
                 console.log("DESELECTED");
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
-                szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+             //   szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].isSelected = false;
+
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].isSelected = false;
+
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].isSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].isSelected = false;
+
+                    szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+                    
+                }
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = false;
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = false;
+                    console.log("sdfsdfsdfdfs");
+                    szene.socket.emit('structureSelectedKaserne', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
+                    
+                }
+
+                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].laborIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].laborIsSelected = false;
+                    szene.socket.emit('structureSelectedLabor', IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected);
+                }
+
+                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
+
+
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].fabricIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].fabricIsSelected = false;
+    
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].fabricIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected = false;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].fabricIsSelected = false;
+                    szene.socket.emit('structureSelectedFabrik', IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected);
                 }
             }
         }
@@ -71,47 +114,55 @@ function placeBuilding(szene) {
             console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
 
+              
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
-                IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
-                szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
-                    IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].isSelected = true;
 
-                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].isSelected = true;
 
-                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].barracksIsSelected = true;
-                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].barracksIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].isSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].isSelected = true;
 
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].barracksIsSelected);
-
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].barracksIsSelected);
-
-
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 2].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 2].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].barracksIsSelected);
+                    szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+                    
                 }
 
-                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2 || IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
+                   
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = true;
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected);
-                    szene.socket.emit('structureSelectedBarracks', IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected);
+                    szene.socket.emit('structureSelectedKaserne', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
                 }
+
+                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].laborIsSelected = true;
+                    IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].laborIsSelected = true;
+                    szene.socket.emit('structureSelectedLabor', IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected);
+                }
+            }
+
+            if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
+
+
+                IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected = true;
+                IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].fabricIsSelected = true;
+                IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].fabricIsSelected = true;
+
+                IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].fabricIsSelected = true;
+                IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected = true;
+                IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].fabricIsSelected = true;
+                szene.socket.emit('structureSelectedFabrik', IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected);
             }
         }
     }, this);
@@ -164,15 +215,15 @@ function createSelectionRectangle(scene) {
 
     scene.input.on('pointerdown', function (pointer) {
         if (pointer.rightButtonDown()) {
-            selectionRectangle = scene.add.rectangle(pointer.x, pointer.y, 0, 0, 0xffffff, 0.5);
+           // selectionRectangle = scene.add.rectangle(pointer.x, pointer.y, 0, 0, 0xffffff, 0.5);
         }
     }, this);
 
     scene.input.on('pointerup', function (pointer) {
         if (pointer.rightButtonDown()) {
             // console.log("dsfsdfsdf");
-            selectionRectangle.x = -1000;
-            selectionRectangle.destroy();
+           // selectionRectangle.x = -1000;
+            //selectionRectangle.destroy();
         }
 
     }, this);

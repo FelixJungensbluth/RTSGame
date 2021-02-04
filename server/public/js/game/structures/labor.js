@@ -15,7 +15,7 @@ function drawLabor(Xi, Yi, scene) {
     var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
     var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
     var labor = {
-        "id": "2",
+        "id": "3",
         "name": "Labor",
         "baseHp": 1000,
         "currentHp": 1000,
@@ -26,7 +26,7 @@ function drawLabor(Xi, Yi, scene) {
         "AnzhalTilesX": "1",
         "AnzhalTilesY": "1",
         "isSelected": false,
-        "barracksIsSelected": false,
+        "laborIsSelected": false,
         "canBeSelected": false,
         "image": laborImg,
     }
@@ -64,12 +64,14 @@ function addLabor(scene) {
             laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
+            resourceCounter -= 25;
 
         } else if (teamname != 1) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor2').setInteractive();
             laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
+            resourceCounter -= 25;
         }
     });
 }

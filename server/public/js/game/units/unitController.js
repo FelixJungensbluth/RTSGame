@@ -402,7 +402,7 @@ function doDamageUnits() {
 
 function displayAttack() {
     graphics.clear();
-    graphics.setDepth(2);
+    graphics.setDepth(7000);
     removeDamage = false;
     if (attackPath.length != 0) {
         for (var b = 0; b < attackPath.length; b++) {
@@ -496,7 +496,7 @@ function moveOnResource() {
     graphics.clear();
     graphics.lineStyle(2, 0xffffff, 1);
     graphics.fillStyle(0xff0000, 1);
-    graphics.setDepth(1);
+    graphics.setDepth(7000);
     for (var b = 0; b < resourcePathArray.length; b++) {
         if (unitsOnResourceArray.length != 0) {
 
@@ -601,7 +601,7 @@ function showAttackRange() {
                     rangeGraphics.lineTo(0 + p3.x, 0 + p3.y);
                     rangeGraphics.lineTo(0 + p4.x, 0 + p4.y);
                     rangeGraphics.fillPath();
-                    rangeGraphics.setDepth(1);
+                    rangeGraphics.setDepth(7000);
                     rangeOne = false;
                 }
             });

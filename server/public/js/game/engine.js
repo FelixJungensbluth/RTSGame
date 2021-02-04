@@ -1,8 +1,20 @@
-var config = {
-  type: Phaser.WEBGL,
+const config = {
+  type: Phaser.AUTO,
+  parent: "game",
   width: window.innerWidth - 15,
   height: window.innerHeight - 10,
   mousewheel: true,
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: {
+        y: 200
+      }
+    }
+  },
+  dom: {
+    createContainer: true
+  },
   scene: {
     preload: preload,
     create: create,
@@ -127,6 +139,8 @@ var gameEnded = false;
 var winner;
 var loser;
 
+var finalTeam;
+
 function preload() {
 
   //Arrays werden initalisiert
@@ -156,9 +170,9 @@ function preload() {
   this.load.image("tankR", "assets/tankR.png");
 
   this.load.image("worker", "assets/worker1.png");
- 
 
-  this.load.image("minimap", "assets/map.png");
+
+  this.load.image("minimap", "assets/map2.png");
   this.load.image("olMap", "assets/HUD_map.png");
   this.load.image("olOptions", "assets/HUD_options.png");
   this.load.image("olTime", "assets/HUD_time.png");
@@ -173,6 +187,9 @@ function preload() {
   this.load.image("settings", "assets/menuBackground.png");
   this.load.image("surrender", "assets/menuButton2.png");
   this.load.image("range", "assets/menuButton1.png");
+
+  this.load.html("form", "form.html");
+  this.load.image("chat", "assets/chat_button.png");
 
   this.load.spritesheet('boom', 'assets/explosion.png', {
     frameWidth: 64,
@@ -210,6 +227,7 @@ function create() {
   //SocketIO wird initalisiert 
   this.socket = io();
 
+  displayChat(scene);
   //Custom Cursor wird festeglegt 
 
   // Oeffnen des Rechtsklickmenue wird disabled
@@ -249,7 +267,7 @@ function create() {
   getLastClicked(this);
   getResourcePosition();
 
-  fillDepthSortArry(); 
+  fillDepthSortArry();
 
   // Infotext
   tilePosition = this.add.text(20, 140, 'Tile Position:', {
@@ -287,8 +305,8 @@ function create() {
     mousePosition.setText('Mouse X: ' + pointer.x + ' Mouse Y: ' + pointer.y);
     if (lastClicked.length != 0) {
       if (lastClicked[0].button == "rechts") {
-        selectionRectangle.width = (pointer.x - lastClicked[0].positionX) + camMoveX;
-        selectionRectangle.height = (pointer.y - lastClicked[0].positionY) + camMoveY;
+        //  selectionRectangle.width = (pointer.x - lastClicked[0].positionX) + camMoveX;
+        // selectionRectangle.height = (pointer.y - lastClicked[0].positionY) + camMoveY;
       }
     }
 
@@ -340,9 +358,8 @@ function create() {
     }
   }
 
-
-  getPlayerName(scene);
   testPlayers(scene);
+  getPlayerName(scene);
   // Minimap
   createMap(scene);
 
@@ -371,15 +388,28 @@ function create() {
 
   countdownText.setDepth(3001);
 
-  // Initialisierung der Keyinput variablen 
-  keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-  keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-  keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-  keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
-  keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-  keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-  keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-  keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+  // Buildings
+  keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+  keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+  keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+  keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+
+  // Units
+  keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
+  keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
+  keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SEVEN);
+
+
+
+
+  // Attack
+  keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
+
+  this.socket.on('newPlayer', function (playerInfo) {
+   console.log(playerInfo.team1);
+   finalTeam = playerInfo.team1
+  });
+
 
   this.aKeyPressed = false;
   this.sKeyPressed = false;
@@ -527,7 +557,6 @@ function drawTile(Xi, Yi) {
 
 // Methode die 60/s ausgefuehrt wird 
 function update(time, delta) {
-
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
@@ -569,129 +598,132 @@ function update(time, delta) {
   resources.setText(resourceCounter);
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
- if(gameStart) {
+  if (gameStart) {
 
- 
-  this.socket.emit('playerInput', {
-    mouse: clicked
-  });
 
-  //KeyboardInput
-  const a = this.keyApressed;
-  const s = this.keySpressed;
-  const d = this.keyDpressed;
-  const q = this.keyQpressed;
-  const x = this.keyXpressed;
-  const e = this.keyEpressed;
-  const w = this.keyWpressed;
-  const f = this.keyFpressed;
-
-  // Wenn A gedrueckt ist
-  if (keyA.isDown) {
-    this.keyApressed = true;
-    this.socket.emit('pressed', {
-      pressed: "a"
-    });
-    // Wenn S gedrueckt ist
-  } else if (keyS.isDown) {
-    if (pressed == "none") {
-      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'star').setInteractive();
-    }
-    pressed = "s"
-    this.socket.emit('pressed', {
-      pressed: "s"
-    });
-    this.keySpressed = true;
-
-  } else if (keyD.isDown) {
-    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
-      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'kaserne').setInteractive();
-    }
-    pressed = "d"
-    this.socket.emit('pressed', {
-      pressed: "d"
-    });
-    this.keyDpressed = true;
-
-  } else if (keyQ.isDown) {
-    this.keyQpressed = true;
-    this.socket.emit('pressed', {
-      pressed: "q"
+    this.socket.emit('playerInput', {
+      mouse: clicked
     });
 
-  } else if (keyX.isDown) {
-    this.keyXpressed = true;
-    this.socket.emit('pressed', {
-      pressed: "x"
-    });
-    pressed = "x"
-    this.input.setDefaultCursor('url(assets/attack.cur), pointer');
-    // Wenn S gedrueckt ist
-  } else if (keyE.isDown) {
-    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
-      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'labor').setInteractive();
-    }
-    pressed = "e"
-    this.socket.emit('pressed', {
-      pressed: "e"
-    });
-    this.keyEpressed = true;
+    //KeyboardInput
+    const a = this.keyApressed;
+    const s = this.keySpressed;
+    const d = this.keyDpressed;
+    const q = this.keyQpressed;
+    const x = this.keyXpressed;
+    const e = this.keyEpressed;
+    const w = this.keyWpressed;
+    const f = this.keyFpressed;
 
-  } else if (keyW.isDown) {
-    this.keyWpressed = true;
-    this.socket.emit('pressed', {
-      pressed: "w"
-    });
-
-  } else if (keyF.isDown) {
-    if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
-      selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'factory').setInteractive();
-    }
-    pressed = "f"
-    this.socket.emit('pressed', {
-      pressed: "f"
-    });
-    this.keyFpressed = true;
-
-  } else {
-    if (pressed == "x") {
-      pressed = "none";
+    // Wenn A gedrueckt ist
+    if (keyA.isDown) {
+      this.keyApressed = true;
       this.socket.emit('pressed', {
-        pressed: "none"
+        pressed: "a"
+      });
+      // Wenn S gedrueckt ist
+    } else if (keyS.isDown) {
+      if (pressed == "none") {
+        selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'star').setInteractive();
+      }
+      pressed = "s"
+      if (!showChat) {
+        this.socket.emit('pressed', {
+          pressed: "s"
+        });
+      }
+
+      this.keySpressed = true;
+
+    } else if (keyD.isDown) {
+      if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+        selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'kaserne').setInteractive();
+      }
+      pressed = "d"
+      this.socket.emit('pressed', {
+        pressed: "d"
+      });
+      this.keyDpressed = true;
+
+    } else if (keyQ.isDown) {
+      this.keyQpressed = true;
+      this.socket.emit('pressed', {
+        pressed: "q"
+      });
+
+    } else if (keyX.isDown) {
+      this.keyXpressed = true;
+      this.socket.emit('pressed', {
+        pressed: "x"
+      });
+      pressed = "x"
+      this.input.setDefaultCursor('url(assets/attack.cur), pointer');
+      // Wenn S gedrueckt ist
+    } else if (keyE.isDown) {
+      if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+        selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'labor').setInteractive();
+      }
+      pressed = "e"
+      this.socket.emit('pressed', {
+        pressed: "e"
+      });
+      this.keyEpressed = true;
+
+    } else if (keyW.isDown) {
+      this.keyWpressed = true;
+      this.socket.emit('pressed', {
+        pressed: "w"
+      });
+
+    } else if (keyF.isDown) {
+      if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+        selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'factory').setInteractive();
+      }
+      pressed = "f"
+      this.socket.emit('pressed', {
+        pressed: "f"
+      });
+      this.keyFpressed = true;
+
+    } else {
+      if (pressed == "x") {
+        pressed = "none";
+        this.socket.emit('pressed', {
+          pressed: "none"
+        });
+      }
+      this.keyApressed = false;
+      this.keyDpressed = false;
+      this.keySpressed = false;
+      this.keyQpressed = false;
+      this.keyXpressed = false;
+      this.keyEpressed = false;
+      this.keyWpressed = false;
+      this.keyFpressed = false;
+      this.input.setDefaultCursor('url(assets/normal.cur), pointer');
+    }
+
+    // Daten ueber KeyboardInput werden an den Server geschickt 
+    if (a !== this.keyApressed) {
+      this.socket.emit('playerInput', {
+        a: this.keyApressed,
       });
     }
-    this.keyApressed = false;
-    this.keyDpressed = false;
-    this.keySpressed = false;
-    this.keyQpressed = false;
-    this.keyXpressed = false;
-    this.keyEpressed = false;
-    this.keyWpressed = false;
-    this.keyFpressed = false;
-    this.input.setDefaultCursor('url(assets/normal.cur), pointer');
-  }
 
-  // Daten ueber KeyboardInput werden an den Server geschickt 
-  if (a !== this.keyApressed) {
-    this.socket.emit('playerInput', {
-      a: this.keyApressed,
-    });
-  }
+    if (q !== this.keyQpressed) {
 
-  if (q !== this.keyQpressed) {
+      this.socket.emit('playerInput', {
+        q: this.keyQpressed,
+      });
+    }
 
-    this.socket.emit('playerInput', {
-      q: this.keyQpressed,
-    });
+    if (w !== this.keyWpressed) {
+      console.log("sdfsdfsdf");
+      this.socket.emit('playerInput', {
+        w: this.keyWpressed,
+      });
+    }
   }
-
-  if (w !== this.keyWpressed) {
-    console.log("sdfsdfsdf");
-    this.socket.emit('playerInput', {
-      w: this.keyWpressed,
-    });
-  }
-}
 }
 
 /*
@@ -906,7 +938,7 @@ function setWinner() {
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
     backgroundEnd.setDepth(4000);
     if (team && !win) {
-     
+
 
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       lose.setDepth(4001);
@@ -915,7 +947,7 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
-      
+
       winner = localStorage.getItem("username");
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
@@ -928,11 +960,10 @@ function setWinner() {
   });
 
   scene.socket.on('loserStatus', function (team) {
-    
-
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
     backgroundEnd.setDepth(4000);
+    winner = playersArray[finalTeam];
     if (team && lose) {
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
@@ -942,7 +973,9 @@ function setWinner() {
       }, this);
     } else {
 
-      winner = localStorage.getItem("username");
+      console.log(playersArray[finalTeam]);
+      
+
       gameEnded = true;
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
@@ -951,7 +984,7 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     }
-    
+    gameEnded = true;
   });
 }
 
