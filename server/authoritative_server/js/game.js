@@ -68,6 +68,7 @@ var readyPlayers = new Array();
 var playerArray = new Array();
 
 var sendPlayers = false;
+onRestrictedTile = false;
 
 
 function preload() {
@@ -81,9 +82,6 @@ function preload() {
 function create() {
   const self = this;
   this.players = this.physics.add.group();
-  easystar = new EasyStar.js();
-  easystar.setAcceptableTiles([0]);
-  easystar.setGrid(IsometricMap.grid);
 
   // Objekt mit Mausinfos
   this.mouseInfo = {

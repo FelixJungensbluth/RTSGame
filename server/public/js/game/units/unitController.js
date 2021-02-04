@@ -230,7 +230,7 @@ function getDirection(path, i, unit) {
 
     if (direction == "l") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerL');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderL');
         } else if (unit.getData("name") == "tank") {
@@ -239,7 +239,7 @@ function getDirection(path, i, unit) {
 
     } else if (direction == "r") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerR');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderR');
 
@@ -249,7 +249,7 @@ function getDirection(path, i, unit) {
 
     } else if (direction == "o") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerU');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('solider');
 
@@ -259,7 +259,7 @@ function getDirection(path, i, unit) {
 
     } else if (direction == "u") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerO');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderN');
         } else if (unit.getData("name") == "tank") {
