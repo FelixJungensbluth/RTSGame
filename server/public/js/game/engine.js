@@ -164,6 +164,11 @@ function preload() {
   this.load.image("soliderR", "assets/soliderR.png");
   this.load.image("soliderL", "assets/soliderL.png");
 
+  this.load.image("workerO", "assets/workerO.png");
+  this.load.image("workerU", "assets/worker1.png");
+  this.load.image("workerR", "assets/workerR.png");
+  this.load.image("workerL", "assets/workerL.png");
+
   this.load.image("tankO", "assets/tankO.png");
   this.load.image("tankU", "assets/tankU.png");
   this.load.image("tankL", "assets/tankL.png");
@@ -274,19 +279,26 @@ function create() {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
+  tilePosition.setDepth(10000);
+
   mousePosition = this.add.text(20, 160, 'Mouse Position: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
+  mousePosition.setDepth(10000);
+
   belegt = this.add.text(20, 180, 'Tile Status: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
+  belegt.setDepth(10000);
+
   mausInfo = this.add.text(20, 200, 'Mausinfo: ', {
     fontSize: '15px',
     fill: '#fff'
   }).setScrollFactor(0);
   addBuildingOnMap(scene);
+  mausInfo.setDepth(10000);
 
   // Bestimmung des ausgewählten Tiles
   this.input.on('pointerdown', function (pointer) {
