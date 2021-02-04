@@ -30,16 +30,19 @@ var recArray = new Array();
 
 var gameStart = false;
 
+
+
 /*
  Alle Overlays werden in die SCene platziert 
  Map, Zeit, Materialien
 */
 function displayOverlay() {
-    mapOverlay = scene.add.image(180, window.innerHeight - 200, 'olMap').setScrollFactor(0);
-    optionsOverlay = scene.add.image(window.innerWidth - 200, window.innerHeight - 80, 'olOptions').setScrollFactor(0);
+    mapOverlay = scene.add.image(180, window.innerHeight - 173, 'olMap').setScrollFactor(0);
+    optionsOverlay = scene.add.image(window.innerWidth - 195, window.innerHeight-173, 'olOptions').setScrollFactor(0);
     timeOverlay = scene.add.image(109, 17, 'olTime').setScrollFactor(0);
     resourceOverlay = scene.add.image(90, 48, 'olResource').setScrollFactor(0);
 }
+
 
 
 /*

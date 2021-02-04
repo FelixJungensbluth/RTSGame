@@ -146,7 +146,12 @@ function create() {
       },
       resources: 100,
       hqCount: 0,
+      laborCount: 0.,
       hqSelected: false,
+      kaserneSelected: false,
+      laborSelected: false,
+      farbikSelected: false,
+      unitCounter: 0,
 
     };
 
@@ -155,7 +160,7 @@ function create() {
     // send the players object to the new player
     socket.emit('currentPlayers', players);
     // update all other players of the new player
-    socket.broadcast.emit('newPlayer', players[socket.id]);
+    socket.emit('newPlayer', players[socket.id]);
     // send the star object to the new player
     // send the current scores
     socket.emit('updateTime', self.times);
@@ -192,6 +197,21 @@ function create() {
     socket.on('structureSelected', function (selected) {
       // selectedStatus = selected;
       handlSelectedStatus(self, socket.id, selected)
+    });
+
+    socket.on('structureSelectedKaserne', function (selected) {
+      // selectedStatus = selected;
+      handlSelectedStatusKaserne(self, socket.id, selected)
+    });
+
+    socket.on('structureSelectedLabor', function (selected) {
+      // selectedStatus = selected;
+      handlSelectedStatusLabor(self, socket.id, selected)
+    });
+
+    socket.on('structureSelectedFabrik', function (selected) {
+      // selectedStatus = selected;
+      handlSelectedStatusFabrik(self, socket.id, selected)
     });
 
     socket.on('structureSelectedBarracks', function (selected) {
@@ -271,22 +291,24 @@ function update(time) {
     const pressed = players[player.playerId].test.pressed;
     const resource = players[player.playerId].resources;
     const test = players[player.playerId].hqSelected;
+    const kaserne = players[player.playerId].kaserneSelected;
+    const labor = players[player.playerId].laborSelected;
+    const fabrik = players[player.playerId].farbikSelected;
 
     this.team.name = players[player.playerId].team1
 
-    if(playerArray.length ==2  ) {
+    //if(playerArray.length ==1) {
       if(!sendPlayers) {
         io.emit("players", playerArray);
         sendPlayers = true;
       }
-    }
+   // }
 
     io.emit('team', this.team);
 
     if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
       addHq(this, this.team, players[player.playerId].team1);
       players[player.playerId].hqCount++;
-      console.log(players[player.playerId].hqCount);
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('hqUpdate', hq);
@@ -294,7 +316,7 @@ function update(time) {
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "d" && !onRestrictedTile && test) {
+    if (input.mouse && pressed == "d" && !onRestrictedTile && test  && resource > 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addBarracks(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
@@ -302,15 +324,16 @@ function update(time) {
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "e" && !onRestrictedTile && test) {
+    if (input.mouse && pressed == "e" && !onRestrictedTile && test  && resource > 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
+        players[player.playerId].laborCount++
       addLabor(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "f" && !onRestrictedTile && test) {
+    if (input.mouse && pressed == "f" && !onRestrictedTile && test  && resource > 0 && players[player.playerId].laborCount == 1) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addFactory(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
@@ -323,12 +346,12 @@ function update(time) {
       this.presesdInfo.pressed == "none"
     }
 
-    if (input.q && test) {
+    if (input.q && kaserne) {
       addSolider(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
     }
 
-    if (input.w && test) {
+    if (input.w && fabrik) {
       addTank(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
     }
@@ -344,7 +367,6 @@ function update(time) {
 
       }
       if (input.mouse) {
-
         io.emit("break", mental);
         mental.length = 0;
         io.emit("resourcePos", updatedPos);
@@ -365,6 +387,21 @@ function update(time) {
     } else if (this.presesdInfo.pressed == "a") {
 
     }
+    if (onlyOnce2) {
+      if (winner) {
+        io.emit('winnerStatus', winner);
+        io.emit('playerWon', players[player.playerId].team1);
+        onlyOnce2 = false;
+      }
+  
+      if (surrender) {
+        console.log(players[player.playerId].team1);
+        io.emit('playerLost', players[player.playerId].team1);
+        io.emit('loserStatus', surrender);
+       
+        onlyOnce2 = false;
+      }
+    }
   });
   io.emit('playerUpdates', players);
 
@@ -372,17 +409,7 @@ function update(time) {
   io.emit('updateTime', this.times);
   io.emit('currentPlayers', players);
 
-  if (onlyOnce2) {
-    if (winner) {
-      io.emit('winnerStatus', winner);
-      onlyOnce2 = false;
-    }
-
-    if (surrender) {
-      io.emit('loserStatus', surrender);
-      onlyOnce2 = false;
-    }
-  }
+ 
 
   isPlacingAllowed(this);
 }
@@ -419,6 +446,33 @@ function handlSelectedStatus(self, playerId, status) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
       players[player.playerId].hqSelected = status;
+    }
+  });
+}
+
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handlSelectedStatusKaserne(self, playerId, status) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].kaserneSelected = status;
+    }
+  });
+}
+
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handlSelectedStatusFabrik(self, playerId, status) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].farbikSelected = status;
+    }
+  });
+}
+
+// Daten zu den Inputs werden in den Variablen des Servers gespeichert
+function handlSelectedStatusLabor(self, playerId, status) {
+  self.players.getChildren().forEach((player) => {
+    if (playerId === player.playerId) {
+      players[player.playerId].laborSelected = status;
     }
   });
 }

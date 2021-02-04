@@ -75,7 +75,7 @@ function drawHq(Xi, Yi) {
   IsometricMap.grid[Yi + 2][Xi - 2] = hq;
 
   // Wird auf der Map angezeigt 
-  addBuilindsToMap(offY, offX);
+  addBuilindsToMap(Xi, Yi);
 
   // Pathfinding Grid wird geupdated
   easystar.setAcceptableTiles([0]);

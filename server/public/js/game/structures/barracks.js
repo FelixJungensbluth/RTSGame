@@ -46,7 +46,7 @@ function drawBarracks(Xi, Yi, scene) {
   IsometricMap.grid[Yi + 1][Xi - 1] = barrack;
 
   // Wird auf der Map angezeigt 
-  addBuilindsToMap(offY, offX);
+  addBuilindsToMap(Xi, Yi);
 
   // Pathfinding Grid wird geupdated
   easystar.setAcceptableTiles([0]);
@@ -68,13 +68,13 @@ function addBarracks(scene) {
       barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
-      resourceCounter -= 0;
+      resourceCounter -= 25;
     } else if (teamname != 1) {
       barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
       barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackTest);
       drawBarracks(selectedTileX, selectedTileY, scene);
-      resourceCounter -= 0;
+      resourceCounter -= 25;
     }
   });
 }

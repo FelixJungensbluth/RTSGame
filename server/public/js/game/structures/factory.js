@@ -4,7 +4,7 @@ function drawFac(Xi, Yi) {
     var offX = (Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX) + 20;
     var offY = (Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY) - 100;
     var fac = {
-        "id": "2",
+        "id": "4",
         "name": "Fabrik",
         "baseHp": 500,
         "currentHp": 100,
@@ -14,7 +14,7 @@ function drawFac(Xi, Yi) {
         "tileY": Yi,
         "AnzhalTilesX": "4",
         "AnzhalTilesY": "2",
-        "isSelected": false,
+        "fabricIsSelected": false,
         "canBeSelected": false,
         "image": factoryImg,
     }
@@ -47,11 +47,13 @@ function addFactory(scene) {
             factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
+            resourceCounter -= 25;
         } else if (teamname != 1) {
             factoryImg = scene.add.image(hqLocation.x, hqLocation.y, 'factory').setInteractive();
             factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
+            resourceCounter -= 25;
         }
     });
 }

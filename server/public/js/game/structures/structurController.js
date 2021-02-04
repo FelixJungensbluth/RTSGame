@@ -29,7 +29,7 @@ function doDamage(scene) {
             if (!removeDamage) {
                 play = true;
                 IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 10;
-                playDamage(scene, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionY);
+               // playDamage(scene, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionY);
             } else {
                 play = false;
                 IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 0;
@@ -55,7 +55,7 @@ function doDamage(scene) {
                             scene.socket.emit('win', win);
 
                         }
-                        dmgSprite.destroy();
+                       // dmgSprite.destroy();
                         play = false;
 
                     }

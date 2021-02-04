@@ -2,8 +2,11 @@ var map
 var mapScaleX = 0;
 var mapScaleY = 0;
 var color = 0;
+var tileWidth;
+var tileHeight;
 
 var testMap = new Array();
+
 
 /*
  Map wird erstellt
@@ -11,40 +14,32 @@ var testMap = new Array();
 */
 function createMap(scene) {
     // Map Image
-    map = scene.add.image(0 + 200, window.innerHeight - 200, 'minimap').setScrollFactor(0);
-
-    var mapWidth = isometricTo2d(IsometricMap.map.length, IsometricMap.map[0].length).x - isometricTo2d(0, 0).x;
-    var mapHeight = isometricTo2d(0, 0).y + isometricTo2d(0, IsometricMap.map[0].length).y;
-
-    mapScaleX = 600 / mapWidth;
-    mapScaleY = 600 / mapWidth;
+    map = scene.add.image(0 + 180, window.innerHeight - 173, 'minimap').setScrollFactor(0);
+    var width = 344;
+    var height = 327;
+    var columns = IsometricMap.map[0].length;
+    var rows= IsometricMap.map.length;
+    tileWidth  = width / columns;
+    tileHeight = height / rows;
 }
 
 /*
  Positon auf der Karte wird berechnet 
 */
 function addBuilindsToMap(x, y) {
-    var angle = 90;
-    var rad = angle * Math.PI / 180;
-    var newX = x * Math.cos(-rad) - y * Math.sin(-rad);
-    var newY = y * Math.cos(-rad) + x * Math.sin(-rad);
+    var xPos= x * tileWidth;
+    var yPos = y * tileHeight;
 
-    var xCor = ((newX) * mapScaleX) - 250;
-    var yCor = (-((newY * mapScaleY))) + 600;
 
     var mapDisplay = {
-        x: xCor,
-        y: yCor,
+        x: xPos,
+        y: yPos,
         team: teamname,
     }
 
     scene.socket.emit('onMap', mapDisplay);
 }
 
-/*
- PLatzierte Strukturen werden mit Rechtecken auf der Map platziert 
- Je nach Team haben die Rechtecke eine andere Farbe
-*/
 function addBuildingOnMap(scene) {
     scene.socket.on('allBuildingsOnMap', function (rec) {
 
@@ -53,7 +48,9 @@ function addBuildingOnMap(scene) {
         } else {
             color = 0x000080;
         }
-        scene.add.rectangle(rec[rec.length - 1].x, rec[rec.length - 1].y, 10, 10, color, 1).setScrollFactor(0);
+       
+        var mapPos = scene.add.rectangle(rec[rec.length - 1].x, rec[rec.length - 1].y + window.innerHeight - 327, 10, 10, color, 1).setScrollFactor(0);
+        mapPos.setDepth(4000);
     });
 }
 

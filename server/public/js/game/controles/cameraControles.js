@@ -5,7 +5,15 @@ var canMoveCam = false;
   Wenn man mit dem Mauszeiger an einen Rand kommt bewegt sich die Kamera 
   in die jeweilige Richtung 
 */
+
 function moveCamera(szene, cam) {
+    if(finalTeam != 1) {
+        cam.scrollX = 400;
+        camMoveX = 400;
+    } else {
+        cam.scrollX = -400;
+        camMoveX = -400;
+    }
 
     szene.input.on('pointermove', function (pointer) {
 
@@ -15,23 +23,23 @@ function moveCamera(szene, cam) {
         if(canMoveCam) {
 
         if (pointer.y < camMoveThresholdY) {
-            cam.scrollY -= 10;
-            camMoveY -= 10;
+            cam.scrollY -= 4;
+            camMoveY -= 4;
         }
 
         if (pointer.y > window.innerHeight -camMoveThresholdY) {
-            cam.scrollY += 10;
-            camMoveY += 10;
+            cam.scrollY += 4;
+            camMoveY += 4;
         }
 
         if (pointer.x < camMoveThresholdX) {
-            cam.scrollX -= 10;
-            camMoveX -= 10;
+            cam.scrollX -= 4;
+            camMoveX -= 4;
         }
 
         if (pointer.x > window.innerWidth -camMoveThresholdX) {
-            cam.scrollX += 10;
-            camMoveX += 10;
+            cam.scrollX += 4;
+            camMoveX += 4;
         }
     }
     }, this);
