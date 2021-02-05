@@ -124,7 +124,7 @@ function updateHqPosition() {
     });
    
    
-    console.log(uniq(updatedHqArray));
+    updatedHqArray =uniq(updatedHqArray);
     if(finalTeam ==1)  { 
       updatedHqPos = { // TODO Send to server
         "x": hqLocation[0].x,
@@ -144,7 +144,12 @@ function updateHqPosition() {
 
 function uniq(a) {
   const uniqueObjects = [...new Map(a.map(item => [item.team, item])).values()]
+  sort(uniqueObjects);
   return (uniqueObjects);
+}
+
+function sort(array){
+  array.sort((a, b) => (a.team > b.team) ? 1 : -1)
 }
 
 function getHq() {
