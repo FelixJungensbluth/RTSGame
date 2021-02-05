@@ -93,9 +93,20 @@ async function getPlayers(socket) {
     players.spieler.forEach(element => {
       playerArray.push(element);
     });
-    if(playerArray.length >0) {
+    if(playerArray.length == 2) {
       console.log(playerArray);
       socket.emit("players", playerArray);
+
+      playerArray.forEach(element => {
+        console.log(element);
+        collectionPlayers.updateOne({}, {
+        "$pull": {
+          "spieler": element
+        }
+      });
+    });
+    
+
     }
    
   } catch (e) {

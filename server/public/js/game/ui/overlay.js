@@ -30,6 +30,20 @@ var recArray = new Array();
 
 var gameStart = false;
 
+var overviewOnce = true;
+
+var kaserneButton;
+var laborButton;
+var workerButton;
+var walkerButton;
+var fabrikButton;
+var panzerButton;
+
+var attackUp;
+var armorUp;
+
+var buttonArray= new Array();
+
 
 
 /*
@@ -38,7 +52,7 @@ var gameStart = false;
 */
 function displayOverlay() {
     mapOverlay = scene.add.image(180, window.innerHeight - 173, 'olMap').setScrollFactor(0);
-    optionsOverlay = scene.add.image(window.innerWidth - 195, window.innerHeight-173, 'olOptions').setScrollFactor(0);
+    optionsOverlay = scene.add.image(window.innerWidth - 195, window.innerHeight - 173, 'olOptions').setScrollFactor(0);
     timeOverlay = scene.add.image(109, 17, 'olTime').setScrollFactor(0);
     resourceOverlay = scene.add.image(90, 48, 'olResource').setScrollFactor(0);
 }
@@ -186,6 +200,112 @@ function readyUp(scene) {
 
         }
     });
+}
 
 
+function overview() {
+    
+   
+   
+
+  
+   
+   
+
+   
+    
+    
+
+
+
+
+    hqButton = scene.add.image(window.innerWidth -280, window.innerHeight -226, '1b').setScrollFactor(0);
+
+    scene.input.on('pointerdown', function (pointer) {
+
+
+        if (pointer.rightButtonDown()) {
+            if (overviewOnce) {
+               
+                if (hqSelected) {
+                    hqButton.destroy();
+                    kaserneButton = scene.add.image(window.innerWidth -180, window.innerHeight -226, '2b').setScrollFactor(0);
+                    kaserneButton.setDepth(8000);
+
+                    workerButton = scene.add.image(window.innerWidth -180, window.innerHeight -136, '5b').setScrollFactor(0);
+                    workerButton.setDepth(8000);
+
+
+                    laborButton = scene.add.image(window.innerWidth -80, window.innerHeight -226, '3b').setScrollFactor(0);
+                    laborButton.setDepth(8000);
+                    
+                    buttonArray.push(kaserneButton);
+                    buttonArray.push(workerButton);
+                    buttonArray.push(laborButton);
+
+                    if(laborCounter >0) {
+                        fabrikButton = scene.add.image(window.innerWidth -280, window.innerHeight -136, '4b').setScrollFactor(0);
+                        fabrikButton.setDepth(8000);
+                        buttonArray.push(fabrikButton);
+                    }
+
+                    if(resourceCounter < 100) {
+                        laborButton.setTint(0xFFFFFF, 0.1);
+                    }
+
+                    if(resourceCounter < 50) {
+                        kaserneButton.setTint(0xFFFFFF, 0.1);
+                    }
+
+                    if(resourceCounter < 10) {
+                        workerButton.setTint(0xFFFFFF, 0.1);
+                    }
+                }
+                if (kaserneSelected) {
+                    walkerButton = scene.add.image(window.innerWidth -80, window.innerHeight -136, '6b').setScrollFactor(0);
+                    walkerButton.setDepth(8000);
+                    buttonArray.push(walkerButton);
+                    if(resourceCounter < 20) {
+                        walkerButton.setTint(0xFFFFFF, 0.1);
+                    }
+                }
+
+                if (laborSelected) {
+                    armorUp = scene.add.image(window.innerWidth -280, window.innerHeight -46, '9b').setScrollFactor(0);
+                    armorUp.setDepth(8000);
+
+                    attackUp =scene.add.image(window.innerWidth -180, window.innerHeight -46, '8b').setScrollFactor(0);
+                    attackUp.setDepth(8000);
+
+                    buttonArray.push(armorUp);
+                    buttonArray.push(attackUp);
+
+                    if(resourceCounter < 200) {
+                        attackUp.setTint(0xFFFFFF, 0.1);
+                        armorUp.setTint(0xFFFFFF, 0.1);
+                    }
+                }
+
+                if (fabrikSelected) {
+                    panzerButton = scene.add.image(window.innerWidth -80, window.innerHeight -46, '7b').setScrollFactor(0);
+                    panzerButton.setDepth(8000);
+                    buttonArray.push(panzerButton);
+                    if(resourceCounter < 50) {
+                        panzerButton.setTint(0xFFFFFF, 0.1);
+                    }
+                    
+                }
+            }
+        }
+
+        if (pointer.leftButtonDown()) {
+            //overviewOnce = true;
+
+            buttonArray.forEach(element => {
+               element.destroy();
+           });
+
+        }
+
+    }, this);
 }

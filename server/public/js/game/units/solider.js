@@ -1,5 +1,5 @@
 var solider = "solider";
-function initSolider() {
+function initSolider(team) {
     solider.setData({
         name: 'solider',
         id: id,
@@ -16,7 +16,7 @@ function initSolider() {
         tileY: 0,
         canMove: true,
         canAttack: false,
-        team: teamname,
+        team: team,
         fromX: 0,
         fromY: 0,
         toX: 0,
@@ -32,6 +32,12 @@ function addSolider(scene) {
         soliderX = soliderLocation.x;
         soliderY = soliderLocation.y;
         solider = scene.add.image(soliderLocation.x, soliderLocation.y, 'solider').setInteractive();
-        initSolider();
+        initSolider(soliderLocation.team);
+
+        if(soliderLocation.team == finalTeam) { 
+            resourceCounter -=5;
+        } else {
+            solider.setTint(0x0070FF);
+        }
     });
 }

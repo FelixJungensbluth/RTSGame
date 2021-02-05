@@ -1,8 +1,8 @@
 const config = {
   type: Phaser.AUTO,
   parent: "game",
-  width: window.innerWidth - 15,
-  height: window.innerHeight - 10,
+  width: window.innerWidth -20,
+  height: window.innerHeight -20 ,
   mousewheel: true,
   physics: {
     default: "arcade",
@@ -175,6 +175,7 @@ function preload() {
   this.load.image("tankR", "assets/tankR.png");
 
   this.load.image("worker", "assets/worker1.png");
+  this.load.image("worker2", "assets/workerB.png");
 
 
   this.load.image("minimap", "assets/map2.png");
@@ -195,6 +196,16 @@ function preload() {
 
   this.load.html("form", "form.html");
   this.load.image("chat", "assets/chat_button.png");
+
+  this.load.image("1b", "assets/hq_button.png");
+  this.load.image("2b", "assets/kaserne_button.png");
+  this.load.image("3b", "assets/labor_button.png");
+  this.load.image("4b", "assets/factory_button.png");
+  this.load.image("5b", "assets/worker_button.png");
+  this.load.image("6b", "assets/walker_button.png");
+  this.load.image("7b", "assets/temp_button.png");
+  this.load.image("8b", "assets/gmdup_button.png");
+  this.load.image("9b", "assets/armorup_button.png");
 
   this.load.spritesheet('boom', 'assets/explosion.png', {
     frameWidth: 64,
@@ -262,6 +273,13 @@ function create() {
   this.Xtiles = IsometricMap.map.length;
   this.Ytiles = IsometricMap.map[0].length;
 
+  this.socket.on('newPlayer', function (playerInfo) {
+   finalTeam = playerInfo.team1;
+   console.log(finalTeam);
+   setCamera(this, cam, finalTeam);
+  });
+
+  
   // Kamera
   var cam = this.cameras.main;
   cam.setZoom(1);
@@ -273,6 +291,7 @@ function create() {
   getResourcePosition();
 
   fillDepthSortArry();
+  
 
   // Infotext
   tilePosition = this.add.text(20, 140, 'Tile Position:', {
@@ -417,12 +436,6 @@ function create() {
   // Attack
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
 
-  this.socket.on('newPlayer', function (playerInfo) {
-   console.log(playerInfo.team1);
-   finalTeam = playerInfo.team1
-  });
-
-
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
@@ -512,6 +525,7 @@ function create() {
   updateSelect(scene);
   globalDamagePos();
   setWinner();
+  overview();
 
 }
 
@@ -583,6 +597,7 @@ function update(time, delta) {
 
   updateMap();
   setGameData(this);
+
 
   // Update Resourceanzeige
   timer += delta;

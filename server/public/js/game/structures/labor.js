@@ -1,4 +1,5 @@
 var laborImg = "none";
+var laborCounter  =0;
 /*
   Darstellung der Kaserne
 
@@ -65,6 +66,7 @@ function addLabor(scene) {
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
             resourceCounter -= 25;
+            laborCounter++;
 
         } else if (teamname != 1) {
             laborImg = scene.add.image(hqLocation.x, hqLocation.y, 'labor2').setInteractive();
@@ -72,6 +74,7 @@ function addLabor(scene) {
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
             resourceCounter -= 25;
+            laborCounter++;
         }
     });
 }

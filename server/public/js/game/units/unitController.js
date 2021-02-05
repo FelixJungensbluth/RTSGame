@@ -50,6 +50,7 @@ var dy;
 
 var directons = new Array();
 var direction;
+var moveToPos;
 
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
@@ -96,33 +97,33 @@ function handleUnitMovment(scene) {
                         var fromX = unit.getData('tileX');
                         var fromY = unit.getData('tileY');
 
-                        if (IsometricMap.map[unit.getData("tileX")][unit.getData("tileY")].id !== 6) {
 
-                            easystar.findPath(fromX, fromY, toX, toY, function (path) {
-                                if (path === null) {
-                                    console.warn("Path was not found.");
-                                } else {
-                                    pathToUse.push(path);
-                                    scene.socket.emit('MOVE', path);
-                                    unit.setData({
-                                        fromX: fromX,
-                                        fromY: fromY,
-                                        toX: toX,
-                                        toY: toY,
-                                        tileX: toX,
-                                        tileY: toY,
 
-                                    });
+                        easystar.findPath(fromX, fromY, toX, toY, function (path) {
+                            if (path === null) {
+                                console.warn("Path was not found.");
+                            } else {
+                                pathToUse.push(path);
+                                scene.socket.emit('MOVE', path);
+                                unit.setData({
+                                    fromX: fromX,
+                                    fromY: fromY,
+                                    toX: toX,
+                                    toY: toY,
+                                    tileX: toX,
+                                    tileY: toY,
 
-                                    unit.setData({
-                                        tileX: path[path.length - 1].x,
-                                        tileY: path[path.length - 1].y,
-                                    });
-                                }
-                            });
+                                });
 
-                            easystar.calculate();
-                        }
+                                unit.setData({
+                                    tileX: path[path.length - 1].x,
+                                    tileY: path[path.length - 1].y,
+                                });
+                            }
+                        });
+
+                        easystar.calculate();
+
                     }
                 });
             }
@@ -131,8 +132,7 @@ function handleUnitMovment(scene) {
     }, this);
 }
 
-/*
-function getDirection(path, unit) {
+function getDirection2(path, i, unit) {
     for (let i = 0; i < path.length; i++) {
 
         if (i == 0) {
@@ -157,24 +157,20 @@ function getDirection(path, unit) {
         } else if (downDown) {
             direction = "o";
         }
-
-        directons.push(direction);
     }
 
-    var finalDirection = directons[directons.length - 1]
-
-    if (finalDirection == "l") {
+    if (direction == "l") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerL');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderL');
         } else if (unit.getData("name") == "tank") {
             unit.setTexture('tankL');
         }
 
-    } else if (finalDirection == "r") {
+    } else if (direction == "r") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerR');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderR');
 
@@ -182,9 +178,9 @@ function getDirection(path, unit) {
             unit.setTexture('tankR');
         }
 
-    } else if (finalDirection == "o") {
+    } else if (direction == "o") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerU');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('solider');
 
@@ -192,22 +188,25 @@ function getDirection(path, unit) {
             unit.setTexture('tankU');
         }
 
-    } else if (finalDirection == "u") {
+    } else if (direction == "u") {
         if (unit.getData("name") == "worker") {
-
+            unit.setTexture('workerO');
         } else if (unit.getData("name") == "solider") {
             unit.setTexture('soliderN');
         } else if (unit.getData("name") == "tank") {
             unit.setTexture('tankO');
         }
     }
+    if (unit.getData("team") != finalTeam) {
+
+        unit.setTint(0x0070FF);
+    }
 }
-*/
 
 function getDirection(path, i, unit) {
     if (i == 0) {
-        dx = 0 - path[i].x;
-        dy = 0 - path[i].y;
+        dx = unit.getData("tileX") - path[i].x;
+        dy = unit.getData("tileY") - path[i].y;
     } else {
         dx = path[i].x - path[i - 1].x;
         dy = path[i].y - path[i - 1].y;
@@ -265,6 +264,10 @@ function getDirection(path, i, unit) {
         } else if (unit.getData("name") == "tank") {
             unit.setTexture('tankO');
         }
+    }
+    if (unit.getData("team") != finalTeam) {
+
+        unit.setTint(0x0070FF);
     }
 }
 
@@ -476,7 +479,23 @@ function moveCharacterTest(path, scene, unit) {
     }
     resourcePathArray.push(rePA);
 
-    var line1 = new Phaser.Curves.Line([path.x, path.y, updatedHqPos.x, updatedHqPos.y]);
+
+    if (unit.getData("team") == finalTeam) {
+        console.log(updatedHqArray);
+        moveToPos =updatedHqArray[finalTeam - 1];
+        console.warn("RICHTIG");
+    } else {
+        console.warn("FALSCH");
+        if(finalTeam == 1) { 
+            moveToPos =updatedHqArray[1];
+        } else {
+            moveToPos =updatedHqArray[0];
+        }
+      
+    }
+
+
+    var line1 = new Phaser.Curves.Line([path.x, path.y, moveToPos.x, moveToPos.y]);
 
     //var line1 = new Phaser.Curves.Line([500,500, 1000, 1000]);
     path1.add(line1);
