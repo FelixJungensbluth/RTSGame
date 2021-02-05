@@ -309,6 +309,7 @@ function update(time) {
       players[player.playerId].hqCount++;
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
+      
       io.emit('hqUpdate', hq);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
@@ -340,7 +341,7 @@ function update(time) {
     }
 
     if (input.a && test) {
-      addWorker(this, players[player.playerId].unit, this.team);
+      addWorker(this, players[player.playerId].team1);
       this.presesdInfo.pressed == "none"
     }
 
@@ -653,11 +654,12 @@ function addFactory(self) {
   IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY + 1] = factory;
 }
 
-function addWorker(self) {
+function addWorker(self,team) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   io.emit('workerLocation', {
-    x: 760,
-    y: 345,
+    x: 2000,
+    y: 600,
+    team: team
   });
 }
 

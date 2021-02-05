@@ -1,6 +1,6 @@
 var worker = "worker";
 
-function initWorker() {
+function initWorker(team) {
     worker.setData({
         name: 'worker',
         id: id,
@@ -16,7 +16,7 @@ function initWorker() {
         tileX: 0,
         tileY: 0,
         canMove: true,
-        team: teamname,
+        team: team,
         fromX: 0,
         fromY: 0,
         toX: 0,
@@ -32,6 +32,15 @@ function addWorker(scene) {
         workerX = workerLocation.x;
         workerY = workerLocation.y;
         worker = scene.add.image(workerLocation.x, workerLocation.y, 'worker').setInteractive();
-        initWorker();
+        initWorker(workerLocation.team);
+
+        if(workerLocation.team == finalTeam) { 
+            resourceCounter -=5;
+        } else {
+            worker.setTint(0x0070FF);
+        }
+
+        console.log(worker.getData("team") + "  " + workerLocation.team);
+
     });
 }

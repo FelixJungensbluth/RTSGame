@@ -3,6 +3,11 @@ var selectionRectangle;
 
 var testSelect = false; // Auswahlrechteck
 
+var hqSelected = false;
+var laborSelected = false;
+var kaserneSelected = false;
+var fabrikSelected = false;
+
 
 // Gebaeude werden durch linksklick platziert
 function placeBuilding(szene) {
@@ -60,6 +65,7 @@ function placeBuilding(szene) {
              //   szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
+                    hqSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].isSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].isSelected = false;
@@ -77,6 +83,7 @@ function placeBuilding(szene) {
                 }
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
+                    kaserneSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = false;
@@ -118,6 +125,11 @@ function placeBuilding(szene) {
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
+                    hqSelected = true;
+                    laborSelected = false;
+                    kaserneSelected = false;
+                    fabrikSelected = false;
+
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].isSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].isSelected = true;
@@ -135,7 +147,10 @@ function placeBuilding(szene) {
                 }
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
-                   
+                    hqSelected = false;
+                    kaserneSelected = true;
+                    fabrikSelected = false;
+                    laborSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = true;
@@ -144,6 +159,10 @@ function placeBuilding(szene) {
                 }
 
                 if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                    hqSelected = false;
+                    kaserneSelected = false;
+                    fabrikSelected = false;
+                    laborSelected = true;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected = true;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].laborIsSelected = true;
@@ -153,8 +172,10 @@ function placeBuilding(szene) {
             }
 
             if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
-
-
+                hqSelected = false;
+                kaserneSelected = false;
+                laborSelected = false;
+                fabrikSelected = true;
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected = true;
                 IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].fabricIsSelected = true;
                 IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].fabricIsSelected = true;

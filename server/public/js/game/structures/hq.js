@@ -6,6 +6,8 @@ var updatedHqPos;
 
 var imageArray = new Array();
 
+var updatedHqArray  = new Array();
+
 /*
   Darstellung des HQ
 
@@ -43,7 +45,7 @@ function drawHq(Xi, Yi) {
     "y": offY,
     "tileX": Xi,
     "tileY": Yi,
-    "team": teamname
+    "team": finalTeam
   }
   scene.socket.emit('hqPosition', hqPosition);
 
@@ -117,20 +119,32 @@ function addHq(scene) {
 // HQ Positon wird fuer alle Spieler geupdated
 function updateHqPosition() {
   scene.socket.on('hqUpdate', function (hqLocation) {
-    if (teamname === 1) {
+    hqLocation.forEach(element => {
+       updatedHqArray.push(element);
+    });
+   
+   
+    console.log(uniq(updatedHqArray));
+    if(finalTeam ==1)  { 
       updatedHqPos = { // TODO Send to server
         "x": hqLocation[0].x,
         "y": hqLocation[0].y,
         "team": teamname
       }
-    } else {
+    } else { 
       updatedHqPos = { // TODO Send to server
-        "x": hqLocation[hqLocation.length - 1].x,
-        "y": hqLocation[hqLocation.length - 1].y,
+        "x": hqLocation[1].x,
+        "y": hqLocation[1].y,
         "team": teamname
       }
     }
+  
   });
+}
+
+function uniq(a) {
+  const uniqueObjects = [...new Map(a.map(item => [item.team, item])).values()]
+  return (uniqueObjects);
 }
 
 function getHq() {

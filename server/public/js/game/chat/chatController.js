@@ -36,7 +36,7 @@ function displayChat(scene) {
     scene.enterKey.on("down", event => {
           let chatbox = textInput1.getChildByName("chat");
           if (chatbox.value != "") {
-            var name = localStorage.getItem("username");
+            var name =  playersArray[finalTeam];
             // line Break : \n
             scene.socket.emit("message", "[" + minutes + ":" + seconds+ "] "  + name + " : "+ chatbox.value);
               chatbox.value = "";

@@ -1,6 +1,6 @@
 var tank = "tank";
 
-function initTank() {
+function initTank(team) {
     tank.setData({
         name: 'tank',
         id: id,
@@ -17,7 +17,7 @@ function initTank() {
         tileY: 0,
         canMove: true,
         canAttack: false,
-        team: teamname,
+        team: team,
         fromX: 0,
         fromY: 0,
         toX: 0,
@@ -33,6 +33,12 @@ function addTank(scene) {
         tankX = tankLocation.x;
         tankY = tankLocation.y;
         tank = scene.add.image(tankLocation.x, tankLocation.y, 'tankU').setInteractive();
-        initTank();
+        initTank(tankLocation.team);
+
+        if(tankLocation.team == finalTeam) { 
+            resourceCounter -=5;
+        } else {
+            tank.setTint(0x0070FF);
+        }
     });
 }
