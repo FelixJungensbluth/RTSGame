@@ -1,7 +1,7 @@
 var laborImg = "none";
-var laborCounter  =0;
+var laborCounter = 0;
 /*
-  Darstellung der Kaserne
+  Darstellung des Labors
 
   Die Position im 2D Array der Map wird in X & Y Koordinaten umgerechnet 
   Das Bild des HQ besitzt eine ID welche auch im Array gespeichret ist 

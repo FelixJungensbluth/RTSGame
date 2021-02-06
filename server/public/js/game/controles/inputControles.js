@@ -24,7 +24,7 @@ function placeBuilding(szene) {
                 }
 
                 // Kaserne 
-                if (!isSelected && pressed == "d" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                if (!isSelected && pressed == "d" && IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected) {
                     pressed = "none"
                     drawBarracks(selectedTileX, selectedTileY, szene);
                     buildingTime(szene);
@@ -35,7 +35,7 @@ function placeBuilding(szene) {
                 }
 
                 // Labor 
-                if (!isSelected && pressed == "e" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                if (!isSelected && pressed == "e" && IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected) {
                     pressed = "none"
                     drawLabor(selectedTileX, selectedTileY, szene);
                     buildingTime(szene);
@@ -46,7 +46,7 @@ function placeBuilding(szene) {
                 }
 
                 // Fatory
-                if (!isSelected && pressed == "f" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+                if (!isSelected && pressed == "f" && IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected) {
                     pressed = "none"
                     drawFac(selectedTileX, selectedTileY, szene);
                     buildingTime(szene);
@@ -58,11 +58,11 @@ function placeBuilding(szene) {
             }
 
             // Auswahl wird entfernt 
-            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected ||   IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected) {
+            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected) {
                 console.log("DESELECTED");
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
-             //   szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
+                //   szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
                     hqSelected = false;
@@ -79,7 +79,7 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].isSelected = false;
 
                     szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
-                    
+
                 }
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
@@ -90,10 +90,10 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = false;
                     console.log("sdfsdfsdfdfs");
                     szene.socket.emit('structureSelectedKaserne', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
-                    
+
                 }
 
-                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].laborIsSelected = false;
@@ -101,13 +101,13 @@ function placeBuilding(szene) {
                     szene.socket.emit('structureSelectedLabor', IsometricMap.buildingMap[selectedTileX][selectedTileY].laborIsSelected);
                 }
 
-                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
 
 
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].fabricIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].fabricIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY].fabricIsSelected = false;
-    
+
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].fabricIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 1].fabricIsSelected = false;
@@ -121,7 +121,7 @@ function placeBuilding(szene) {
             console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
 
-              
+
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.setTint(0xFFFFFF, 0.05);
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 1) {
@@ -143,7 +143,7 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[selectedTileX - 2][selectedTileY + 2].isSelected = true;
 
                     szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
-                    
+
                 }
 
                 if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 2) {
@@ -158,7 +158,7 @@ function placeBuilding(szene) {
                     szene.socket.emit('structureSelectedKaserne', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
                 }
 
-                if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
+                if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 3) {
                     hqSelected = false;
                     kaserneSelected = false;
                     fabrikSelected = false;
@@ -171,7 +171,7 @@ function placeBuilding(szene) {
                 }
             }
 
-            if ( IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
+            if (IsometricMap.buildingMap[selectedTileX][selectedTileY].id == 4) {
                 hqSelected = false;
                 kaserneSelected = false;
                 laborSelected = false;
@@ -231,26 +231,6 @@ function getLastClicked(szene) {
     }, this);
 }
 
-// TODO Fix
-function createSelectionRectangle(scene) {
-
-    scene.input.on('pointerdown', function (pointer) {
-        if (pointer.rightButtonDown()) {
-           // selectionRectangle = scene.add.rectangle(pointer.x, pointer.y, 0, 0, 0xffffff, 0.5);
-        }
-    }, this);
-
-    scene.input.on('pointerup', function (pointer) {
-        if (pointer.rightButtonDown()) {
-            // console.log("dsfsdfsdf");
-           // selectionRectangle.x = -1000;
-            //selectionRectangle.destroy();
-        }
-
-    }, this);
-}
-
-// TODO Fix
 function checkUnitsInSelection() {
     if (unitsArray1.length != 0) {
         unitsArray1.forEach(unit => {

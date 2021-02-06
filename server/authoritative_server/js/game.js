@@ -41,11 +41,9 @@ var easystar;
 
 var onlyOnce = true;
 var onlyOnce2 = true;
-var fuck = new Array;
+var unitsMove = new Array;
 
-var mental = new Array;
-
-var mental = new Array;
+var selectedUnits = new Array;
 
 var buildingsOnMap = new Array;
 
@@ -217,11 +215,11 @@ function create() {
     });
 
     socket.on('MOVE', function (move) {
-      fuck.push(move);
+      unitsMove.push(move);
     });
 
     socket.on('selctedUnitID', function (sUId) {
-      mental.push(sUId);
+      selectedUnits.push(sUId);
     });
 
     socket.on('onMap', function (mapCords) {
@@ -295,12 +293,12 @@ function update(time) {
 
     this.team.name = players[player.playerId].team1
 
-    //if(playerArray.length ==1) {
-      if(!sendPlayers) {
+    if (playerArray.length > 0) {
+      if (!sendPlayers) {
         io.emit("players", playerArray);
         sendPlayers = true;
       }
-   // }
+    }
 
     io.emit('team', this.team);
 
@@ -309,30 +307,30 @@ function update(time) {
       players[player.playerId].hqCount++;
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
-      
+
       io.emit('hqUpdate', hq);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "d" && !onRestrictedTile && test  && resource > 0) {
+    if (input.mouse && pressed == "d" && !onRestrictedTile && test && resource > 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
-      addBarracks(this);
+      addBarracks(this, players[player.playerId].team1);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "e" && !onRestrictedTile && test  && resource > 0) {
+    if (input.mouse && pressed == "e" && !onRestrictedTile && test && resource > 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
-        players[player.playerId].laborCount++
+      players[player.playerId].laborCount++
       addLabor(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "f" && !onRestrictedTile && test  && resource > 0 && players[player.playerId].laborCount == 1) {
+    if (input.mouse && pressed == "f" && !onRestrictedTile && test && resource > 0 && players[player.playerId].laborCount == 1) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addFactory(this);
       io.emit('allBuildingsOnMap', buildingsOnMap);
@@ -346,7 +344,7 @@ function update(time) {
     }
 
     if (input.q && kaserne) {
-      addSolider(this, players[player.playerId].unit, this.team);
+      addSolider(this, players[player.playerId].team1);
       this.presesdInfo.pressed == "none"
     }
 
@@ -366,11 +364,11 @@ function update(time) {
 
       }
       if (input.mouse) {
-        io.emit("break", mental);
-        mental.length = 0;
+        io.emit("break", selectedUnits);
+        selectedUnits.length = 0;
         io.emit("resourcePos", updatedPos);
-        io.emit("FUCKINFO", fuck);
-        fuck.length = 0;
+        io.emit("unitsMove", unitsMove);
+        unitsMove.length = 0;
         updatedPos.length = 0;
 
         onlyOnce = false;
@@ -392,12 +390,12 @@ function update(time) {
         io.emit('playerWon', players[player.playerId].team1);
         onlyOnce2 = false;
       }
-  
+
       if (surrender) {
         console.log(players[player.playerId].team1);
         io.emit('playerLost', players[player.playerId].team1);
         io.emit('loserStatus', surrender);
-       
+
         onlyOnce2 = false;
       }
     }
@@ -408,7 +406,7 @@ function update(time) {
   io.emit('updateTime', this.times);
   io.emit('currentPlayers', players);
 
- 
+
 
   isPlacingAllowed(this);
 }
@@ -549,7 +547,7 @@ function addHq(self, test1, teamNum) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addBarracks(self) {
+function addBarracks(self, team) {
   console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
@@ -573,6 +571,7 @@ function addBarracks(self) {
     "image": test,
     "canBeSelected": false,
     "damage": 0,
+    team: team,
   }
 
   this.buildingArray.push(hq);
@@ -654,41 +653,129 @@ function addFactory(self) {
   IsometricMap.buildingMap[self.mouseInfo.tileX - 2][self.mouseInfo.tileY + 1] = factory;
 }
 
-function addWorker(self,team) {
+function addWorker(self, team) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
-  io.emit('workerLocation', {
-    x: 2000,
-    y: 600,
-    team: team
-  });
+  hq = uniqHq(hq);
+  console.log(hq);
+  var posX = 0;
+  var posY = 0;
+
+  if (team == 1) {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('workerLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  } else {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('workerLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  }
 }
 
-function addSolider(self) {
+/*
+ Umrechnung von Weltkoordinaten in 2D Koordinaten
+*/
+function isometricTo2d(Xi, Yi) {
+  var offX = Xi * tileColumnOffset / 2 + Yi * tileColumnOffset / 2 + originX;
+  var offY = Yi * tileRowOffset / 2 - Xi * tileRowOffset / 2 + originY;
+
+  var cords = {
+    x: offX,
+    y: offY,
+  }
+
+  return cords;
+}
+
+function uniqHq(a) {
+  const uniqueObjects = [...new Map(a.map(item => [item.team, item])).values()]
+  sort(uniqueObjects);
+  return (uniqueObjects);
+}
+
+function sort(array) {
+  array.sort((a, b) => (a.team > b.team) ? 1 : -1)
+}
+
+function addSolider(self, team) {
   solider = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
-  io.emit('soliderLocation', {
-    x: 820,
-    y: 400,
-  });
+
+  if (team == 1) {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('soliderLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  } else {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('soliderLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  }
 }
 
 function addTank(self) {
   solider = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
-  io.emit('tankLocation', {
-    x: 1000,
-    y: 600,
-  });
+  if (team == 1) {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('tankLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  } else {
+    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
+    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+
+    io.emit('tankLocation', {
+      x: posX,
+      y: posY,
+      team: team,
+      spawnTileX: hq[0].tileX - 1,
+      spawnTileY: hq[0].tileY + 3
+    });
+  }
 }
 
 
 // Gleiche wie in Engine
 function isPlacingAllowed(self) {
 
-  if (self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 && self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY <= IsometricMap.buildingMap.length) {
+  if (self.mouseInfo.tileX >= 0 && self.mouseInfo.tileY >= 0 && self.mouseInfo.tileX < IsometricMap.buildingMap.length && self.mouseInfo.tileY < IsometricMap.buildingMap.length) {
     if ((IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 1 ||
         IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 2 ||
         IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 3 ||
         IsometricMap.buildingMap[self.mouseInfo.tileX][self.mouseInfo.tileY].id == 4 ||
-        IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 2)) {
+        IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 4 ||
+        IsometricMap.map[self.mouseInfo.tileX][self.mouseInfo.tileY] === 6)) {
       onRestrictedTile = true;
       io.emit('checkTileStatus', onRestrictedTile);
     } else {

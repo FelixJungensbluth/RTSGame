@@ -1,4 +1,6 @@
-var barrackTest = "none";
+var barrackImg = "none";
+var isBuild = false;
+
 /*
   Darstellung der Kaserne
 
@@ -28,7 +30,7 @@ function drawBarracks(Xi, Yi, scene) {
     "isSelected": false,
     "barracksIsSelected": false,
     "canBeSelected": false,
-    "image": barrackTest,
+    "image": barrackImg,
   }
 
 
@@ -51,10 +53,6 @@ function drawBarracks(Xi, Yi, scene) {
   // Pathfinding Grid wird geupdated
   easystar.setAcceptableTiles([0]);
   easystar.setGrid(IsometricMap.grid);
-
-  // selectedStatus des HQ wird an den Server gesendet 
-  //scene.socket.emit('structureSelected', IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected);
-
 }
 
 /*
@@ -64,15 +62,15 @@ Daten von starLocation2 werden Empfangen und verarbeitet
 function addBarracks(scene) {
   scene.socket.on('barracks', function (hqLocation) {
     if (teamname === 1) {
-      barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne').setInteractive();
-      barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
-      imageArray.push(barrackTest);
+      barrackImg = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne').setInteractive();
+      barrackImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
+      imageArray.push(barrackImg);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 25;
     } else if (teamname != 1) {
-      barrackTest = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
-      barrackTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
-      imageArray.push(barrackTest);
+      barrackImg = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
+      barrackImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
+      imageArray.push(barrackImg);
       drawBarracks(selectedTileX, selectedTileY, scene);
       resourceCounter -= 25;
     }

@@ -1,8 +1,8 @@
 const config = {
   type: Phaser.AUTO,
   parent: "game",
-  width: window.innerWidth -20,
-  height: window.innerHeight -20 ,
+  width: window.innerWidth - 20,
+  height: window.innerHeight - 20,
   mousewheel: true,
   physics: {
     default: "arcade",
@@ -27,43 +27,28 @@ var game = new Phaser.Game(config);
 var follower;
 var path1;
 var graphics;
-
 var tileWidthHalf;
 var tileHeightHalf;
-
 var scene;
 var timer = 0;
-
 var tileColumnOffset = 100; // pixels
 var tileRowOffset = 50; // pixels
-
 var originX = 480; // offset from left
 var originY = 400; // offset from top
-
 var Xtiles = 0; // Number of tiles in X-dimension
 var Ytiles = 0; // Number of tiles in Y-dimension
-
 var selectedTileX = 0;
 var selectedTileY = 0;
-
 var buildingPositionX = undefined; // X-Koordinate der platziereten Gebäude
 var buildingPositionY = undefined; // Y-Koordinate der platziereten Gebäude
-
 var name = "tiles"; // name der Tiles
-
 var cam; // Camrea 
-
 var zoom = 1; // Standart Zoomstufe
-
 var camMoveX = 0; // Wert wie weit sich die Kamera in X-Richtung bewegt hat 
 var camMoveY = 0 // Wert wie weit sich die Kamera in Y-Richtung bewegt hat 
-
 var selectionRectWidth = 0; // Breite des Auswahlrechteckes
 var selectionRectHeight = 0; // Höhe  des Auswahlrechteckes
-
 var buildingArray = new Array(); // Array indem die platzierten Gebäude gespeichert werden
-
-// Debug Text
 var tilePosition;
 var tileName;
 var mousePosition;
@@ -72,34 +57,20 @@ var structureName;
 var mausInfo;
 var time;
 var resources;
-
 var resourceCounter = 100;
-
-// Mauskoordianten fuer die Bewegung des Vorschaubildes des platzierten Objektes
 var mausX;
 var mausY;
-
 var isSelected = false; // Boolean ob Gebaude ausgewaehlt ist 
-
 var lastClicked = new Array(); // Array um Werte des letzten Mausklicks zu speichern 
-
 var selectedStructure;
-
-// Timer Variablen 
-var minutes;
+var minutes; // Timer Variablen 
 var seconds;
-
-// Anzeige fuer die Bauszeit
 var timeBar; // Zeitanzeige
 var timeBarBackGround; // Hintergrund
 var healthBarArray = new Array(); // Speicherung aller Bauzeitanzeigen
 var healthBarBackGroundArray = new Array(); // Speicherung aller Bauzeitanzeigen Backgrounds
-
 var timedEvent; // Variable fuer ein Timer
-
 var clicked = false; // Boolean ob eine Maustaste benutzt wurde
-
-// Keyinput
 let keyA; // Variable fuer die Taste A
 let keyS; // Variable fuer die Taste S
 let keyD; // Variable fuer die Taste S
@@ -109,40 +80,26 @@ let keyE;
 let keyW;
 let keyF;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
-
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
-
 var tileStatus = false;
-
 var selectedStatus = false;
-
 var workerX;
 var workerY;
-
 var soliderX;
 var soliderY;
-
 var tankX;
 var tankY;
-
 var easystar;
-
 var testRect; // Pathfinnding
-
 var countdownText;
-
 var timeOnce = true;
 var elo = 1000;
-
-
 var gameEnded = false;
 var winner;
 var loser;
-
 var finalTeam;
 
 function preload() {
-
   //Arrays werden initalisiert
   this.buildingPositionX = new Array();
   this.buildingPositionY = new Array();
@@ -206,6 +163,7 @@ function preload() {
   this.load.image("7b", "assets/temp_button.png");
   this.load.image("8b", "assets/gmdup_button.png");
   this.load.image("9b", "assets/armorup_button.png");
+  this.load.image("background", "assets/background.png");
 
   this.load.spritesheet('boom', 'assets/explosion.png', {
     frameWidth: 64,
@@ -239,11 +197,13 @@ function create() {
   path1 = this.add.path();
   this.players = this.add.group();
   easystar = new EasyStar.js();
+  easystar2 = new EasyStar.js();
 
   //SocketIO wird initalisiert 
   this.socket = io();
 
   displayChat(scene);
+  backgorundImage();
   //Custom Cursor wird festeglegt 
 
   // Oeffnen des Rechtsklickmenue wird disabled
@@ -274,24 +234,23 @@ function create() {
   this.Ytiles = IsometricMap.map[0].length;
 
   this.socket.on('newPlayer', function (playerInfo) {
-   finalTeam = playerInfo.team1;
-   console.log(finalTeam);
-   setCamera(this, cam, finalTeam);
+    finalTeam = playerInfo.team1;
+    console.log(finalTeam);
+    setCamera(this, cam, finalTeam);
   });
 
-  
+
   // Kamera
   var cam = this.cameras.main;
   cam.setZoom(1);
-  readyUp(scene);
 
-  moveCamera(this, cam);
   // Controles
+  readyUp(scene);
+  moveCamera(this, cam);
   getLastClicked(this);
   getResourcePosition();
-
   fillDepthSortArry();
-  
+
 
   // Infotext
   tilePosition = this.add.text(20, 140, 'Tile Position:', {
@@ -328,18 +287,10 @@ function create() {
     }
   }, this);
 
-  createSelectionRectangle(scene);
-
   // Bestimming des aktuellen Tiles 
   this.input.on('pointermove', function (pointer) {
     // InfoText
     mousePosition.setText('Mouse X: ' + pointer.x + ' Mouse Y: ' + pointer.y);
-    if (lastClicked.length != 0) {
-      if (lastClicked[0].button == "rechts") {
-        //  selectionRectangle.width = (pointer.x - lastClicked[0].positionX) + camMoveX;
-        // selectionRectangle.height = (pointer.y - lastClicked[0].positionY) + camMoveY;
-      }
-    }
 
     // Mauspositon wird den Variablen zugewiesen
     mausX = pointer.x;
@@ -389,26 +340,30 @@ function create() {
     }
   }
 
-  testPlayers(scene);
+  getAllPlayers(scene);
   getPlayerName(scene);
+
   // Minimap
   createMap(scene);
 
   // Overlay
   displayOverlay();
   settings();
+  overview();
 
   // Zeittext
   time = this.add.text(75, 1, '', {
     font: "23px Arial",
     fill: '#000000',
   }).setScrollFactor(0);
+  time.setDepth(6001);
 
   // Resourcen Text
   resources = this.add.text(130, 35, '0', {
     font: "20px Arial",
     fill: '#000000',
   }).setScrollFactor(0);
+  resources.setDepth(6001);
 
   countdownText = this.add.text(-30 + window.innerWidth / 2, -120 + window.innerHeight / 2, '', {
     font: "200px Arial",
@@ -417,7 +372,7 @@ function create() {
     strokeThickness: 3,
   }).setScrollFactor(0);
 
-  countdownText.setDepth(3001);
+  countdownText.setDepth(10002);
 
   // Buildings
   keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
@@ -429,9 +384,6 @@ function create() {
   keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
   keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
   keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SEVEN);
-
-
-
 
   // Attack
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
@@ -489,19 +441,20 @@ function create() {
   // Fuegt das Labor zu der Scene hinzu
   addFactory(scene)
 
-  // Fuegt den Arbeiter zu der Scene hinzu
+  // Hinzufügen von Units
   addWorker(scene);
   addSolider(scene);
   addTank(scene);
+
+  // Handling der Units
   selectUnits(scene);
-  dgfdjkgdkjflg();
+  initAttackPath();
   handleUnitMovment(scene);
   handelSelectedUnits(scene);
-  attackTest();
-  attack2();
+  initAttack();
+  attack();
   unitAttack(scene);
-  moveTest();
-
+  move();
   showAttackRange(scene);
 
   // Check ob ein Tile belegt ist
@@ -525,8 +478,6 @@ function create() {
   updateSelect(scene);
   globalDamagePos();
   setWinner();
-  overview();
-
 }
 
 // Rotiert und Spieglet die uebergebene Matrix 
@@ -586,22 +537,25 @@ function update(time, delta) {
   //Check ob ein Tile belegt ist und man ein Objekt platzieren kann
   checkTileStatus(this);
   isPlacingAllowed();
+
+  // Leben der Elemten 
   //hp();
   updateHp();
-  // Zeigt die Zeit an
 
   // Sammeln von Resourcen | Bewegen der Units zwischen HQ und Resourcen
   moveOnResource();
 
+  // Anzeige der Angriffsreichweite
   displayAttack();
 
+  // Updaten der Map
   updateMap();
+
+  // Daten am Ende des Spiels an den Server senden 
   setGameData(this);
 
-
-  // Update Resourceanzeige
+  // Funktionen werden nur jede Sekunde ausgeführt
   timer += delta;
-
   while (timer > 1000) {
     resourceCounter += unitsOnResourceArray2.length;
     doDamage(this);
@@ -626,8 +580,6 @@ function update(time, delta) {
 
   // Daten ob die Maus gedrueckt worden ist wird an denServer geschickt 
   if (gameStart) {
-
-
     this.socket.emit('playerInput', {
       mouse: clicked
     });
@@ -663,7 +615,7 @@ function update(time, delta) {
       this.keySpressed = true;
 
     } else if (keyD.isDown) {
-      if (pressed == "none" && IsometricMap.buildingMap[hqPositionTest.tileX][hqPositionTest.tileY].isSelected) {
+      if (pressed == "none" && IsometricMap.buildingMap[hqPosition.tileX][hqPosition.tileY].isSelected) {
         selectedStructure = scene.add.image(mausX + camMoveX, mausY + 8 + camMoveY, 'kaserne').setInteractive();
       }
       pressed = "d"
@@ -797,12 +749,12 @@ function buildingTime(scene) {
   timeBarBackGround = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     100, 10, 0xffffff);
-  timeBarBackGround.setDepth(1000);
+  timeBarBackGround.setDepth(4000);
   // Anzeige 
   timeBar = scene.add.rectangle(IsometricMap.buildingMap[selectedTileX][selectedTileY].positionX - 50,
     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
     0, 10, 0x4169E1);
-  timeBar.setDepth(1000);
+  timeBar.setDepth(4000);
 
   var buildInfo = {
     "buildingX": selectedTileX,
@@ -959,26 +911,29 @@ function visualizeGrid() {
   }
 }
 
+/*
+Gewinner wird festgelegt
+*/
 function setWinner() {
   scene.socket.on('winnerStatus', function (team) {
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
-    backgroundEnd.setDepth(4000);
+    backgroundEnd.setDepth(12000);
     if (team && !win) {
 
 
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
-      lose.setDepth(4001);
+      lose.setDepth(12001);
       lose.setInteractive();
       lose.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
 
-      winner = localStorage.getItem("username");
+      winner = playersArray[finalTeam - 1];
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.setDepth(4001);
+      winImg.setDepth(12001);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -989,24 +944,27 @@ function setWinner() {
   scene.socket.on('loserStatus', function (team) {
     canMoveCam = false;
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
-    backgroundEnd.setDepth(4000);
-    winner = playersArray[finalTeam];
+    backgroundEnd.setDepth(12000);
+    winner = playersArray[finalTeam - 1];
+
+    scene.emit('elo', playersArray[finalTeam - 1]);
+
     if (team && lose) {
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       loseImg.setInteractive();
-      loseImg.setDepth(4001);
+      loseImg.setDepth(12001);
       loseImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
 
       console.log(playersArray[finalTeam]);
-      
+
 
       gameEnded = true;
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
-      winImg.setDepth(4001);
+      winImg.setDepth(12001);
       winImg.on('pointerdown', () => {
         window.open('http://localhost:3000/test.html')
       }, this);
@@ -1015,6 +973,10 @@ function setWinner() {
   });
 }
 
+
+/*
+Map wird geupdated 
+*/
 function updateMap() {
   scene.socket.on('updateMap', function (map) {
     IsometricMap.buildingMapAll = map;

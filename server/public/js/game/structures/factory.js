@@ -1,5 +1,18 @@
 var factoryImg = "none";
 
+
+/*
+  Darstellung der Fabrik
+
+  Die Position im 2D Array der Map wird in X & Y Koordinaten umgerechnet 
+  Das Bild des HQ besitzt eine ID welche auch im Array gespeichret ist 
+
+  Alle Infomationen ueber das HQ werden in einem Objekt gespeichert
+  ID im Array wird durch das Objekt ersezt, damit man immer auf die Infos zugreifen kann
+
+  Xi = X-Koordninate im Array der Map
+  Yi = Y-Koordninate im Array der Map
+*/
 function drawFac(Xi, Yi) {
     var offX = (Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX) + 20;
     var offY = (Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY) - 100;
@@ -18,9 +31,9 @@ function drawFac(Xi, Yi) {
         "canBeSelected": false,
         "image": factoryImg,
     }
-    
+
     this.buildingArray.push(fac);
-    
+
     IsometricMap.buildingMap[Xi][Yi] = fac;
     IsometricMap.buildingMap[Xi - 1][Yi] = fac;
     IsometricMap.buildingMap[Xi - 2][Yi] = fac;

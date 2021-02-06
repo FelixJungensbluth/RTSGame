@@ -1,57 +1,42 @@
 var worker = "worker";
 var unitsArray1 = new Array();
-
 var selectedArray = new Array();
 var unitsToMove = new Array();
 var pathToUse = new Array();
-
 var id = 0;
-
 var globalUnits = new Array;
-
 var onlyOnce = true;
-
 var unitsOnResource = 0;
-
 var vectorArray = new Array();
 var resourcePathArray = new Array();
 var unitsOnResourceArray = new Array();
 var unitsOnResourceArray2 = new Array();
-
-var test = new Array();
-
 var stopUnit = 0;
 var c = 0;
-
 var attackPath = new Array();
 var attackPath2 = new Array();
 var attackerUnits = new Array();
 var attackerUnits2 = new Array();
-
 var dmg = 0;
-
 var rangeGraphics;
-
 var win = false;
 var lose = false;
-
 var rangeOne = true;
-
 var removeDamage = false;
-
-var testSDHIJF = true;
-
 var workerAttack = new Array();
 var attackedUnits = new Array();
 var woAtt = false;
-
 var dx;
 var dy;
-
 var directons = new Array();
 var direction;
 var moveToPos;
+var pathNotFound = false;
 
+
+/*
+Units werden Clientseitig ausgewählt
+*/
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         gameObject.setData({
@@ -66,6 +51,9 @@ function selectUnits(scene) {
     }, scene);
 }
 
+/*
+Alle ausgewählten Units werden anhand der ID festgelegt
+*/
 function handelSelectedUnits(scene) {
     scene.socket.on('break', function (id) {
         unitsArray1.forEach(unit => {
@@ -78,6 +66,9 @@ function handelSelectedUnits(scene) {
     });
 }
 
+/*
+Pathfinding
+*/
 function handleUnitMovment(scene) {
     scene.input.on('pointerdown', function (pointer) {
 
@@ -102,6 +93,7 @@ function handleUnitMovment(scene) {
                         easystar.findPath(fromX, fromY, toX, toY, function (path) {
                             if (path === null) {
                                 console.warn("Path was not found.");
+                                pathNotFound = true;
                             } else {
                                 pathToUse.push(path);
                                 scene.socket.emit('MOVE', path);
@@ -132,77 +124,9 @@ function handleUnitMovment(scene) {
     }, this);
 }
 
-function getDirection2(path, i, unit) {
-    for (let i = 0; i < path.length; i++) {
-
-        if (i == 0) {
-            dx = 0 - path[i].x;
-            dy = 0 - path[i].y;
-        } else {
-            dx = path[i].x - path[i - 1].x;
-            dy = path[i].y - path[i - 1].y;
-        }
-
-        const leftDown = dx < 0
-        const rightDown = dx > 0
-        const upDown = dy < 0
-        const downDown = dy > 0
-
-        if (leftDown) {
-            direction = "l";
-        } else if (rightDown) {
-            direction = "r";
-        } else if (upDown) {
-            direction = "u";
-        } else if (downDown) {
-            direction = "o";
-        }
-    }
-
-    if (direction == "l") {
-        if (unit.getData("name") == "worker") {
-            unit.setTexture('workerL');
-        } else if (unit.getData("name") == "solider") {
-            unit.setTexture('soliderL');
-        } else if (unit.getData("name") == "tank") {
-            unit.setTexture('tankL');
-        }
-
-    } else if (direction == "r") {
-        if (unit.getData("name") == "worker") {
-            unit.setTexture('workerR');
-        } else if (unit.getData("name") == "solider") {
-            unit.setTexture('soliderR');
-
-        } else if (unit.getData("name") == "tank") {
-            unit.setTexture('tankR');
-        }
-
-    } else if (direction == "o") {
-        if (unit.getData("name") == "worker") {
-            unit.setTexture('workerU');
-        } else if (unit.getData("name") == "solider") {
-            unit.setTexture('solider');
-
-        } else if (unit.getData("name") == "tank") {
-            unit.setTexture('tankU');
-        }
-
-    } else if (direction == "u") {
-        if (unit.getData("name") == "worker") {
-            unit.setTexture('workerO');
-        } else if (unit.getData("name") == "solider") {
-            unit.setTexture('soliderN');
-        } else if (unit.getData("name") == "tank") {
-            unit.setTexture('tankO');
-        }
-    }
-    if (unit.getData("team") != finalTeam) {
-
-        unit.setTint(0x0070FF);
-    }
-}
-
+/*
+Änderung der Richtung der Units bei der Bewegung 
+*/
 function getDirection(path, i, unit) {
     if (i == 0) {
         dx = unit.getData("tileX") - path[i].x;
@@ -271,16 +195,22 @@ function getDirection(path, i, unit) {
     }
 }
 
-function moveTest() {
-    scene.socket.on('FUCKINFO', function (paths) {
+/*
+Bewegung der Units 
+*/
+function move() {
+    scene.socket.on('unitsMove', function (paths) {
+        if (attackPath2.length != 0) {
+            pathNotFound = false;
+        }
 
         for (var i = 0; i < globalUnits.length; i++) {
+
             if (attackPath2.length == 0) {
                 var endPos = {
                     x: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).x,
                     y: isometricTo2d(paths[i][paths[i].length - 1].x, paths[i][paths[i].length - 1].y).y,
-                };
-                //getDirection(paths[i, globalUnits[i]);
+                }
             } else {
                 var endPos = {
                     x: 0,
@@ -294,6 +224,8 @@ function moveTest() {
                         moveCharacter(paths[i], scene, globalUnits[i]);
                         attackerUnits.length = 0;
                         attackPath.length = 0;
+                        globalDamage.splice(globalDamage.length - 1, 1);
+                        damagePositon.splice(globalDamage.length - 1, 1);
                         removeDamage = true;
                     }
                 } else {
@@ -304,26 +236,33 @@ function moveTest() {
                 workerAttack.length = 0;
             } else {
                 if (globalUnits[i].getData("name") == 'worker') {
-                    moveCharacterTest(endPos, scene, globalUnits[i]);
+                    moveCharacterOnResource(endPos, scene, globalUnits[i]);
                 }
                 if (IsometricMap.map[globalUnits[i].getData("tileX")][globalUnits[i].getData("tileY")].id == 6 && globalUnits[i].getData("name") == 'worker') {
                     collect(globalUnits[i]);
                 }
             }
+
+            pathToUse.length = 0;
+            selectedArray.length = 0;
+            globalUnits.length = 0;
+            attackPath2.length = 0;
+            directons.length = 0;
         }
-        pathToUse.length = 0;
-        selectedArray.length = 0;
-        globalUnits.length = 0;
-        attackPath2.length = 0;
-        directons.length = 0;
     });
 }
 
+/*
+Sammeln der Resourcen 
+*/
 function collect(unit) {
     unitsOnResourceArray2.push(unit);
 }
 
-function attackTest() {
+/*
+Angriff wird initialisiert 
+*/
+function initAttack() {
     scene.input.keyboard.on('keydown_X', function (event) {
         woAtt = true
     }, this);
@@ -341,7 +280,10 @@ function attackTest() {
     }, scene);
 }
 
-function attack2() {
+/*
+Angriff wird ausgeführt 
+*/
+function attack() {
     scene.input.on('pointerdown', function (pointer) {
         selectedArray.forEach(unit => {
             if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0 || workerAttack.length != 0) {
@@ -349,7 +291,6 @@ function attack2() {
                     x: unit.x,
                     y: unit.y,
                 }
-
                 var end = isometricTo2d(selectedTileX, selectedTileY);
 
                 var pathObject = {
@@ -377,6 +318,9 @@ function attack2() {
     }, this);
 }
 
+/*
+Auswahl der Units welche angreifen
+*/
 function unitAttack(scene) {
     scene.socket.on('attackedUnits', function (down) {
         unitsArray1.forEach(unit => {
@@ -390,6 +334,9 @@ function unitAttack(scene) {
     });
 }
 
+/*
+Schaden an andere Units 
+*/
 function doDamageUnits() {
     if (attackedUnits.length != 0) {
         attackedUnits.forEach(unit => {
@@ -403,6 +350,9 @@ function doDamageUnits() {
     }
 }
 
+/*
+Angriff wird dargestellt 
+*/
 function displayAttack() {
     graphics.clear();
     graphics.setDepth(7000);
@@ -419,8 +369,9 @@ function displayAttack() {
     }
 }
 
-
-
+/*
+Bewegung der Units
+*/
 function moveCharacter(path, scene, unit) {
     // Sets up a list of tweens, one for each tile to walk, that will be chained by the timeline
     var tweens = [];
@@ -452,7 +403,7 @@ function moveCharacter(path, scene, unit) {
             },
         });
     }
-    var test = scene.tweens.timeline({
+    scene.tweens.timeline({
         tweens: tweens
     });
 }
@@ -465,7 +416,10 @@ function updateUnits(unit) {
     scene.socket.emit('updatePosResource', toUpdatePositon);
 }
 
-function moveCharacterTest(path, scene, unit) {
+/*
+Bewegung der Unis zwischen Resourcen und HQ
+*/
+function moveCharacterOnResource(path, scene, unit) {
     unitsOnResourceArray.push(unit);
     var follower1 = {
         t: 0,
@@ -479,25 +433,20 @@ function moveCharacterTest(path, scene, unit) {
     }
     resourcePathArray.push(rePA);
 
-
     if (unit.getData("team") == finalTeam) {
         console.log(updatedHqArray);
-        moveToPos =updatedHqArray[finalTeam - 1];
+        moveToPos = updatedHqArray[finalTeam - 1];
         console.warn("RICHTIG");
     } else {
         console.warn("FALSCH");
-        if(finalTeam == 1) { 
-            moveToPos =updatedHqArray[1];
+        if (finalTeam == 1) {
+            moveToPos = updatedHqArray[1];
         } else {
-            moveToPos =updatedHqArray[0];
+            moveToPos = updatedHqArray[0];
         }
-      
     }
 
-
     var line1 = new Phaser.Curves.Line([path.x, path.y, moveToPos.x, moveToPos.y]);
-
-    //var line1 = new Phaser.Curves.Line([500,500, 1000, 1000]);
     path1.add(line1);
 
     scene.tweens.add({
@@ -511,6 +460,9 @@ function moveCharacterTest(path, scene, unit) {
     vectorArray.push(follower1);
 }
 
+/*
+Bewegung der Unis zwischen Resourcen und HQ
+*/
 function moveOnResource() {
     graphics.clear();
     graphics.lineStyle(2, 0xffffff, 1);
@@ -545,7 +497,9 @@ function moveOnResource() {
     }
 }
 
-// Worker nur eine bestimmte Anzahl zwischen HQ und Resource hinunterher gehen lassen 
+/*
+Resourcencounter wird geupdated 
+*/
 function collectResources() {
     if (selectedArray.length != 0) {
 
@@ -560,13 +514,19 @@ function collectResources() {
     }
 }
 
+/*
+Länge der Linien werden berechnet 
+*/
 function lineDistance(x1, y1, x2, y2) {
     var length = Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
 
     return length;
 }
 
-function dgfdjkgdkjflg() {
+/*
+Angriff 
+*/
+function initAttackPath() {
     scene.socket.on('attackBreak', function (down) {
         down.forEach(line => {
             var path1 = scene.add.path();
@@ -589,6 +549,9 @@ function dgfdjkgdkjflg() {
     });
 }
 
+/*
+Attackrange wird angezeigt 
+*/
 function showAttackRange() {
     scene.input.keyboard.on('keydown_X', function (event) {
         if (showRange) {

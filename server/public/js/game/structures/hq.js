@@ -1,22 +1,16 @@
-var buildingTest = "none";
+var hqImg = "none";
 var hqPosition;
 var hqPositionTest;
-
 var updatedHqPos;
-
 var imageArray = new Array();
-
-var updatedHqArray  = new Array();
+var updatedHqArray = new Array();
 
 /*
   Darstellung des HQ
-
   Die Position im 2D Array der Map wird in X & Y Koordinaten umgerechnet 
   Das Bild des HQ besitzt eine ID welche auch im Array gespeichret ist 
-
   Alle Infomationen ueber das HQ werden in einem Objekt gespeichert
   ID im Array wird durch das Objekt ersezt, damit man immer auf die Infos zugreifen kann
-
   Xi = X-Koordninate im Array der Map
   Yi = Y-Koordninate im Array der Map
 */
@@ -36,7 +30,7 @@ function drawHq(Xi, Yi) {
     "AnzhalTilesY": "1",
     "isSelected": false,
     "canBeSelected": false,
-    "image": buildingTest,
+    "image": hqImg,
   }
 
   // Position des HQs wird an den Server gesendet 
@@ -100,17 +94,17 @@ function addHq(scene) {
   scene.socket.on('hq', function (hqLocation) {
     if (teamname === 1) {
       getHq()
-      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
-      buildingTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
-      imageArray.push(buildingTest);
-      drawHq(selectedTileX, selectedTileY, buildingTest);
+      hqImg = scene.add.image(hqLocation.x, hqLocation.y, 'star').setInteractive();
+      hqImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
+      imageArray.push(hqImg);
+      drawHq(selectedTileX, selectedTileY, hqImg);
       resourceCounter -= 50;
     } else if (teamname != 1) {
       getHq();
-      buildingTest = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
-      buildingTest.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
-      imageArray.push(buildingTest);
-      drawHq(selectedTileX, selectedTileY, buildingTest);
+      hqImg = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
+      hqImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
+      imageArray.push(hqImg);
+      drawHq(selectedTileX, selectedTileY, hqImg);
       resourceCounter -= 50;
     }
   });
@@ -120,33 +114,41 @@ function addHq(scene) {
 function updateHqPosition() {
   scene.socket.on('hqUpdate', function (hqLocation) {
     hqLocation.forEach(element => {
-       updatedHqArray.push(element);
+      updatedHqArray.push(element);
     });
-   
-   
-    console.log(uniq(updatedHqArray));
-    if(finalTeam ==1)  { 
+
+
+    updatedHqArray = uniq(updatedHqArray);
+    if (finalTeam == 1) {
       updatedHqPos = { // TODO Send to server
         "x": hqLocation[0].x,
         "y": hqLocation[0].y,
         "team": teamname
       }
-    } else { 
+    } else {
       updatedHqPos = { // TODO Send to server
         "x": hqLocation[1].x,
         "y": hqLocation[1].y,
         "team": teamname
       }
     }
-  
+
   });
 }
 
 function uniq(a) {
   const uniqueObjects = [...new Map(a.map(item => [item.team, item])).values()]
+  sort(uniqueObjects);
   return (uniqueObjects);
 }
 
+function sort(array) {
+  array.sort((a, b) => (a.team > b.team) ? 1 : -1)
+}
+
+/*
+Position des Hqs auf der Map
+*/
 function getHq() {
   for (var i = 0; i < IsometricMap.buildingMap.length; i++) {
     for (var j = 0; j < IsometricMap.buildingMap.length; j++) {

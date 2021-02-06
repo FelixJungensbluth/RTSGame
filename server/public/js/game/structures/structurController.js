@@ -1,17 +1,18 @@
 var damagePositon = new Array();
 var globalDamage = new Array();
-
 var play = true;
+var canBuild = false;
 
+/*
+Positon auf der Map welches Gebäude Schaden bekommt
+*/
 function destroyBuilding(x, y, scene) {
-
     var positon = {
         xPos: x,
         yPos: y,
     }
-    console.log(positon);
-    damagePositon.push(positon);
 
+    damagePositon.push(positon);
 
     for (var i = 0; i < buildingArray.length; i++) {
         if (buildingArray[i].image == 'none') {
@@ -22,45 +23,40 @@ function destroyBuilding(x, y, scene) {
     scene.socket.emit('damagePositon', positon);
 }
 
+/*
+Schaden wird auf die Gebäude ausgeübt
+Wenn das Leben auf 0 fällt wird das Gebäude entfernt 
+*/
 function doDamage(scene) {
+    console.log(globalDamage.length);
     if (globalDamage.length != 0) {
         globalDamage.forEach(building => {
 
             if (!removeDamage) {
                 play = true;
                 IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 10;
-               // playDamage(scene, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX, IsometricMap.buildingMapAll[building.xPos][building.yPos].positionY);
             } else {
                 play = false;
                 IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 0;
             }
 
-
-
             if (IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp <= 0) {
                 console.log(imageArray);
                 for (var i = 0; i < imageArray.length; i++) {
 
-                    console.log(imageArray[i].x + "  " + IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX);
-
                     if (imageArray[i].x == IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX && imageArray[i].y == IsometricMap.buildingMapAll[building.xPos][building.yPos].positionY) {
-                        console.log(IsometricMap.buildingMapAll[building.xPos][building.yPos].team + '   ' + teamname);
-
                         playExplosion(scene, imageArray[i].x, imageArray[i].y);
                         imageArray[i].destroy();
                         imageArray.splice(i, 1);
+                        globalDamage.splice(globalDamage.length - 1, 1);
 
                         if (IsometricMap.buildingMapAll[building.xPos][building.yPos].name == "hq") {
                             win = true;
                             scene.socket.emit('win', win);
 
                         }
-                       // dmgSprite.destroy();
                         play = false;
-
                     }
-
-
                 }
                 IsometricMap.buildingMapAll[building.xPos][building.yPos] = 0;
             }

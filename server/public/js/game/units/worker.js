@@ -1,5 +1,8 @@
 var worker = "worker";
 
+/*
+Panzer wird initalisiert
+*/
 function initWorker(team) {
     worker.setData({
         name: 'worker',
@@ -26,6 +29,9 @@ function initWorker(team) {
     unitsArray1.push(worker);
 }
 
+/*
+Arbeiter wird der Szene hinzugefügt
+*/
 function addWorker(scene) {
     scene.socket.on('workerLocation', function (workerLocation) {
         id++;
@@ -33,9 +39,13 @@ function addWorker(scene) {
         workerY = workerLocation.y;
         worker = scene.add.image(workerLocation.x, workerLocation.y, 'worker').setInteractive();
         initWorker(workerLocation.team);
+        worker.setData({
+            tileX: workerLocation.spawnTileX,
+            tileY: workerLocation.spawnTileY,
+        });
 
-        if(workerLocation.team == finalTeam) { 
-            resourceCounter -=5;
+        if (workerLocation.team == finalTeam) {
+            resourceCounter -= 5;
         } else {
             worker.setTint(0x0070FF);
         }

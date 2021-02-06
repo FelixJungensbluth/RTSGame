@@ -15,11 +15,12 @@ var testMap = new Array();
 function createMap(scene) {
     // Map Image
     map = scene.add.image(0 + 180, window.innerHeight - 173, 'minimap').setScrollFactor(0);
+    map.setDepth(3999);
     var width = 344;
     var height = 327;
     var columns = IsometricMap.map[0].length;
-    var rows= IsometricMap.map.length;
-    tileWidth  = width / columns;
+    var rows = IsometricMap.map.length;
+    tileWidth = width / columns;
     tileHeight = height / rows;
 }
 
@@ -27,7 +28,7 @@ function createMap(scene) {
  Positon auf der Karte wird berechnet 
 */
 function addBuilindsToMap(x, y) {
-    var xPos= x * tileWidth;
+    var xPos = x * tileWidth;
     var yPos = y * tileHeight;
 
 
@@ -40,6 +41,9 @@ function addBuilindsToMap(x, y) {
     scene.socket.emit('onMap', mapDisplay);
 }
 
+/*
+Gebäude werden auf der Map angezeigt 
+*/
 function addBuildingOnMap(scene) {
     scene.socket.on('allBuildingsOnMap', function (rec) {
 
@@ -48,7 +52,7 @@ function addBuildingOnMap(scene) {
         } else {
             color = 0x000080;
         }
-       
+
         var mapPos = scene.add.rectangle(rec[rec.length - 1].x, rec[rec.length - 1].y + window.innerHeight - 327, 10, 10, color, 1).setScrollFactor(0);
         mapPos.setDepth(4000);
     });

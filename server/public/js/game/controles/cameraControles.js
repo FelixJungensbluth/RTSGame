@@ -1,11 +1,9 @@
 var canMoveCam = false;
 
-/*
-  Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
-  Wenn man mit dem Mauszeiger an einen Rand kommt bewegt sich die Kamera 
-  in die jeweilige Richtung 
-*/
 
+/*
+Die Kamera wird je nach Team angepasst, dass jeder Spieler auf der richtigen Position auf der Map ist 
+*/
 function setCamera(scene, cam, team) {
     console.log(team);
     if (finalTeam != 1) {
@@ -24,13 +22,16 @@ function setCamera(scene, cam, team) {
     }
 }
 
+/*
+  Bewegung der Kamera wenn der Cursor an einen Rand des Fensters kommt 
+  Wenn man mit dem Mauszeiger an einen Rand kommt bewegt sich die Kamera 
+  in die jeweilige Richtung 
+*/
 function moveCamera(szene, cam) {
-
-
     szene.input.on('pointermove', function (pointer) {
 
-        var camMoveThresholdX = window.innerWidth * 0.04;
-        var camMoveThresholdY = window.innerHeight * 0.04;
+        var camMoveThresholdX = window.innerWidth * 0.1;
+        var camMoveThresholdY = window.innerHeight * 0.1;
 
         if (canMoveCam) {
 

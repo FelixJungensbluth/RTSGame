@@ -1,5 +1,8 @@
 var tank = "tank";
 
+/*
+Panzer wird initalisiert
+*/
 function initTank(team) {
     tank.setData({
         name: 'tank',
@@ -27,6 +30,9 @@ function initTank(team) {
     unitsArray1.push(tank);
 }
 
+/*
+Panzer wird der Szene hinzugefügt
+*/
 function addTank(scene) {
     scene.socket.on('tankLocation', function (tankLocation) {
         id++;
@@ -35,8 +41,14 @@ function addTank(scene) {
         tank = scene.add.image(tankLocation.x, tankLocation.y, 'tankU').setInteractive();
         initTank(tankLocation.team);
 
-        if(tankLocation.team == finalTeam) { 
-            resourceCounter -=5;
+        tank.setData({
+            tileX: soliderLocation.spawnTileX,
+            tileY: soliderLocation.spawnTileY,
+        });
+
+
+        if (tankLocation.team == finalTeam) {
+            resourceCounter -= 5;
         } else {
             tank.setTint(0x0070FF);
         }

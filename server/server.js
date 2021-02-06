@@ -7,9 +7,14 @@ const server = require('http').Server(app);
 const io = require('socket.io').listen(server);
 const Datauri = require('datauri');
 const datauri = new Datauri();
+require('dotenv').config();
+
+// MongoDB Client
 const {
   MongoClient
 } = require('mongodb');
+const client = new MongoClient(process.env.URI);
+
 const {
   JSDOM
 } = jsdom;
@@ -18,9 +23,7 @@ var once = true;
 var collection;
 var collectionPlayers;
 var playerArray = new Array();
-
-const uriChat = "mongodb+srv://rtsUser:SCBV5rk8qzbRCM6d@rts.sisib.mongodb.net/Chats?retryWrites=true&w=majority";
-const clientChat = new MongoClient(uriChat);
+var elos = new Array();
 
 function setupAuthoritativePhaser() {
   JSDOM.fromFile(path.join(__dirname, 'authoritative_server/index.html'), {
@@ -38,28 +41,19 @@ function setupAuthoritativePhaser() {
     };
     dom.window.URL.revokeObjectURL = (objectURL) => {};
     dom.window.gameLoaded = () => {
-      // server.listen(3000, '0.0.0.0', function () {
-      //  console.log(`Listening on ${server.address().port}`);
-      //  });
-
       server.listen(3000, async () => {
         try {
-          await clientChat.connect();
-          collection = clientChat.db("Chats").collection("chat");
-          collectionPlayers = clientChat.db("Spiele").collection("spiel");
+          await client.connect();
+          collection = client.db("Chats").collection("chat");
+          collectionPlayers = client.db("Spiele").collection("spiel");
+          elo = client.db("Spielerliste").collection("spieler");
           console.log("Listening on port :%s...", server.address().port);
-
-
         } catch (e) {
           console.error(e);
         }
-
-     
       });
 
     };
-
-
     dom.window.io = io;
   }).catch((error) => {
     console.log(error.message);
@@ -67,12 +61,12 @@ function setupAuthoritativePhaser() {
 }
 
 setupAuthoritativePhaser();
-app.use(express.static(__dirname + '/public'));
 
+// Routen 
+app.use(express.static(__dirname + '/public'));
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
-
 app.get("/chats", async (request, response) => {
   try {
     let result = await collection.findOne({
@@ -86,17 +80,19 @@ app.get("/chats", async (request, response) => {
   }
 });
 
+/*
+Spieler werden aus der Datenbank abgefragt 
+*/
 async function getPlayers(socket) {
-  
   try {
-    let players = await collectionPlayers.findOne( {} )
+    let players = await collectionPlayers.findOne({})
     players.spieler.forEach(element => {
       playerArray.push(element);
     });
-    if(playerArray.length == 2) {
-      console.log(playerArray);
+    if (playerArray.length == 2) {
       socket.emit("players", playerArray);
 
+      /*
       playerArray.forEach(element => {
         console.log(element);
         collectionPlayers.updateOne({}, {
@@ -105,10 +101,11 @@ async function getPlayers(socket) {
         }
       });
     });
-    
+     */
+
 
     }
-   
+
   } catch (e) {
     console.error(e);
   }
@@ -116,18 +113,17 @@ async function getPlayers(socket) {
 }
 
 io.on("connection", (socket) => {
-
   getPlayers(socket);
+  calculateElo();
 
   socket.on("mongo", (data) => {
     if (once) {
       main(data.p1, data.p2, data.time, data.won).catch(console.error);
-      // Query for a movie that has a title of type string
       once = false;
     }
 
   });
-  
+
   socket.on("join", async (gameId) => {
     try {
       let result = await collection.findOne({
@@ -158,17 +154,10 @@ io.on("connection", (socket) => {
   });
 });
 
-
-
+/*
+Daten werden nach jedem Spiel in die Datnbank eingefügt
+*/
 async function main(p1, p2, time, won) {
-  /**
-   * Connection URI. Update <username>, <password>, and <your-cluster-url> to reflect your cluster.
-   * See https://docs.mongodb.com/ecosystem/drivers/node/ for more details
-   */
-  const uri = "mongodb+srv://rtsUser:SCBV5rk8qzbRCM6d@rts.sisib.mongodb.net/test?retryWrites=true&w=majority";
-
-  const client = new MongoClient(uri);
-
   try {
     // Connect to the MongoDB cluster
     await client.connect();
@@ -181,8 +170,9 @@ async function main(p1, p2, time, won) {
       gewonnen: won,
 
     });
-
     await run();
+    await calculateElo(winner)
+
 
   } catch (e) {
     console.error(e);
@@ -191,27 +181,63 @@ async function main(p1, p2, time, won) {
   }
 }
 
+/*
+Leerund der Chat Collection 
+*/
 async function run() {
   try {
-    const database = clientChat.db("Chats");
+    const database = client.db("Chats");
     const collection = database.collection("chat");
     // Query for all movies with the title "Santa Claus"
-  
+
     const result = await collection.deleteMany({});
     console.log("Deleted " + result.deletedCount + " documents");
   } finally {
-    await clientChat.close();
+    await client.close();
   }
 }
 
 async function createListing(client, newListing) {
-  const result = await client.db("game").collection("games").insertOne(newListing);
+  const result = await client.db("Matchhistory").collection("matches").insertOne(newListing);
   console.log(`New listing created with the following id: ${result.insertedId}`);
 }
 
 
 /*
-rtsUser : USERNAME
-SCBV5rk8qzbRCM6d: PASSWORT
-
+Elo der Spieler werden berechnet und geupdated 
 */
+async function calculateElo(winner) {
+
+  let eloPLayer1 = await elo.findOne({
+    'name': playerArray[0]
+  });
+  let eloPLayer2 = await elo.findOne({
+    'name': playerArray[1]
+  });
+
+  elos.push(eloPLayer1);
+  elos.push(eloPLayer2);
+
+  eloGain = Math.round(((eloPLayer1 + eloPLayer2) / 2) / 100);
+
+  for (let index = 0; playerArray < playerArray.length; index++) {
+    if (winner = playerArray[i]) {
+      elo.updateOne({
+        "name": playerArray[i]
+      }, {
+        "$set": {
+          "elo": elos[i] + eloGain
+        }
+      });
+    } else if (winner != playerArray[i]) {
+
+      elo.updateOne({
+        "name": playerArray[i]
+      }, {
+        "$set": {
+          "elo": elos[i] - eloGain
+        }
+      });
+    }
+  }
+}
