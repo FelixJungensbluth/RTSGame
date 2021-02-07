@@ -119,16 +119,15 @@ function create() {
   /*
     Wenn ein Spieler connectet wird ein Objekt des Spieler mit allen Infos erzeugt 
   */
+
   io.on('connection', function (socket) {
     console.log('a user connected');
     team++;
-    // create a new player and add it to our players object
     players[socket.id] = {
       rotation: 0,
       x: Math.floor(Math.random() * 700) + 50,
       y: Math.floor(Math.random() * 500) + 50,
       playerId: socket.id,
-      team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
       team1: team,
       input: {
         a: false,
@@ -148,7 +147,6 @@ function create() {
       laborSelected: false,
       farbikSelected: false,
       unitCounter: 0,
-
     };
 
     // add player to server
@@ -302,8 +300,8 @@ function update(time) {
 
     io.emit('team', this.team);
 
-    if (input.mouse && pressed == "s" && !onRestrictedTile && resource > 50 && players[player.playerId].hqCount == 0) {
-      addHq(this, this.team, players[player.playerId].team1);
+    if (input.mouse && pressed == "s" && !onRestrictedTile && players[player.playerId].hqCount == 0) {
+      addHq(this, players[player.playerId].team1);
       players[player.playerId].hqCount++;
 
       io.emit('allBuildingsOnMap', buildingsOnMap);
@@ -313,7 +311,7 @@ function update(time) {
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "d" && !onRestrictedTile && test && resource > 0) {
+    if (input.mouse && pressed == "d" && !onRestrictedTile && test && resource >= 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       addBarracks(this, players[player.playerId].team1);
       io.emit('allBuildingsOnMap', buildingsOnMap);
@@ -321,41 +319,50 @@ function update(time) {
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "e" && !onRestrictedTile && test && resource > 0) {
+    if (input.mouse && pressed == "e" && !onRestrictedTile && test && resource >= 0) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
       players[player.playerId].laborCount++
-      addLabor(this);
+      addLabor(this,players[player.playerId].team1);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.mouse && pressed == "f" && !onRestrictedTile && test && resource > 0 && players[player.playerId].laborCount == 1) {
+    if (input.mouse && pressed == "f" && !onRestrictedTile && test && resource >= 0 && players[player.playerId].laborCount == 1) {
       //if (input.mouse && pressed == "d" && !onRestrictedTile && resource > 0 && test) {
-      addFactory(this);
+      addFactory(this,players[player.playerId].team1);
       io.emit('allBuildingsOnMap', buildingsOnMap);
       io.emit('updateMap', IsometricMap.buildingMap);
       io.emit('global', globalStructurs);
     }
 
-    if (input.a && test) {
+    if (input.a && test && resource >= 0) {
       addWorker(this, players[player.playerId].team1);
       this.presesdInfo.pressed == "none"
     }
 
-    if (input.q && kaserne) {
+    if (input.q && kaserne && resource >= 0) {
       addSolider(this, players[player.playerId].team1);
       this.presesdInfo.pressed == "none"
     }
 
-    if (input.w && fabrik) {
+    if (input.w && fabrik && resource >=0) {
       addTank(this, players[player.playerId].unit, this.team);
       this.presesdInfo.pressed == "none"
     }
 
+    if (pressed == "9" ) {
+      io.emit("hpUp", players[player.playerId].team1);
+      this.presesdInfo.pressed == "none";
+    }
+
+    if (pressed == "8" ) {
+      io.emit("dmgUp", players[player.playerId].team1);
+      this.presesdInfo.pressed == "none";
+    }
+
     if (onlyOnce) {
       if (input.mouse && pressed == "x") {
-        console.log('ATTACL');
         io.emit("attackBreak", attackLines);
         io.emit("testDmg", dmg);
         io.emit("attackedUnits", attackedUnits);
@@ -392,7 +399,6 @@ function update(time) {
       }
 
       if (surrender) {
-        console.log(players[player.playerId].team1);
         io.emit('playerLost', players[player.playerId].team1);
         io.emit('loserStatus', surrender);
 
@@ -477,7 +483,6 @@ function handlSelectedStatusLabor(self, playerId, status) {
 function handleReadyCheck(self, playerId) {
   self.players.getChildren().forEach((player) => {
     if (playerId === player.playerId) {
-      //  console.log(players[player.playerId].team1);
       readyPlayers.push(players[player.playerId].team1);
       readyPlayers = uniq(readyPlayers);
 
@@ -501,15 +506,14 @@ function addPlayer(self, playerInfo) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addHq(self, test1, teamNum) {
-  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+function addHq(self, teamNum) {
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('hq', {
     x: offX,
     y: offY,
-    team: test1
+    team: teamNum
 
   });
   var hq = {
@@ -548,13 +552,13 @@ function addHq(self, test1, teamNum) {
 
 // Erster Versuch das HQ zu platzieren 
 function addBarracks(self, team) {
-  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('barracks', {
     x: offX,
     y: offY,
+    team:team,
   });
   var hq = {
     "id": "2",
@@ -582,14 +586,14 @@ function addBarracks(self, team) {
 }
 
 // Erster Versuch das HQ zu platzieren 
-function addLabor(self) {
-  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
+function addLabor(self,team) {
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('labor', {
     x: offX,
     y: offY,
+    team: team,
   });
   var hq = {
     "id": "3",
@@ -618,13 +622,13 @@ function addLabor(self) {
 
 // Erster Versuch das HQ zu platzieren 
 function addFactory(self) {
-  console.log(self.mouseInfo.x + ' ' + self.mouseInfo.y + ' ' + self.mouseInfo.tileX + ' ' + self.mouseInfo.tileY);
   var offX = self.mouseInfo.tileX * this.tileColumnOffset / 2 + self.mouseInfo.tileY * this.tileColumnOffset / 2 + this.originX;
   var offY = self.mouseInfo.tileY * this.tileRowOffset / 2 - self.mouseInfo.tileX * this.tileRowOffset / 2 + this.originY;
   var test = self.physics.add.image(offX, offY, 'star');
   io.emit('factory', {
     x: offX,
     y: offY,
+    team: team,
   });
   var factory = {
     "id": "4",
@@ -656,7 +660,6 @@ function addFactory(self) {
 function addWorker(self, team) {
   worker = self.add.image(Phaser.Math.RND.between(800, 200), Phaser.Math.RND.between(1000, 200), 'star').setInteractive();
   hq = uniqHq(hq);
-  console.log(hq);
   var posX = 0;
   var posY = 0;
 
@@ -672,15 +675,15 @@ function addWorker(self, team) {
       spawnTileY: hq[0].tileY + 3
     });
   } else {
-    posX = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).x
-    posY = isometricTo2d(hq[0].tileX - 1, hq[0].tileY + 3).y
+    posX = isometricTo2d(hq[1].tileX - 1, hq[1].tileY + 3).x
+    posY = isometricTo2d(hq[1].tileX - 1, hq[1].tileY + 3).y
 
     io.emit('workerLocation', {
       x: posX,
       y: posY,
       team: team,
-      spawnTileX: hq[0].tileX - 1,
-      spawnTileY: hq[0].tileY + 3
+      spawnTileX: hq[1].tileX - 1,
+      spawnTileY: hq[1].tileY + 3
     });
   }
 }

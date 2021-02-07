@@ -3,13 +3,14 @@ var worker = "worker";
 /*
 Panzer wird initalisiert
 */
+
 function initWorker(team) {
     worker.setData({
         name: 'worker',
         id: id,
         x: workerX,
         y: workerY,
-        hp: 50,
+        hp: 50 + hpUp,
         currentHp: 50,
         timeToBuild: 40,
         isSelected: true,
@@ -32,6 +33,7 @@ function initWorker(team) {
 /*
 Arbeiter wird der Szene hinzugefügt
 */
+
 function addWorker(scene) {
     scene.socket.on('workerLocation', function (workerLocation) {
         id++;
@@ -49,8 +51,5 @@ function addWorker(scene) {
         } else {
             worker.setTint(0x0070FF);
         }
-
-        console.log(worker.getData("team") + "  " + workerLocation.team);
-
     });
 }

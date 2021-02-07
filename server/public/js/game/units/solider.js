@@ -9,7 +9,7 @@ function initSolider(team) {
         id: id,
         x: soliderX,
         y: soliderY,
-        hp: 50,
+        hp: 51000 + hpUp,
         timeToBuild: 40,
         damage: 5,
         isSelected: true,

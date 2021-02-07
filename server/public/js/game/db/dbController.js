@@ -22,16 +22,15 @@ function getAllPlayers(scene) {
         players.forEach(element => {
             playersArray.push(element);
         });
-        console.log(playersArray);
     });
 }
 
 /*
 Wenn das Spiel beendet ist werden Daten in ein Objekt gespeichert und an der Server gesendet
 */
+
 function setGameData(scene) {
     if (gameEnded) {
-        console.log(winner);
         var gameData = {
             p1: playersArray[0],
             p2: playersArray[playersArray.length - 1],

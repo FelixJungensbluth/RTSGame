@@ -66,13 +66,14 @@ function addBarracks(scene) {
       barrackImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackImg);
       drawBarracks(selectedTileX, selectedTileY, scene);
-      resourceCounter -= 25;
     } else if (teamname != 1) {
       barrackImg = scene.add.image(hqLocation.x, hqLocation.y, 'kaserne2').setInteractive();
       barrackImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(barrackImg);
       drawBarracks(selectedTileX, selectedTileY, scene);
-      resourceCounter -= 25;
+    }
+    if (hqLocation.team == finalTeam) {
+      resourceCounter -= 50;
     }
   });
 }

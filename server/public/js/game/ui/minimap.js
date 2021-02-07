@@ -31,7 +31,6 @@ function addBuilindsToMap(x, y) {
     var xPos = x * tileWidth;
     var yPos = y * tileHeight;
 
-
     var mapDisplay = {
         x: xPos,
         y: yPos,

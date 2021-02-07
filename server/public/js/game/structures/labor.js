@@ -12,7 +12,8 @@ var laborCounter = 0;
   Xi = X-Koordninate im Array der Map
   Yi = Y-Koordninate im Array der Map
 */
-function drawLabor(Xi, Yi, scene) {
+
+function drawLabor(Xi, Yi) {
     var offX = Xi * this.tileColumnOffset / 2 + Yi * this.tileColumnOffset / 2 + this.originX;
     var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
     var labor = {
@@ -44,7 +45,7 @@ function drawLabor(Xi, Yi, scene) {
     IsometricMap.grid[Yi][Xi - 1] = labor;
     IsometricMap.grid[Yi + 1][Xi - 1] = labor;
     // Wird auf der Map angezeigt 
-    addBuilindsToMap(offY, offX);
+    addBuilindsToMap(Xi, Yi);
 
     // Pathfinding Grid wird geupdated
     easystar.setAcceptableTiles([0]);
@@ -58,6 +59,7 @@ function drawLabor(Xi, Yi, scene) {
 Anzeige der Gebaeude fuer den CLient
 Daten von starLocation2 werden Empfangen und verarbeitet
 */
+
 function addLabor(scene) {
     scene.socket.on('labor', function (hqLocation) {
         if (teamname === 1) {
@@ -65,7 +67,6 @@ function addLabor(scene) {
             laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
-            resourceCounter -= 25;
             laborCounter++;
 
         } else if (teamname != 1) {
@@ -73,8 +74,11 @@ function addLabor(scene) {
             laborImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(laborImg);
             drawLabor(selectedTileX, selectedTileY, scene);
-            resourceCounter -= 25;
             laborCounter++;
         }
+
+        if (hqLocation.team == finalTeam) {
+            resourceCounter -= 100;
+          }
     });
 }

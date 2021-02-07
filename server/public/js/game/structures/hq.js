@@ -98,14 +98,15 @@ function addHq(scene) {
       hqImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(hqImg);
       drawHq(selectedTileX, selectedTileY, hqImg);
-      resourceCounter -= 50;
     } else if (teamname != 1) {
       getHq();
       hqImg = scene.add.image(hqLocation.x, hqLocation.y, 'turm2').setInteractive();
       hqImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
       imageArray.push(hqImg);
       drawHq(selectedTileX, selectedTileY, hqImg);
-      resourceCounter -= 50;
+    }
+    if (hqLocation.team == finalTeam) {
+      resourceCounter -= 75;
     }
   });
 }
@@ -127,8 +128,8 @@ function updateHqPosition() {
       }
     } else {
       updatedHqPos = { // TODO Send to server
-        "x": hqLocation[1].x,
-        "y": hqLocation[1].y,
+        "x": hqLocation[0].x,
+        "y": hqLocation[0].y,
         "team": teamname
       }
     }

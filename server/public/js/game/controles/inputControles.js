@@ -59,7 +59,6 @@ function placeBuilding(szene) {
 
             // Auswahl wird entfernt 
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].laborIsSelected || IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].fabricIsSelected) {
-                console.log("DESELECTED");
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].image.clearTint();
                 IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected = false;
                 //   szene.socket.emit('structureSelected', IsometricMap.buildingMap[selectedTileX][selectedTileY].isSelected);
@@ -88,7 +87,6 @@ function placeBuilding(szene) {
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY].barracksIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX][selectedTileY + 1].barracksIsSelected = false;
                     IsometricMap.buildingMap[selectedTileX - 1][selectedTileY + 1].barracksIsSelected = false;
-                    console.log("sdfsdfsdfdfs");
                     szene.socket.emit('structureSelectedKaserne', IsometricMap.buildingMap[selectedTileX][selectedTileY].barracksIsSelected);
 
                 }
@@ -118,7 +116,6 @@ function placeBuilding(szene) {
 
         if (pointer.rightButtonDown()) {
             // Auswahl wird hinzugefuegt.
-            console.log(IsometricMap.buildingMap[selectedTileX][selectedTileY]);
             if (IsometricMap.buildingMap[selectedTileX][selectedTileY].canBeSelected) {
 
 

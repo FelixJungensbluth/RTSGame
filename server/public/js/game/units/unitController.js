@@ -37,12 +37,16 @@ var pathNotFound = false;
 /*
 Units werden Clientseitig ausgewählt
 */
+
 function selectUnits(scene) {
     scene.input.on('gameobjectdown', function (pointer, gameObject) {
         gameObject.setData({
             isSelected: true
         });
-        if (gameObject.getData('isSelected') && (gameObject.getData('name') == 'solider' || gameObject.getData('name') == 'worker' || gameObject.getData('name') == 'tank')) {
+        if (gameObject.getData('isSelected') && (gameObject.getData('name') == 'solider' ||
+            gameObject.getData('name') == 'worker' ||
+            gameObject.getData('name') == 'tank')) {
+
             gameObject.setTint(0xFFFFFF, 0.05);
             selectedArray.push(gameObject);
 
@@ -54,11 +58,12 @@ function selectUnits(scene) {
 /*
 Alle ausgewählten Units werden anhand der ID festgelegt
 */
+
 function handelSelectedUnits(scene) {
     scene.socket.on('break', function (id) {
         unitsArray1.forEach(unit => {
             id.forEach(ids => {
-                if (unit.getData('id') == ids) { //  TODO
+                if (unit.getData('id') == ids) {
                     globalUnits.push(unit);
                 }
             });
@@ -80,15 +85,13 @@ function handleUnitMovment(scene) {
                             isSelected: false,
                             canMove: true,
                         });
-
                         unit.clearTint();
+
                         var toX = lastClicked[0].tilePositionX;
                         var toY = lastClicked[0].tilePositionY;
 
                         var fromX = unit.getData('tileX');
                         var fromY = unit.getData('tileY');
-
-
 
                         easystar.findPath(fromX, fromY, toX, toY, function (path) {
                             if (path === null) {
@@ -128,6 +131,7 @@ function handleUnitMovment(scene) {
 Änderung der Richtung der Units bei der Bewegung 
 */
 function getDirection(path, i, unit) {
+
     if (i == 0) {
         dx = unit.getData("tileX") - path[i].x;
         dy = unit.getData("tileY") - path[i].y;
@@ -263,11 +267,11 @@ function collect(unit) {
 Angriff wird initialisiert 
 */
 function initAttack() {
-    scene.input.keyboard.on('keydown_X', function (event) {
+    scene.input.keyboard.on('keydown_CTRL', function (event) {
         woAtt = true
     }, this);
 
-    scene.input.keyboard.on('keyup_X', function (event) {
+    scene.input.keyboard.on('keyup_CTRL', function (event) {
         woAtt = false
     }, this);
 
@@ -283,10 +287,13 @@ function initAttack() {
 /*
 Angriff wird ausgeführt 
 */
+
 function attack() {
     scene.input.on('pointerdown', function (pointer) {
         selectedArray.forEach(unit => {
-            if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0 || workerAttack.length != 0) {
+            if (IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 5 
+                && IsometricMap.buildingMapAll[selectedTileX][selectedTileY] != 0 
+                || workerAttack.length != 0) {
                 var start = {
                     x: unit.x,
                     y: unit.y,
@@ -325,7 +332,7 @@ function unitAttack(scene) {
     scene.socket.on('attackedUnits', function (down) {
         unitsArray1.forEach(unit => {
             down.forEach(ids => {
-                if (unit.getData('id') == ids) { //  TODO
+                if (unit.getData('id') == ids) {
                     attackedUnits.push(unit);
                 }
             });
@@ -341,7 +348,7 @@ function doDamageUnits() {
     if (attackedUnits.length != 0) {
         attackedUnits.forEach(unit => {
             unit.setData({
-                currentHp: unit.getData('currentHp') - 5
+                currentHp: unit.getData('currentHp') - 5 +damageUp
             });
             if (unit.getData('currentHp') <= 0) {
                 unit.destroy();
@@ -372,8 +379,8 @@ function displayAttack() {
 /*
 Bewegung der Units
 */
+
 function moveCharacter(path, scene, unit) {
-    // Sets up a list of tweens, one for each tile to walk, that will be chained by the timeline
     var tweens = [];
 
     for (var i = 0; i < path.length - 1; i++) {
@@ -419,6 +426,7 @@ function updateUnits(unit) {
 /*
 Bewegung der Unis zwischen Resourcen und HQ
 */
+
 function moveCharacterOnResource(path, scene, unit) {
     unitsOnResourceArray.push(unit);
     var follower1 = {
@@ -434,11 +442,8 @@ function moveCharacterOnResource(path, scene, unit) {
     resourcePathArray.push(rePA);
 
     if (unit.getData("team") == finalTeam) {
-        console.log(updatedHqArray);
         moveToPos = updatedHqArray[finalTeam - 1];
-        console.warn("RICHTIG");
     } else {
-        console.warn("FALSCH");
         if (finalTeam == 1) {
             moveToPos = updatedHqArray[1];
         } else {
@@ -526,6 +531,7 @@ function lineDistance(x1, y1, x2, y2) {
 /*
 Angriff 
 */
+
 function initAttackPath() {
     scene.socket.on('attackBreak', function (down) {
         down.forEach(line => {

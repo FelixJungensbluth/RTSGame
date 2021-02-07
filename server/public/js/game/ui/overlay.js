@@ -71,6 +71,7 @@ function hp() {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
                     80, 5, 0xff0000
                 );
+                hpBackground.setDepth(4000);
 
                 recArray.push(hpBackground);
                 testRect = scene.add.rectangle(
@@ -78,6 +79,7 @@ function hp() {
                     IsometricMap.buildingMap[selectedTileX][selectedTileY].positionY - 40,
                     hpWidth, 5, 0x39ff14
                 );
+                testRect.setDepth(4000);
                 recArray.push(testRect);
                 onlyOnce = false;
             }
@@ -165,7 +167,6 @@ function readyUp(scene) {
     playButton.setInteractive();
     playButton.setDepth(10001);
     playButton.on('pointerdown', function (pointer) {
-        console.log(teamname);
         scene.socket.emit("ready", "test");
     }, this);
 
@@ -178,8 +179,7 @@ function readyUp(scene) {
 
         }
 
-        if (recCount == 1) {
-            // if (recCount == 2) {
+        if (recCount == 2) {
             ready2 = scene.add.rectangle(40 + window.innerWidth / 2, -19 + window.innerHeight / 2, 76, 20, 0xff0000, 1).setScrollFactor(0);
             ready2.setDepth(10002);
             readyArray.push(ready2);

@@ -13,6 +13,9 @@ require('dotenv').config();
 const {
   MongoClient
 } = require('mongodb');
+const {
+  captureRejectionSymbol
+} = require('events');
 const client = new MongoClient(process.env.URI);
 
 const {
@@ -83,13 +86,14 @@ app.get("/chats", async (request, response) => {
 /*
 Spieler werden aus der Datenbank abgefragt 
 */
+
 async function getPlayers(socket) {
   try {
     let players = await collectionPlayers.findOne({})
     players.spieler.forEach(element => {
       playerArray.push(element);
     });
-    if (playerArray.length == 2) {
+    if (playerArray.length >= 2) {
       socket.emit("players", playerArray);
 
       /*
@@ -114,8 +118,6 @@ async function getPlayers(socket) {
 
 io.on("connection", (socket) => {
   getPlayers(socket);
-  calculateElo();
-
   socket.on("mongo", (data) => {
     if (once) {
       main(data.p1, data.p2, data.time, data.won).catch(console.error);
@@ -171,7 +173,7 @@ async function main(p1, p2, time, won) {
 
     });
     await run();
-    await calculateElo(winner)
+    await calculateElo(won)
 
 
   } catch (e) {
@@ -206,6 +208,7 @@ async function createListing(client, newListing) {
 /*
 Elo der Spieler werden berechnet und geupdated 
 */
+
 async function calculateElo(winner) {
 
   let eloPLayer1 = await elo.findOne({
@@ -215,29 +218,28 @@ async function calculateElo(winner) {
     'name': playerArray[1]
   });
 
-  elos.push(eloPLayer1);
-  elos.push(eloPLayer2);
+  elos.push(eloPLayer1.elo);
+  elos.push(eloPLayer2.elo);
 
-  eloGain = Math.round(((eloPLayer1 + eloPLayer2) / 2) / 100);
-
-  for (let index = 0; playerArray < playerArray.length; index++) {
-    if (winner = playerArray[i]) {
+  var eloGain = Math.round(((eloPLayer1.elo + eloPLayer2.elo) / 2) /10);
+  for (let index = 0; index < playerArray.length; index++) {
+    if (playerArray[index] == winner) {
       elo.updateOne({
-        "name": playerArray[i]
+        "name": playerArray[index]
       }, {
         "$set": {
-          "elo": elos[i] + eloGain
+          "elo": elos[index] + eloGain
         }
       });
-    } else if (winner != playerArray[i]) {
-
+    } else if(playerArray[index] != winner) {
       elo.updateOne({
-        "name": playerArray[i]
+        "name": playerArray[index]
       }, {
         "$set": {
-          "elo": elos[i] - eloGain
+          "elo": elos[index] - eloGain
         }
       });
     }
+
   }
 }

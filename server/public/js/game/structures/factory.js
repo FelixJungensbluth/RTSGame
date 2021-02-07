@@ -34,6 +34,8 @@ function drawFac(Xi, Yi) {
 
     this.buildingArray.push(fac);
 
+    addBuilindsToMap(Xi, Yi);
+
     IsometricMap.buildingMap[Xi][Yi] = fac;
     IsometricMap.buildingMap[Xi - 1][Yi] = fac;
     IsometricMap.buildingMap[Xi - 2][Yi] = fac;
@@ -60,13 +62,14 @@ function addFactory(scene) {
             factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
-            resourceCounter -= 25;
         } else if (teamname != 1) {
             factoryImg = scene.add.image(hqLocation.x, hqLocation.y, 'factory').setInteractive();
             factoryImg.setDepth(IsometricMap.depth[selectedTileY][selectedTileX]);
             imageArray.push(factoryImg);
             drawFac(selectedTileX, selectedTileY, scene);
-            resourceCounter -= 25;
         }
+        if (hqLocation.team == finalTeam) {
+            resourceCounter -= 150;
+          }
     });
 }

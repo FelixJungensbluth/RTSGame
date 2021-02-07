@@ -5,6 +5,7 @@ var showChat = false;
 /*
 Chat wir eingeblendet wenn de Button gedrückt wird 
 */
+
 function setChatActive() {
   chatImg = scene.add.image(window.innerWidth - 70, window.innerHeight - 310, 'chat').setScrollFactor(0);
   chatImg.setInteractive();
@@ -55,7 +56,6 @@ function displayChat(scene) {
   })
 
   scene.socket.connect();
-
   scene.socket.on("connect", async () => {
     scene.socket.emit("join", "mongodb");
   });
@@ -63,7 +63,6 @@ function displayChat(scene) {
   scene.socket.on("joined", async (gameId) => {
     let result = await fetch("http://localhost:3000/chats?room=" + gameId).then(response => response.json());
     scene.chatMessages = result.messages;
-    // scene.chatMessages.push("Welcome to " + gameId);
     if (scene.chatMessages.length > 6) {
       scene.chatMessages.shift();
     }

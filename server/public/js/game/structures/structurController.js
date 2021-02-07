@@ -28,20 +28,18 @@ Schaden wird auf die Gebäude ausgeübt
 Wenn das Leben auf 0 fällt wird das Gebäude entfernt 
 */
 function doDamage(scene) {
-    console.log(globalDamage.length);
     if (globalDamage.length != 0) {
         globalDamage.forEach(building => {
 
             if (!removeDamage) {
                 play = true;
-                IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 10;
+                IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 10 + damageUp;
             } else {
                 play = false;
                 IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp -= 0;
             }
 
             if (IsometricMap.buildingMapAll[building.xPos][building.yPos].currentHp <= 0) {
-                console.log(imageArray);
                 for (var i = 0; i < imageArray.length; i++) {
 
                     if (imageArray[i].x == IsometricMap.buildingMapAll[building.xPos][building.yPos].positionX && imageArray[i].y == IsometricMap.buildingMapAll[building.xPos][building.yPos].positionY) {
@@ -69,7 +67,5 @@ function globalDamagePos() {
         pos.forEach(sdfs => {
             globalDamage.push(sdfs);
         });
-
-        console.log(globalDamage);
     });
 }

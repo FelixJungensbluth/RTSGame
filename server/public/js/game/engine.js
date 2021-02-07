@@ -79,6 +79,8 @@ let keyX;
 let keyE;
 let keyW;
 let keyF;
+let key8;
+let key9;
 var pressed = "none"; // String der speichert weilche Taste gedrueckt wurde 
 var teamname = "none"; // String in welchem Team der Spieler ist (Im Moment Rot oder Blau)
 var tileStatus = false;
@@ -213,9 +215,7 @@ function create() {
     Object.keys(players).forEach(function (id) {
 
       if (players[id].playerId === scene.socket.id) {
-        //console.log("test");
       } else {
-        // console.log("test1");
       }
     });
   });
@@ -235,7 +235,6 @@ function create() {
 
   this.socket.on('newPlayer', function (playerInfo) {
     finalTeam = playerInfo.team1;
-    console.log(finalTeam);
     setCamera(this, cam, finalTeam);
   });
 
@@ -251,47 +250,8 @@ function create() {
   getResourcePosition();
   fillDepthSortArry();
 
-
-  // Infotext
-  tilePosition = this.add.text(20, 140, 'Tile Position:', {
-    fontSize: '15px',
-    fill: '#fff'
-  }).setScrollFactor(0);
-  tilePosition.setDepth(10000);
-
-  mousePosition = this.add.text(20, 160, 'Mouse Position: ', {
-    fontSize: '15px',
-    fill: '#fff'
-  }).setScrollFactor(0);
-  mousePosition.setDepth(10000);
-
-  belegt = this.add.text(20, 180, 'Tile Status: ', {
-    fontSize: '15px',
-    fill: '#fff'
-  }).setScrollFactor(0);
-  belegt.setDepth(10000);
-
-  mausInfo = this.add.text(20, 200, 'Mausinfo: ', {
-    fontSize: '15px',
-    fill: '#fff'
-  }).setScrollFactor(0);
-  addBuildingOnMap(scene);
-  mausInfo.setDepth(10000);
-
-  // Bestimmung des ausgewählten Tiles
-  this.input.on('pointerdown', function (pointer) {
-    if (lastClicked.length != 0) {
-      mausInfo.setText('Mausbutton: ' + lastClicked[0].button + '\n' +
-        'Zuletzt geklickte Tile Position X: ' + lastClicked[0].tilePositionX + '\n' +
-        'Zuletzt geklickte Tile Position Y: ' + lastClicked[0].tilePositionY);
-    }
-  }, this);
-
   // Bestimming des aktuellen Tiles 
   this.input.on('pointermove', function (pointer) {
-    // InfoText
-    mousePosition.setText('Mouse X: ' + pointer.x + ' Mouse Y: ' + pointer.y);
-
     // Mauspositon wird den Variablen zugewiesen
     mausX = pointer.x;
     mausY = pointer.y;
@@ -313,9 +273,6 @@ function create() {
     // Aktuelle Positon im 2D Array wird in den jeweiligen Variablen gespiechert
     selectedTileX = tileX;
     selectedTileY = tileY + 1;
-
-    // InfoText
-    tilePosition.setText('Tile X: ' + selectedTileX + ' Tile Y: ' + selectedTileY);
 
     this.socket.emit('mouse', {
       x: pointer.x,
@@ -388,6 +345,10 @@ function create() {
   // Attack
   keyX = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
 
+  // PowerUps
+  key8 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EIGHT);
+  key9 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NINE);
+
   this.aKeyPressed = false;
   this.sKeyPressed = false;
   this.dKeyPressed = false;
@@ -440,11 +401,15 @@ function create() {
 
   // Fuegt das Labor zu der Scene hinzu
   addFactory(scene)
+  addBuildingOnMap(scene);
 
   // Hinzufügen von Units
   addWorker(scene);
   addSolider(scene);
   addTank(scene);
+
+  setHpUp();
+  setAttackUp();
 
   // Handling der Units
   selectUnits(scene);
@@ -510,6 +475,7 @@ function rotate(matrix) {
   Xi = X-Koordninate im Array der Map
   Yi = Y-Koordninate im Array der Map
 */
+
 function drawTile(Xi, Yi) {
 
   // Umrechnung der Koordinaten
@@ -558,11 +524,13 @@ function update(time, delta) {
   timer += delta;
   while (timer > 1000) {
     resourceCounter += unitsOnResourceArray2.length;
+    if(resourceCounter <= 0) {
+      resourceCounter = 0;
+    }
     doDamage(this);
     doDamageUnits();
 
     if (countdown) {
-      console.log(secsPassed);
       secsPassed -= 1;
       countdownText.setText(secsPassed);
       if (secsPassed == 0) {
@@ -593,6 +561,8 @@ function update(time, delta) {
     const e = this.keyEpressed;
     const w = this.keyWpressed;
     const f = this.keyFpressed;
+    const b8 = this.key8pressed;
+    const b9 = this.key9pressed;
 
     // Wenn A gedrueckt ist
     if (keyA.isDown) {
@@ -664,7 +634,19 @@ function update(time, delta) {
       });
       this.keyFpressed = true;
 
-    } else {
+    } else if (key8.isDown) {
+      this.key8pressed = true;
+      this.socket.emit('pressed', {
+        pressed: "8"
+      });
+
+    }else if (key9.isDown) {
+      this.key9pressed = true;
+      this.socket.emit('pressed', {
+        pressed: "9"
+      });
+
+    }else {
       if (pressed == "x") {
         pressed = "none";
         this.socket.emit('pressed', {
@@ -697,7 +679,6 @@ function update(time, delta) {
     }
 
     if (w !== this.keyWpressed) {
-      console.log("sdfsdfsdf");
       this.socket.emit('playerInput', {
         w: this.keyWpressed,
       });
@@ -713,11 +694,9 @@ function checkTileStatus() {
 
   // Wenn auf der derzeitigen Position ein Gebauede mit der ID 1 befindent wird dieses Tile als belegt festgelegt 
   if (tileStatus) {
-    belegt.setText('Tile Status: Belegt');
     isSelected = true;
   } else {
     isSelected = false;
-    belegt.setText('Tile Status: frei');
   }
 }
 
@@ -920,8 +899,6 @@ function setWinner() {
     backgroundEnd = scene.add.rectangle(0 + window.innerWidth / 2, 0 + window.innerHeight / 2, window.innerWidth, window.innerHeight, 0x0000, 0.85).setScrollFactor(0);
     backgroundEnd.setDepth(12000);
     if (team && !win) {
-
-
       var lose = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
       lose.setDepth(12001);
       lose.setInteractive();
@@ -929,7 +906,6 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
-
       winner = playersArray[finalTeam - 1];
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
@@ -947,7 +923,7 @@ function setWinner() {
     backgroundEnd.setDepth(12000);
     winner = playersArray[finalTeam - 1];
 
-    scene.emit('elo', playersArray[finalTeam - 1]);
+    scene.socket.emit('elo', playersArray[finalTeam - 1]);
 
     if (team && lose) {
       var loseImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'lose').setScrollFactor(0);
@@ -957,10 +933,6 @@ function setWinner() {
         window.open('http://localhost:3000/test.html')
       }, this);
     } else {
-
-      console.log(playersArray[finalTeam]);
-
-
       gameEnded = true;
       var winImg = scene.add.image(window.innerWidth / 2, window.innerHeight / 2, 'win').setScrollFactor(0);
       winImg.setInteractive();
